@@ -1,0 +1,9755 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import MapComponent from './components/MapComponent';
+
+const ALL_DATA = [
+  {
+    "id": 1,
+    "lat": 22.106377,
+    "lng": -159.65332,
+    "status": "healthy",
+    "note": "[Living Tree] We took a loop walk through Kokee State Park overlooking Waimea Canyon starting and ending at the YWCA campground. Cant give exact location of feral hive but was about half way round the loop 30 feet downhill from the trail about 10 feet up a tree. Looked like a thriving hive. No idea how long it has been there.",
+    "date": "2008-12-01"
+  },
+  {
+    "id": 2,
+    "lat": 20.036257,
+    "lng": -155.448685,
+    "status": "healthy",
+    "note": "[Living Tree] Colony in a big flowering tree alive in a hole about 10+ meters up. We filmed this hive with a telephoto video lens - at dawn pretty good footage - nice colony! It was quiet at Kalopa park and the humming of the bees made the forest hum too.",
+    "date": "2010-07-01"
+  },
+  {
+    "id": 3,
+    "lat": 46.982975,
+    "lng": -123.823387,
+    "status": "warning",
+    "note": "[Dead Tree] A small hive in a fallen tree bridging a ravine. On the border between a private yard and a park. Apparently has been there for several years. The tree fell in the Dec 2007 wind storm. Removal was not possible. Left a swarm trap.",
+    "date": "2008-07-22"
+  },
+  {
+    "id": 4,
+    "lat": 46.954773,
+    "lng": -123.781113,
+    "status": "healthy",
+    "note": "[Living Tree] A small hive in a living red cedar tree in the middle of a private driveway. Apparently new this year. About seven feet off the ground. Removal not possible. [healthy]",
+    "date": "2008-07-22"
+  },
+  {
+    "id": 5,
+    "lat": 42.452595,
+    "lng": -123.46122,
+    "status": "healthy",
+    "note": "[Living Tree] 20ft from ground in oak tree near gate that enters property. Hive was noticed in spring 2009",
+    "date": "2009-12-15"
+  },
+  {
+    "id": 6,
+    "lat": 45.319744,
+    "lng": -123.071808,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is approx. 25 ft. off the ground in a broken ash tree. tree is 15ft east of Chehalem creek. This hive has been here for at least 70 years. [healthy]",
+    "date": "2011-02-21"
+  },
+  {
+    "id": 7,
+    "lat": 43.815075,
+    "lng": -123.018082,
+    "status": "healthy",
+    "note": "[Living Tree] 1 FOOT OFF GROUND IN BASE OF OAK TREEBEEN THERE SINCE THIS SUMMER 2008ITS RIGHT NEXT TO OUR DRIVEWAY IN A GOAT PADDOCK.",
+    "date": "2008-10-05"
+  },
+  {
+    "id": 8,
+    "lat": 43.982319,
+    "lng": -122.9888,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is at the base of an old tree at the SE corner of a pasture at Deerwood Rd. and Matthews Rd. The entrance is at the base of the tree facing east. Facing south was a ground yellow jacket nest also.",
+    "date": "2008-11-04"
+  },
+  {
+    "id": 9,
+    "lat": 44.020164,
+    "lng": -122.987305,
+    "status": "healthy",
+    "note": "[Living Tree] Three feet off the ground in a medium sized Acer macrophyllum. Been checking it for the last two years. Very active. Not sure of size.",
+    "date": "2010-02-18"
+  },
+  {
+    "id": 10,
+    "lat": 42.407421,
+    "lng": -122.982277,
+    "status": "warning",
+    "note": "[Manmade Beehive] Removed from a birdhouse. At most only a couple of years old according to the home owners.",
+    "date": "2008-11-28"
+  },
+  {
+    "id": 11,
+    "lat": 42.407436,
+    "lng": -122.982239,
+    "status": "warning",
+    "note": "[Manmade Beehive] Removed from a tree which had been cut down. It is not known how long they were in the tree. (The people cutting the tree down did not even know of its existence until the tree was on the ground.)",
+    "date": "2008-11-28"
+  },
+  {
+    "id": 12,
+    "lat": 47.106472,
+    "lng": -122.854958,
+    "status": "healthy",
+    "note": "[Manmade structure] Aprox. 10-12 feet off ground. First year of intentional establishment of manmade feral hive.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 13,
+    "lat": 38.353909,
+    "lng": -122.782387,
+    "status": "healthy",
+    "note": "[Living Tree] Brand New hive- went from unnoticeable to the size of a three gallon bucket in 2-3 days. Today is day 4 and it is growing more slowly now. Bees are very docile. Hive is in a tree about 6 feet off the ground at bottom of hive; 7.5 to eight feet at the top. Call me to locate. It is in my front yard behind a wood fence.",
+    "date": "2011-05-06"
+  },
+  {
+    "id": 14,
+    "lat": 38.451954,
+    "lng": -122.665092,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is inside hollow tree trunk. Entry is about 9 off the ground. I noticed the hive about 6 months ago.",
+    "date": "2009-09-20"
+  },
+  {
+    "id": 15,
+    "lat": 38.209488,
+    "lng": -122.625511,
+    "status": "healthy",
+    "note": "[Living Tree] East side of I St Eucalyptus tree 3 ft off the ground. Ive seen it there for 2 seasons.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 16,
+    "lat": 37.981277,
+    "lng": -122.505615,
+    "status": "warning",
+    "note": "[Dead Tree] enter the trailhead at Magarita & 255 Highland Ave. Walk down the trail / fireroad for about 300+ yards arround two bents. In one bent look up to your you see a 30 diameter eucalyptus above you to the right at about 12 high. The hive enterance is in the middle of the stump. We know this to bee active since 2005. This winter 2010-11 it was active assuming it survived rather then taken over by a new swarm in spring.",
+    "date": "2011-06-28"
+  },
+  {
+    "id": 17,
+    "lat": 37.734604,
+    "lng": -122.503624,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is at ground level under the stairs leading to the side door of the Mothers Building. It appears to be a large healthy colony. The bees come and go through a crack in the side of the cement staircase. It has been there for at least four years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 18,
+    "lat": 37.732491,
+    "lng": -122.502541,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is within the hollow wall at the west end of the Pachyderm building. Probably about 20 feet off the ground. There has been a hive here for over ten years though Im not sure if it has been the same colony or if it has been periodically repopulated. It is pretty active and visible from the front of the exhibit.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 19,
+    "lat": 37.732491,
+    "lng": -122.502541,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is within the hollow wall at the west end of the Pachyderm building. Probably about 20 feet off the ground. There has been a hive here for over ten years though Im not sure if it has been the same colony or if it has been periodically repopulated. It is pretty active and visible from the front of the exhibit.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 20,
+    "lat": 37.732803,
+    "lng": -122.501373,
+    "status": "healthy",
+    "note": "[Living Tree] In a natural hole in a cypress tree just east of the Pachyderm Building about 20 feet off the ground. I first noticed it in 2007.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 21,
+    "lat": 37.737701,
+    "lng": -122.440918,
+    "status": "healthy",
+    "note": "[Living Tree] Hardy colony at least four years in this knothole of a sycamore tree about 8 ft. off the ground. Appear to be Carniolan but have not verified this. Easy to find - on the edge of the dog run behind the Glen Park Canyon rec center on the path up to the fire road. Look for the tree nearest the giant Eucalyptus that is inside the triangle of paths/roads where the creek goes into a culvert. The colony entrance is facing the rec center. On a warm day you can easily smell their honey.",
+    "date": "2011-04-05"
+  },
+  {
+    "id": 22,
+    "lat": 37.472553,
+    "lng": -122.254692,
+    "status": "healthy",
+    "note": "[Living Tree] 10 off ground in live oak tree",
+    "date": "2010-08-04"
+  },
+  {
+    "id": 23,
+    "lat": 48.151428,
+    "lng": -122.223587,
+    "status": "healthy",
+    "note": "[Living Tree] In a living cedar tree acouple feet off the ground real small entrance [healthy]",
+    "date": "2011-05-26"
+  },
+  {
+    "id": 24,
+    "lat": 37.463322,
+    "lng": -122.192291,
+    "status": "healthy",
+    "note": "[Living Tree] 20 feet up in large knot hole in huge live oak near playground and picnic area.",
+    "date": "2010-07-11"
+  },
+  {
+    "id": 25,
+    "lat": 37.3881,
+    "lng": -122.184303,
+    "status": "healthy",
+    "note": "[Living Tree] the hive is about 4-5 feet off the ground in a living tree the entrance faces southwest and is about the size of a quarter according to friends the hive has been around for more than one year good activity around it",
+    "date": "2011-05-30"
+  },
+  {
+    "id": 26,
+    "lat": 37.360901,
+    "lng": -122.169716,
+    "status": "healthy",
+    "note": "[Living Tree] About 3 off the ground in a large oak. Appears to be a very large and active hive.",
+    "date": "2011-07-16"
+  },
+  {
+    "id": 27,
+    "lat": 37.457008,
+    "lng": -122.163284,
+    "status": "healthy",
+    "note": "[Living Tree] In olive tree 18 off the ground. Hole in the tree is about 2 across. It has been here for a few months but I think it was here once before years ago.",
+    "date": "2010-05-14"
+  },
+  {
+    "id": 28,
+    "lat": 37.726173,
+    "lng": -122.160652,
+    "status": "warning",
+    "note": "[Manmade structure] Hives (+/- 5 separate units) are located within the walls of my garage. They enter from the outside and have taken up residence between the studs. The interior is paneled with 1/4 plywood which serves as a barrier so I can use my garage while they do their thing. The live of 2 side of the building east and south facing side of the garage. They swarm occasionally and we captured one this spring and now lives in the neighbors garden in a more conventional bee box. Its hard to say how large these hives are but you can smell the hiney scent when inside the garage. Was going to have them removed but the pestman said they would just come back unless we sealed the whole bldg. which has too many holes so there are now joint tenants and we share the bldg.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 29,
+    "lat": 37.459667,
+    "lng": -122.156853,
+    "status": "warning",
+    "note": "[Dead Tree] aprox 20 feet above ground in the hollow of a dead tree of unknown species. The tree is at the intersection of the park/school driveway and Pope Street.",
+    "date": "2008-10-31"
+  },
+  {
+    "id": 30,
+    "lat": 38.221367,
+    "lng": -122.147629,
+    "status": "healthy",
+    "note": "[Living Tree] In Oak Tree along creek - been there at least two years.",
+    "date": "2012-01-06"
+  },
+  {
+    "id": 31,
+    "lat": 37.293716,
+    "lng": -122.064941,
+    "status": "healthy",
+    "note": "[Living Tree] hollow oak tree (quercus agrifolia) entrance 3ft off ground been there more than 1 year right beside Regnart road.",
+    "date": "2010-04-23"
+  },
+  {
+    "id": 32,
+    "lat": 37.29076,
+    "lng": -122.060081,
+    "status": "healthy",
+    "note": "[Manmade structure] On the ground in a ravine in an old rusted metal tank been there more than two years beside the trail in Fremont Older open space preserve.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 33,
+    "lat": 37.343262,
+    "lng": -122.054611,
+    "status": "healthy",
+    "note": "[Manmade structure] couple years old between 2 studes in garage wall space from floor to ceiling using existing 4-inch hole as entrance live removal of entire colony performed by local beekeeper on 9-21-09",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 34,
+    "lat": 37.974934,
+    "lng": -122.005386,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-09-06"
+  },
+  {
+    "id": 35,
+    "lat": 37.974651,
+    "lng": -122.003944,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"Old oak tree hive has been there since before 1998.\\rPrivate Property\\\"",
+    "date": "2008-10-21"
+  },
+  {
+    "id": 36,
+    "lat": 36.986923,
+    "lng": -121.938293,
+    "status": "healthy",
+    "note": "[Manmade structure] 18 off the ground manmade hive. There are three of them -- not sure how long theyve been there. It is in a shaded overgrown area on the property of a condo complex.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 37,
+    "lat": 37.397438,
+    "lng": -121.817451,
+    "status": "healthy",
+    "note": "[Manmade structure] About 30 feet off the ground. At least 5 years. On private property in our yard.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 38,
+    "lat": 47.510593,
+    "lng": -121.790504,
+    "status": "healthy",
+    "note": "[Living Tree] 12 feet off ground 3+ years in same location. On the Big Cedar trail in Meadowbrook park.",
+    "date": "2011-08-23"
+  },
+  {
+    "id": 39,
+    "lat": 47.510593,
+    "lng": -121.790504,
+    "status": "healthy",
+    "note": "[Living Tree] 12 feet off ground 3+ years in same location. On the Big Cedar trail in Meadowbrook park.",
+    "date": "2011-08-23"
+  },
+  {
+    "id": 40,
+    "lat": 38.57579,
+    "lng": -121.504204,
+    "status": "healthy",
+    "note": "[Living Tree] Ive noticed bees flying in and out of an opening in the trunk of an old elm tree for about three years now. The tree is on the northeast corner of P St. and 4th St. and the opening in the tree trunk the bees use is about 25 feet up the tree.",
+    "date": "2008-10-11"
+  },
+  {
+    "id": 41,
+    "lat": 38.593464,
+    "lng": -121.45443,
+    "status": "healthy",
+    "note": "[Living Tree] In a live tree in a field off the American River Parkway about 8 feet off the ground. Theres a huge hole in the side of the tree and its easy to see into this large hive.",
+    "date": "2011-02-16"
+  },
+  {
+    "id": 42,
+    "lat": 38.955391,
+    "lng": -120.965721,
+    "status": "healthy",
+    "note": "[Living Tree] On west side of oak tree at ground level. On south side of Foresthill Divide Trail 1/4 mile east of where it crosses dirt road to Upper Clementine.",
+    "date": "2008-10-26"
+  },
+  {
+    "id": 43,
+    "lat": 35.355087,
+    "lng": -120.845985,
+    "status": "healthy",
+    "note": "[Living Tree] Entrance is on the west side of a tree trunk about 5 feet off the ground in Bayside Bluffs Park.",
+    "date": "2008-10-08"
+  },
+  {
+    "id": 44,
+    "lat": 35.320648,
+    "lng": -120.840836,
+    "status": "healthy",
+    "note": "[Living Tree] Large open air colony at least basketball size high in a tree slightly east of the entrance to Sweet Springs Preserve. Locals claim it has been there for years and seems to regularly die out and later repopulate.",
+    "date": "2008-10-08"
+  },
+  {
+    "id": 45,
+    "lat": 34.437744,
+    "lng": -119.916641,
+    "status": "healthy",
+    "note": "[Living Tree] swarm captured in Walnut tree. 12",
+    "date": "2011-11-23"
+  },
+  {
+    "id": 46,
+    "lat": 34.433861,
+    "lng": -119.899307,
+    "status": "warning",
+    "note": "[Living Tree] \\\"swarm removed 4 in Oleander bush\\rThank you Darlene!\\\"",
+    "date": "2011-11-23"
+  },
+  {
+    "id": 47,
+    "lat": 39.504421,
+    "lng": -119.893539,
+    "status": "warning",
+    "note": "[Dead Tree] Tree blew over in high wind now lying on the ground. Its in Mayberry park along the footpath with a blue tarp to keep the wind out.",
+    "date": "2012-01-19"
+  },
+  {
+    "id": 48,
+    "lat": 34.426453,
+    "lng": -119.8853,
+    "status": "healthy",
+    "note": "[Manmade structure] suicide swarm smoked out of wall vent",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 49,
+    "lat": 34.426628,
+    "lng": -119.885063,
+    "status": "warning",
+    "note": "[Manmade structure] \\\"Bees removed from vent\\rThank you Chenoa @ Mathilda Apartments\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 50,
+    "lat": 34.412399,
+    "lng": -119.866089,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"swarm between stacked tables at Frat House\\rThank you GREEKS.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 51,
+    "lat": 34.447018,
+    "lng": -119.842583,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"swarm on ground under orange tree.\\rthank you Joan!\\\"",
+    "date": "2011-11-20"
+  },
+  {
+    "id": 52,
+    "lat": 36.804817,
+    "lng": -119.811424,
+    "status": "healthy",
+    "note": "[Manmade structure] The bees are on a telephone pole owned by Pacific Gas and Electric on the verge of W. Santa Ana Avenue.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 53,
+    "lat": 36.787052,
+    "lng": -119.803551,
+    "status": "healthy",
+    "note": "[Living Tree] Month old hive approx 15 feet off the ground in a tree.",
+    "date": "2011-02-10"
+  },
+  {
+    "id": 54,
+    "lat": 36.80946,
+    "lng": -119.801254,
+    "status": "healthy",
+    "note": "[Living Tree] the hive is in a japanese maple about 5ft off the ground. It is about the size of a small melon and has only been there one month. When we first noticed it it was completely covered in bees now there are only a few on it. [healthy]",
+    "date": "2009-08-31"
+  },
+  {
+    "id": 55,
+    "lat": 34.423653,
+    "lng": -119.782196,
+    "status": "healthy",
+    "note": "[Manmade Beehive] \\\"feral swarm captured and installed in Langstroth hive bodies 2007\\r\\\"",
+    "date": "2011-03-05"
+  },
+  {
+    "id": 56,
+    "lat": 39.115181,
+    "lng": -119.777534,
+    "status": "healthy",
+    "note": "[Living Tree] Feral Colony 12 high in Cotton Wood Tree",
+    "date": "2012-05-03"
+  },
+  {
+    "id": 57,
+    "lat": 39.115612,
+    "lng": -119.777229,
+    "status": "healthy",
+    "note": "[Living Tree] About 10 off the ground south side largest cotton wood in the park.",
+    "date": "2012-04-06"
+  },
+  {
+    "id": 58,
+    "lat": 34.418217,
+    "lng": -119.773125,
+    "status": "healthy",
+    "note": "[Living Tree] 5 high 2 off road black plastic pipe fitting cemented as entrance exit.",
+    "date": "2009-12-23"
+  },
+  {
+    "id": 59,
+    "lat": 34.44862,
+    "lng": -119.757263,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"fence colony cut out relocated to OAS school garden\\rThank you neighbors for our school bees!\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 60,
+    "lat": 36.375027,
+    "lng": -119.745041,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 8 feral hives that were either swarms or were cutout of houses or out buildings that had been there for over 10 years.",
+    "date": "2008-10-07"
+  },
+  {
+    "id": 61,
+    "lat": 34.442612,
+    "lng": -119.743713,
+    "status": "warning",
+    "note": "[Living Tree] swarm 10 Eugenia hedge humanely removed",
+    "date": "2011-11-23"
+  },
+  {
+    "id": 62,
+    "lat": 34.450943,
+    "lng": -119.741501,
+    "status": "healthy",
+    "note": "[Living Tree] yucca hollow colony bait out",
+    "date": "2011-11-23"
+  },
+  {
+    "id": 63,
+    "lat": 34.434258,
+    "lng": -119.72979,
+    "status": "healthy",
+    "note": "[Manmade structure] 2nd story roof bait out",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 64,
+    "lat": 34.413132,
+    "lng": -119.729454,
+    "status": "healthy",
+    "note": "[Manmade Beehive] \\\"back yard beekeeper Todd Bebb\\rferal removal survivor re-domestication\\r\\rThank you Todd\\r\\\"",
+    "date": "2011-03-04"
+  },
+  {
+    "id": 65,
+    "lat": 34.406555,
+    "lng": -119.722237,
+    "status": "warning",
+    "note": "[Manmade structure] \\\"swarm in house wall removed(smoked out)\\rThank you Hepp Family\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 66,
+    "lat": 34.422665,
+    "lng": -119.719742,
+    "status": "healthy",
+    "note": "[Manmade structure] attic bait out. Musicians saving bees on the Westside.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 67,
+    "lat": 34.404022,
+    "lng": -119.711975,
+    "status": "healthy",
+    "note": "[Manmade Beehive] swarm baited into langsthroth hive body in tree.",
+    "date": "2011-11-20"
+  },
+  {
+    "id": 68,
+    "lat": 34.432079,
+    "lng": -119.707413,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"spring swarm captured from mother feral hive in same vicinity. \\r10 high under roof inside garage. contained three small combs. 7 days.\\rSantaBarbarabee.com swarm map data project\\rFor local feral hive tours contact Antonio 805.896-4804\\\" [healthy]",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 69,
+    "lat": 34.410664,
+    "lng": -119.703323,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"late week swarm in bird feeder in orange tree.\\rThank You MR and EJ Barrgan!\\\"",
+    "date": "2011-11-20"
+  },
+  {
+    "id": 70,
+    "lat": 34.457718,
+    "lng": -119.696899,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Ramseys apiary",
+    "date": "2011-03-10"
+  },
+  {
+    "id": 71,
+    "lat": 34.424335,
+    "lng": -119.69117,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"healthy august swarm\\rrelocated to mission canyon\\rThank you RJ Carrol Plumbing\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 72,
+    "lat": 34.431248,
+    "lng": -119.690025,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"in attic\\r Bait out\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 73,
+    "lat": 34.420132,
+    "lng": -119.648117,
+    "status": "healthy",
+    "note": "[Manmade structure] bait out colony in roof/facia",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 74,
+    "lat": 34.445778,
+    "lng": -119.629944,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"swarm capture 02-04-11 5lb \\rist swarm of new season\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 75,
+    "lat": 34.422981,
+    "lng": -119.608284,
+    "status": "healthy",
+    "note": "[Manmade structure] week late swarm in garden bin",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 76,
+    "lat": 34.419922,
+    "lng": -119.59462,
+    "status": "healthy",
+    "note": "[Manmade structure] victorian house 2 colonies 2nd floor under window sill and 5 deep between floors",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 77,
+    "lat": 34.407932,
+    "lng": -119.526154,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"colony in house attic through vents.\\rCone out \\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 78,
+    "lat": 34.415157,
+    "lng": -119.521622,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Small expanding apiary in a wild field [healthy]",
+    "date": "2011-03-10"
+  },
+  {
+    "id": 79,
+    "lat": 34.415089,
+    "lng": -119.521255,
+    "status": "healthy",
+    "note": "[Manmade structure] Artisan bees apiary",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 80,
+    "lat": 46.299622,
+    "lng": -119.3312,
+    "status": "healthy",
+    "note": "[Manmade structure] The Tapteal Greenway Association asked me to remove a feral colony in the wall of an old shed that had been displaced by a flood a decade earlier. Upon arrival I discovered two colonies and sucsessfully moved them to regular hives the Summer of 2008. The shed was being torn down and they did not want the bees killed.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 81,
+    "lat": 46.254539,
+    "lng": -119.285965,
+    "status": "warning",
+    "note": "[Dead Tree] 3 off the ground. Is an established healthy and well populated colony with good brood pattern.",
+    "date": "2009-04-11"
+  },
+  {
+    "id": 82,
+    "lat": 36.299217,
+    "lng": -119.259506,
+    "status": "healthy",
+    "note": "[Living Tree] Hive located in old tree located on the northeast corner of intersection along the canal. Base of tree has small opening and bees live inside hollow part. Five years plus old.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 83,
+    "lat": 46.26141,
+    "lng": -119.232315,
+    "status": "healthy",
+    "note": "[Living Tree] In a tree approx. 3 to 8 feet off ground. At house on the corner of Court Street and Road 108. This tree is severely weakened by disease or pests and must be cut down. Home owner has asked me to relocate to save them. This will probably be done the week of October 6-11 2008. This is for information on where I have been called about feral colonies. Please do not bother the home owner!!!!",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 84,
+    "lat": 46.205841,
+    "lng": -119.170952,
+    "status": "healthy",
+    "note": "[Manmade Beehive] This is my housed where I have about 5-6 colonies. Not feral. Just mine.",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 85,
+    "lat": 46.205841,
+    "lng": -119.170952,
+    "status": "healthy",
+    "note": "[Manmade Beehive] This is my housed where I have about 5-6 colonies. Not feral. Just mine.",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 86,
+    "lat": 46.220322,
+    "lng": -119.166229,
+    "status": "healthy",
+    "note": "[Living Tree] My brother-in law also a beekeeper got a call about a feral colony in a tree at about this location. About 5 feet up. As far as I know they are still there unless homeowner had them exterminated. No way to hive these without cutting down the tree. Approx June 2008.",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 87,
+    "lat": 46.186749,
+    "lng": -119.159973,
+    "status": "healthy",
+    "note": "[Manmade structure] In the floor of this shed. This business uses this area and requested I remove them. Employee safety was the concern. Summer 0f 2008.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 88,
+    "lat": 46.235447,
+    "lng": -119.138145,
+    "status": "healthy",
+    "note": "[Manmade structure] A rather new colony of honey bees in a chimney of a one story house. Near the bottom close to the insert the home owner installed. He is not too concerned as he does not use this fireplace and it is blocked off. A feral swarm may have issued from the neighbors house next door. See the information on that.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 89,
+    "lat": 46.234734,
+    "lng": -119.138016,
+    "status": "healthy",
+    "note": "[Manmade structure] Feral colony in a 2 story home chimney. I have not personally gone up yet to investigate the exact depth. Very high and steep roof. I believe this colony is well established and has issued a number of swarms over the years due to swarm calls in the past and may have issued the swarm that is in the house just to the north.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 90,
+    "lat": 46.171509,
+    "lng": -119.128494,
+    "status": "warning",
+    "note": "[Manmade structure] Feral colony in a decorative barrel section in a garden. Home owner would like to have the honeybees removed in the spring to ensure they are well taken care of next year by a beekeeper. I will return in the spring to remove and relocate them.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 91,
+    "lat": 46.206493,
+    "lng": -119.118294,
+    "status": "healthy",
+    "note": "[Manmade structure] About 40 feet off the ground attached to eaves of church bell tower on the south east side. Bees are exposed to elements but so far have survived the winter. About 8 to 9 combs total.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 92,
+    "lat": 46.196556,
+    "lng": -119.106827,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony was about 15 off of the ground in the eaves of a house. There is a local hobby beekeeper within 200m.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 93,
+    "lat": 46.196556,
+    "lng": -119.106827,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-03-15"
+  },
+  {
+    "id": 94,
+    "lat": 46.233028,
+    "lng": -118.977257,
+    "status": "healthy",
+    "note": "[Manmade structure] In a wood duck nest box.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 95,
+    "lat": 34.177158,
+    "lng": -118.853355,
+    "status": "healthy",
+    "note": "[Living Tree] 15-20 feet off the ground in a hollow portion of a Live Oak that grows on the grounds of Carlson Building Supplies",
+    "date": "2008-10-16"
+  },
+  {
+    "id": 96,
+    "lat": 34.257587,
+    "lng": -118.571274,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive was located in the top of a communications company cell site tower. Tower is about 45 feet in height.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 97,
+    "lat": 34.060879,
+    "lng": -118.558517,
+    "status": "healthy",
+    "note": "[In the ground] 8 feet off the canyon floor east of Palisades Drive.",
+    "date": "2008-11-17"
+  },
+  {
+    "id": 98,
+    "lat": 34.092808,
+    "lng": -118.552704,
+    "status": "healthy",
+    "note": "[In the ground] 20 feet up a cliff in the rocks on a trail in Topanga State Park.",
+    "date": "2008-11-12"
+  },
+  {
+    "id": 99,
+    "lat": 34.097931,
+    "lng": -118.55043,
+    "status": "healthy",
+    "note": "[In the ground] East side of the Temescal Fire road. 8 feet off the road and 6 feet up in the rocks.",
+    "date": "2008-11-19"
+  },
+  {
+    "id": 100,
+    "lat": 34.241207,
+    "lng": -118.545738,
+    "status": "healthy",
+    "note": "[Living Tree] GROUND LEVEL IN OPENING AT THE BASE OF A FRUITLESS MULBERRY TREE IN FRONT YARD OF WHITE HOUSE 30-FT FROM CURB ON WYSTONE AVE.. HIVE HAS BEEN ACTIVE APPROX. 1-YEAR AT PEAK ACTIVITY 40-60 BEES PER MINUTE ENTERING / LEAVING HIVE.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 101,
+    "lat": 34.167927,
+    "lng": -118.442406,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is approximately 15 feet high on a living avocado tree. I discovered it today and have no idea how long it has been there.",
+    "date": "2011-11-28"
+  },
+  {
+    "id": 102,
+    "lat": 33.783997,
+    "lng": -118.431587,
+    "status": "healthy",
+    "note": "[Manmade structure] inside a fenced yard under a bottle brush tree in an long abandoned compost container (rubermaid garbage can with many holes drilled in it. first noticed beginning of summer 2011. probably has been here an additional year",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 103,
+    "lat": 34.029945,
+    "lng": -118.430649,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 ft high on ceiling inside a tool shed located on the southern side of the building underneath a set of stairs. About the size of a basketball.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 104,
+    "lat": 34.030251,
+    "lng": -118.430527,
+    "status": "healthy",
+    "note": "[Manmade structure] Roughly 20 feet high. It is not visible but there is a spot just underneath the top row of Spanish tiles where lots of honey bees fly in and out all day. There may actually be two hives because there is another spot 15 feet away were more bees fly in and out.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 105,
+    "lat": 33.98278,
+    "lng": -118.367828,
+    "status": "healthy",
+    "note": "[Manmade Beehive] about 2 feet off the ground in an indian hawthorn hedge in my front yard. hanging in a cone shape. gardener recently trimmed and exposed it. we noticed a swarm this morning.",
+    "date": "2009-04-25"
+  },
+  {
+    "id": 106,
+    "lat": 36.786674,
+    "lng": -118.297523,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"In oak? tree near SW corner of bridge over creek. Tiny entrance 4 high facing east. Within 2 miles of commercial apiary. Got stung a few feet away.\\r \\\"",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 107,
+    "lat": 34.616787,
+    "lng": -118.206413,
+    "status": "healthy",
+    "note": "[Manmade structure] We just noticed it this morning. We cant see the hive yet just hundreds of bees. Its against a brick retaining wall underneath a Sweetbrush bush.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 108,
+    "lat": 33.836235,
+    "lng": -118.049866,
+    "status": "healthy",
+    "note": "[Manmade Beehive] about 20ft off the ground just noticed it 2 weeks ago about the size of a volley ball",
+    "date": "2009-11-01"
+  },
+  {
+    "id": 109,
+    "lat": 33.720467,
+    "lng": -117.976631,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive entrance is in the base of a lamp post.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 110,
+    "lat": 33.736141,
+    "lng": -117.935867,
+    "status": "healthy",
+    "note": "[Living Tree] started two days ago and growing three to four feet of the ground",
+    "date": "2010-03-15"
+  },
+  {
+    "id": 111,
+    "lat": 33.65144,
+    "lng": -117.911407,
+    "status": "healthy",
+    "note": "[In the ground] loated in a sprinkler irrigation box below ground",
+    "date": "2012-05-23"
+  },
+  {
+    "id": 112,
+    "lat": 33.88039,
+    "lng": -117.841759,
+    "status": "healthy",
+    "note": "[Manmade structure] My hive is 2-3 ft. from ground in a hollow space made of motar and river rock. It is enclosed on all sides and a sheet of wood on top. Beginning of April a swarm started took residence and has never left.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 113,
+    "lat": 41.390873,
+    "lng": -117.734406,
+    "status": "healthy",
+    "note": "[Living Tree] circle A Ranch home",
+    "date": "2011-11-29"
+  },
+  {
+    "id": 114,
+    "lat": 34.068478,
+    "lng": -117.564156,
+    "status": "healthy",
+    "note": "[In the ground] in side sprinkler box .next to pakking lot",
+    "date": "2011-10-31"
+  },
+  {
+    "id": 115,
+    "lat": 46.887314,
+    "lng": -117.367195,
+    "status": "healthy",
+    "note": "[Manmade structure] The bees are between two windows in the historical Perkins House on the second floor. The earliest known of the bees are from the early 1940s. The windows the bees are between face East on Perkins Avenue.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 116,
+    "lat": 33.445049,
+    "lng": -117.329948,
+    "status": "healthy",
+    "note": "[Living Tree] 8 off ground facing south in oak Quercus agrifolia",
+    "date": "2008-12-02"
+  },
+  {
+    "id": 117,
+    "lat": 33.460518,
+    "lng": -117.283089,
+    "status": "healthy",
+    "note": "[Living Tree] 6 off ground facing south in oak Quercus agrifolia",
+    "date": "2008-12-02"
+  },
+  {
+    "id": 118,
+    "lat": 33.184177,
+    "lng": -117.250572,
+    "status": "healthy",
+    "note": "[Manmade structure] Under our shed",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 119,
+    "lat": 34.259468,
+    "lng": -117.221649,
+    "status": "warning",
+    "note": "[Dead Tree] large oak tree .that was cut down.call me to save hive.",
+    "date": "2012-04-26"
+  },
+  {
+    "id": 120,
+    "lat": 33.003464,
+    "lng": -117.214378,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-09-06"
+  },
+  {
+    "id": 121,
+    "lat": 33.003464,
+    "lng": -117.214378,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive was in a water main box near our property. Dont know how long its been there but the water company probably had to remove them...in order to read the meters.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 122,
+    "lat": 33.639774,
+    "lng": -117.210388,
+    "status": "healthy",
+    "note": "[Manmade structure] bees are in the eaves of the back patio about 9 ft off the ground and have been there since march of 2009",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 123,
+    "lat": 32.764179,
+    "lng": -117.136917,
+    "status": "healthy",
+    "note": "[Living Tree] Its pretty big about three and a half feet tall by two feet.",
+    "date": "2009-02-22"
+  },
+  {
+    "id": 124,
+    "lat": 33.023941,
+    "lng": -117.066528,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"This is a swarm which has decided its going to build combs in a neighbors patio cover.\\r\\ra href=http://bees-on-the-net.com/bee-cam.htmlClick here to see the live web-cam/a\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 125,
+    "lat": 32.633141,
+    "lng": -117.063042,
+    "status": "atRisk",
+    "note": "[Living Tree] bottom of old pepper tree trunk by roots. small size hole. probably within the last month. city tree between sidewalk and street. my dog found this hive and one other at a nearby city park but someone killed the park hive by filling it with insulation foam. non-aggressive honey bees. [healthy]",
+    "date": "2009-05-11"
+  },
+  {
+    "id": 126,
+    "lat": 32.686069,
+    "lng": -117.051979,
+    "status": "warning",
+    "note": "[Manmade structure] The hive has been under a storage cabinet in the back yard at ground level for many years. Homeowner recently asked it be removed and on August 15 2009 it the hive was extracted and moved into a Langstroth where they are happy.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 127,
+    "lat": 32.992935,
+    "lng": -117.028908,
+    "status": "healthy",
+    "note": "[In the ground] Bees in utility box in the ground.",
+    "date": "2012-01-30"
+  },
+  {
+    "id": 128,
+    "lat": 32.951038,
+    "lng": -117.015594,
+    "status": "healthy",
+    "note": "[In the ground] We have two seperate feral hives on our property one in same railroad ties and another in a CMU wall sperating our property",
+    "date": "2010-10-16"
+  },
+  {
+    "id": 129,
+    "lat": 32.953865,
+    "lng": -116.981644,
+    "status": "healthy",
+    "note": "[In the ground] Located in rocks. Spotted Nov-2010.",
+    "date": "2010-11-29"
+  },
+  {
+    "id": 130,
+    "lat": 32.953918,
+    "lng": -116.981529,
+    "status": "warning",
+    "note": "[Dead Tree] Hive located at the base of a burned out tree. Spotted in Nov-2010.",
+    "date": "2010-11-29"
+  },
+  {
+    "id": 131,
+    "lat": 32.823635,
+    "lng": -116.928864,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2012-03-08"
+  },
+  {
+    "id": 132,
+    "lat": 32.823635,
+    "lng": -116.928864,
+    "status": "healthy",
+    "note": "[Manmade structure] In a hole in a low cement wall. Faces east. Organic area with lots of food and water. Been here a few years. Produces several swarms a year. Not Africanized. Not infested. Friendly peaceful bees. If an organic gardener or farmer wants a swarm email me--they will be swarming again soon as there is a tremendous amount of pollen for them right now.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 133,
+    "lat": 33.593533,
+    "lng": -116.764587,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"Feral hive loated in the wall of Trip Flats fire station equipment barn. will be trapped out to remove them from the wall may lose queen in the process. aprox 12 up in a woodpecker hole.\\rwill be relocated to my bee yard.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 134,
+    "lat": 33.569256,
+    "lng": -116.712097,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Feral hive cutout relocated from Trip Flats firestation cabin near Anza. currently housed in Lang hive.",
+    "date": "2008-07-14"
+  },
+  {
+    "id": 135,
+    "lat": 33.572578,
+    "lng": -116.665192,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"Feral hive loated in the exterior and interior walls of a house access under eaves and through vent. will be trapped out. may lose queen in process.\\rwill be relocated to my bee yard.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 136,
+    "lat": 33.365101,
+    "lng": -116.419357,
+    "status": "healthy",
+    "note": "[In the ground] In rocks in middle of Anza-Borrego Desert. Probably africanized bees but not aggressive. First found in 1997 and observed to be occupied once every year in winter to 2009. South facing large opening hot summer sun melts much comb every year.",
+    "date": "2009-01-11"
+  },
+  {
+    "id": 137,
+    "lat": 33.357777,
+    "lng": -116.404221,
+    "status": "healthy",
+    "note": "[In the ground] In rocks in Anza-Borrego desert. North facing entrance. No comb visible. Probably africanized",
+    "date": "2009-01-12"
+  },
+  {
+    "id": 138,
+    "lat": 43.633434,
+    "lng": -116.316193,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is at least two years old. It is located on the western side of the auto parts store in the eave that hangs over the sidewalk. It is about 15 feet off the ground.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 139,
+    "lat": 43.638939,
+    "lng": -116.198402,
+    "status": "healthy",
+    "note": "[In the ground] Ground hive at the intersection of the 15th Street Trailhead and Red Fox Trail. It is in the grassy area surrounded by the trails. Not sure how long it has been there or condition.",
+    "date": "2011-10-01"
+  },
+  {
+    "id": 140,
+    "lat": 32.723049,
+    "lng": -114.634033,
+    "status": "healthy",
+    "note": "[Living Tree] Total of 4 hives in an app. 2 acre urbanish setting. 2 in large pecan trees. One in the wall of an old shed(this is a Large! hive) and one in a fallen stump. 2 of them have been here for at least 8 years that I know of. The bees are gentleno one at our house has ever been stung. They are wonderful pollinators of our home orchard and garden.",
+    "date": "2008-10-29"
+  },
+  {
+    "id": 141,
+    "lat": 34.863312,
+    "lng": -114.580032,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is about 8 - 10 feet off the ground in a Tamarisk tree. Dont know how long its been there just found it today. There is old honeycomb on the ground and I dont know what that means. The hive is on my property and is behind a garage. I would like to keep them alive if possible. [healthy]",
+    "date": "2009-03-04"
+  },
+  {
+    "id": 142,
+    "lat": 32.648624,
+    "lng": -114.400635,
+    "status": "healthy",
+    "note": "[Living Tree] 12 above ground on branch of mesquite treeabout 8diameter at top about 8tall been here 2 days that I know about. Look up and you will see it on south side of tree",
+    "date": "2012-03-14"
+  },
+  {
+    "id": 143,
+    "lat": 37.061077,
+    "lng": -113.601997,
+    "status": "healthy",
+    "note": "[In the ground] The hive is about 12 feet off the ground. It is in a crevice of a giant boulder. The bees are real pricks. They stung us 6 times.",
+    "date": "2010-08-11"
+  },
+  {
+    "id": 144,
+    "lat": 34.27346,
+    "lng": -112.649261,
+    "status": "healthy",
+    "note": "[Living Tree] Several Africanized colonies located in trees old structures and outcroppings in locations in the area",
+    "date": "2008-08-06"
+  },
+  {
+    "id": 145,
+    "lat": 33.295181,
+    "lng": -111.813599,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is approx 7 feet off the ground under our eaves in the entry way to our house. Its been there for about 5 months. It is shaped in flat half circles and it consists of 6 of these half circles in a row.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 146,
+    "lat": 33.265434,
+    "lng": -111.71093,
+    "status": "healthy",
+    "note": "[Living Tree] 4 ft from grond in a small tree there is so many its bending the tree over [healthy]",
+    "date": "2009-03-22"
+  },
+  {
+    "id": 147,
+    "lat": 34.383678,
+    "lng": -111.454926,
+    "status": "warning",
+    "note": "[Manmade structure] \\\"Hive is inside a stack of old fencing or wall nailed together wood. The wood stack is about 4 high by 4x4.\\rThe bees arent aggressive in any way. The hive is in an empty wild grass covered lot across from my home.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 148,
+    "lat": 38.585934,
+    "lng": -109.561195,
+    "status": "healthy",
+    "note": "[Living Tree] six feet up in box elder tree three inch opening swarmed may 2009",
+    "date": "2009-08-09"
+  },
+  {
+    "id": 149,
+    "lat": 37.02887,
+    "lng": -107.495728,
+    "status": "healthy",
+    "note": "[Living Tree] Located in the base of a huge cottonwood tree. Over 4 feet in diameter. Entrance is at less than a foot of ground level. Lots of activity approx 20 bees per 10 second interval or greater. Gray color and large bodied. Comb bottom barely visible through opening. Heavy bearding in late afternoon.",
+    "date": "2008-08-06"
+  },
+  {
+    "id": 150,
+    "lat": 31.797295,
+    "lng": -106.311996,
+    "status": "healthy",
+    "note": "[Living Tree] 19ft above ground on pine tree but not inits hanging probly been there for bout 2 days its may 21st now",
+    "date": "2009-05-21"
+  },
+  {
+    "id": 151,
+    "lat": 34.738548,
+    "lng": -106.270828,
+    "status": "healthy",
+    "note": "[In the ground] The hive is under an old rusted steel bucket by an abandon oil tank on a ranch in the foot hills of the Manzano Mountains in New Mexico. The ranch owner says its been there for at least 4 years. He also said he lifted the bucket once and the hive was in the ground. Its a rocky place so the hive could be in between some large rocks. The hive was very active so I was unable to verify the exact location of the comb. The ranch is very remote and in an arid climate that had recently received some rain so there was a proliferation of wild flowers. I have photos of hive bees and many of the flowers. If needed I can instruct the ranch owner on sample methods and have a sample sent via UPS.",
+    "date": "2008-08-04"
+  },
+  {
+    "id": 152,
+    "lat": 38.130775,
+    "lng": -106.258392,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a tree 8ft.+ off the ground. It has been there for many years. It is in the yard at the ranch behind the shop. The mechanic told me it swarms about every two years.",
+    "date": "2010-10-24"
+  },
+  {
+    "id": 153,
+    "lat": 35.480381,
+    "lng": -105.886314,
+    "status": "healthy",
+    "note": "[Manmade structure] 5 feet off the ground in a cinderblock retaining wall. The hive has been there two years has one 1 inch wide entrance. The bees are not agressive. Private property.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 154,
+    "lat": 39.624401,
+    "lng": -105.32859,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 2 deep super hives est. 2006",
+    "date": "2009-02-28"
+  },
+  {
+    "id": 155,
+    "lat": 40.75721,
+    "lng": -105.096054,
+    "status": "warning",
+    "note": "[Dead Tree] Hive is in cotton wood tree stump. Found this summer. Might have come from backyard hive 1/2 mile away as swarm",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 156,
+    "lat": 39.74567,
+    "lng": -105.082687,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is high up in a silver poplar tree. It has been there at least 10 years and probably closer to 20. the tree is on the southwest corner and the hollow where the bees are faces southeast.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 157,
+    "lat": 39.925011,
+    "lng": -105.074532,
+    "status": "healthy",
+    "note": "[In the ground] In the ground shadded by a bush.",
+    "date": "2009-08-18"
+  },
+  {
+    "id": 158,
+    "lat": 39.688232,
+    "lng": -105.063499,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"The hive is in an old brick incineratorand bees have been there on an off for over 20 years. The structure is about 4 feet high and 18inch x 20 around.\\rIt is in my back yard.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 159,
+    "lat": 39.742901,
+    "lng": -104.916428,
+    "status": "healthy",
+    "note": "[In the ground] Ground level under a large rock.",
+    "date": "2008-08-24"
+  },
+  {
+    "id": 160,
+    "lat": 39.738213,
+    "lng": -104.313622,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located under an aging wooden bridge. There is some large abandoned honeycomb near an entrance into a wooden beam where the bees enter and exit.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 161,
+    "lat": 38.453617,
+    "lng": -99.011726,
+    "status": "healthy",
+    "note": "[Living Tree] Colony in a mature locust tree approximately 5 ft. above ground.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 162,
+    "lat": 38.453617,
+    "lng": -99.011726,
+    "status": "healthy",
+    "note": "[Living Tree] Hole about 1-1/2 in diameter approximately 6 above ground in a mature Catalpa tree.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 163,
+    "lat": 34.956764,
+    "lng": -98.927811,
+    "status": "healthy",
+    "note": "[Manmade structure] Manmade structure old barn between walls just above foundation in west door. Africanized? 8 years old",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 164,
+    "lat": 34.623257,
+    "lng": -98.666786,
+    "status": "healthy",
+    "note": "[Living Tree] Ten - twelve feet off the ground in a tree (knothole).",
+    "date": "2009-08-18"
+  },
+  {
+    "id": 165,
+    "lat": 32.146839,
+    "lng": -98.587532,
+    "status": "healthy",
+    "note": "[Living Tree] 1 foot off ground existed 2 years in the base of a large oak tree",
+    "date": "2011-03-22"
+  },
+  {
+    "id": 166,
+    "lat": 39.361,
+    "lng": -97.833565,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is in the west facing roof of an abandoned house",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 167,
+    "lat": 39.361595,
+    "lng": -97.832253,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 168,
+    "lat": 32.981091,
+    "lng": -97.579536,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is 10 ft off the ground. It has been there for 3 years. It is also on a friends property. He is not concerned about the bees bothering his family. The bee tree is in a field.",
+    "date": "2009-12-06"
+  },
+  {
+    "id": 169,
+    "lat": 35.517467,
+    "lng": -97.562904,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is on the side of a wooden squirrel box in an oak tree about 12 feet off the ground in our backyard. The bees appear to cluster around the entry hole. They were noticed only this week; no idea how long theyve used the box. There is no visible hive and we have yet to investigate further.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 170,
+    "lat": 35.472179,
+    "lng": -97.436081,
+    "status": "healthy",
+    "note": "[Living Tree] base of large oak tree inches above ground several years",
+    "date": "2011-01-13"
+  },
+  {
+    "id": 171,
+    "lat": 34.579731,
+    "lng": -97.412682,
+    "status": "warning",
+    "note": "[Dead Tree] Unknown location. Have been feeding them sugar water in the fall for several years this year topping two quarts a day. Travel time from first scout departure to return of main body approximately 2min 30sec so must be fairly close.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 172,
+    "lat": 32.570145,
+    "lng": -97.239777,
+    "status": "healthy",
+    "note": "[Manmade structure] Known to be 3 years old",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 173,
+    "lat": 28.073931,
+    "lng": -97.070419,
+    "status": "healthy",
+    "note": "[Living Tree] Live oak tree 15ft up back of lot near lot line of lot 12 and 13",
+    "date": "2008-10-08"
+  },
+  {
+    "id": 174,
+    "lat": 40.776382,
+    "lng": -96.332764,
+    "status": "healthy",
+    "note": "[Manmade structure] 6 x Top Bar Hives installed 2004.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 175,
+    "lat": 40.769478,
+    "lng": -96.326515,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"TBH swarm followed spring of 09 setting up in hollow locust tree. \\rbuilt box to cover hole to protect from wildlife\\\"",
+    "date": "2010-03-19"
+  },
+  {
+    "id": 176,
+    "lat": 41.281998,
+    "lng": -96.05146,
+    "status": "healthy",
+    "note": "[In the ground] Bumblebees underground.",
+    "date": "2012-06-04"
+  },
+  {
+    "id": 177,
+    "lat": 33.781212,
+    "lng": -96.018028,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 foot off ground in wooded area inside an old Chevy truck cab (behind driver seat) attached to cab wall",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 178,
+    "lat": 30.128345,
+    "lng": -95.621567,
+    "status": "healthy",
+    "note": "[Living Tree] I have not seen the hive but have had approx 1000 bees feeding on my porch for the past couple of days. About 50 or so started out on my humming bird feeders but as I increased the sugar content to at thicker syrup more bees came. I now go through 12 pounds of sugar a day.",
+    "date": "2009-11-02"
+  },
+  {
+    "id": 179,
+    "lat": 32.347191,
+    "lng": -95.298157,
+    "status": "healthy",
+    "note": "[Manmade Beehive] \\\"of the ground 7 years with no intervention other than esential oils \\rnow have 4 hives all feral hives a combination of buckfast all american and ferel bees. Dark black bees with attitude but do well with mites beetles\\\"",
+    "date": "2011-03-22"
+  },
+  {
+    "id": 180,
+    "lat": 32.345161,
+    "lng": -95.289917,
+    "status": "healthy",
+    "note": "[Manmade Beehive] \\\"of the ground 7 years with no intervention other than esential oils \\rnow have 4 hives all feral hives a combination of buckfast all american and ferel bees. Dark black bees with attitude but do well with mites beetles\\\"",
+    "date": "2011-03-22"
+  },
+  {
+    "id": 181,
+    "lat": 39.8396,
+    "lng": -94.823341,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 off the ground on a bush by the fince in Dekalb Mo. 2nd time the H.S. Principal called with a swarm of Bees.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 182,
+    "lat": 38.687279,
+    "lng": -94.675743,
+    "status": "healthy",
+    "note": "[Manmade Beehive] about 8 inches off the ground we have two hives and they have been going about 5 months",
+    "date": "2009-08-28"
+  },
+  {
+    "id": 183,
+    "lat": 37.092224,
+    "lng": -94.51796,
+    "status": "healthy",
+    "note": "[Living Tree] Living Catalpa tree with the hive entrance approximately 3 feet from the ground facing east. It had been there at least 3 years. The owner of the lot was having a problem with the bees stinging when the lawn was mowed. I trapped them out in Spring 2008. He planned on cutting the tree down.",
+    "date": "2008-10-30"
+  },
+  {
+    "id": 184,
+    "lat": 37.335293,
+    "lng": -94.454353,
+    "status": "healthy",
+    "note": "[Living Tree] Approximately 20 feet off the ground in a living Oak tree. Loggers cut the tree down and found the bees September 2005. No one knew how long it had been there. I transfered the bees to one of my hives.",
+    "date": "2008-10-30"
+  },
+  {
+    "id": 185,
+    "lat": 34.542763,
+    "lng": -94.237976,
+    "status": "healthy",
+    "note": "[Manmade structure] In the wall of an outbuilding. entrance is 2 feet off the ground. Have been there for over 20 years. Old man used to keep bees. quit over 20 years ago.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 186,
+    "lat": 36.047375,
+    "lng": -94.173225,
+    "status": "healthy",
+    "note": "[Living Tree] Live oak tree. Entrance 3 ft. off ground facing east",
+    "date": "2008-12-23"
+  },
+  {
+    "id": 187,
+    "lat": 36.78289,
+    "lng": -94.147255,
+    "status": "warning",
+    "note": "[Dead Tree] Approximately 25 feet off the ground in a dead tree. The owners did not know the hive was there until they cut the tree down for firewood. They called me to remove the bees. I was told that another bee tree was cut down in the same wood lot earlier in the year.",
+    "date": "2008-10-30"
+  },
+  {
+    "id": 188,
+    "lat": 36.473095,
+    "lng": -94.087318,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 8 inches off the ground inside a living oak tree on the hill side of one of our fields. I noticed this hive just this spring.",
+    "date": "2011-06-30"
+  },
+  {
+    "id": 189,
+    "lat": 36.473095,
+    "lng": -94.087318,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 8 inches off the ground inside a living oak tree on the hill side of one of our fields. I noticed this hive just this spring.",
+    "date": "2011-06-30"
+  },
+  {
+    "id": 190,
+    "lat": 37.694706,
+    "lng": -93.797516,
+    "status": "healthy",
+    "note": "[Living Tree] The mature soft Maple tree just East of our house is now a home to a new batch of ?feral? honeybees. The hive moved in early this spring; the opening to hive is located approx 4 ft above ground level. I have placed a sign on the tree Honey Bee Home Do Not Disturb. There is quite a bit of sap running out of the tree at the opening of the hive. The bees look like pictures of the dark European Honeybees. They are very gentle and easy to get close to and watch. They are quite interesting as I have never been able to observe wild honeybees before. I want to protect these bees yet I know one day the tree will break apart... The local beekeeper I found on the internet is now retired and assured me that the bees are no Problem... but I would like to find a nearby beekeeper I could call in the event of the tree giving out... I would even be interested in learning about beekeeping myself! I do consider myself an amateur naturalist interested in all wild creatures and plants.",
+    "date": "2011-07-19"
+  },
+  {
+    "id": 191,
+    "lat": 30.157661,
+    "lng": -93.745644,
+    "status": "healthy",
+    "note": "[Living Tree] 7 feet off ground in shrubbery. 6 weeks. round. not in a tree or building. Looks like the stereotypic Winnie the Pooh bee hive.",
+    "date": "2009-07-05"
+  },
+  {
+    "id": 192,
+    "lat": 32.995995,
+    "lng": -93.501892,
+    "status": "healthy",
+    "note": "[Living Tree] 30 inches high in an oak tree. Been there at least 3 years.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 193,
+    "lat": 36.284134,
+    "lng": -93.283539,
+    "status": "healthy",
+    "note": "[Living Tree] aprox. 16 up a tree 2yrs + size unknown (its inside a hole in the tree) in the tree with the rope swing in front of the house.",
+    "date": "2009-01-13"
+  },
+  {
+    "id": 194,
+    "lat": 40.887119,
+    "lng": -92.385132,
+    "status": "healthy",
+    "note": "[Living Tree] it is in a large maple tree and set off two large swarms this year which i now have in hives. they have been there atleast 4 years",
+    "date": "2009-05-28"
+  },
+  {
+    "id": 195,
+    "lat": 43.47905,
+    "lng": -92.338013,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two regular size bee hives approximately 6 inches off the ground were installed June 2008 20 feet east of a building in my front yard. We plan on adding to more hives to this site this Spring 2009.",
+    "date": "2009-03-13"
+  },
+  {
+    "id": 196,
+    "lat": 37.153023,
+    "lng": -92.262573,
+    "status": "healthy",
+    "note": "[Manmade structure] 25 ft off the ground in eve of a building. It has been in building going on 5 years at least.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 197,
+    "lat": 35.079266,
+    "lng": -91.884201,
+    "status": "healthy",
+    "note": "[Manmade structure] Unknown age hive about four feet up entrance in a workshop.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 198,
+    "lat": 35.070759,
+    "lng": -91.881218,
+    "status": "healthy",
+    "note": "[Living Tree] Third year and is about 25-30 feet up in an oak tree. Big old oak on the west side of street the only one there.",
+    "date": "2008-07-23"
+  },
+  {
+    "id": 199,
+    "lat": 41.726456,
+    "lng": -91.787636,
+    "status": "healthy",
+    "note": "[Living Tree] It is about 4 off the ground in a hollow Pine tree with the entrance facing northeast. It is on the south side of the street.",
+    "date": "2010-03-16"
+  },
+  {
+    "id": 200,
+    "lat": 36.381401,
+    "lng": -91.666222,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"25 ft. from ground.\\r3 inch hole in living red oak.\\rHole faces south by southeast.\\r\\\"",
+    "date": "2011-04-21"
+  },
+  {
+    "id": 201,
+    "lat": 30.641752,
+    "lng": -91.188583,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 feet off ground located in front porch column 2 weeks old appears small in size",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 202,
+    "lat": 30.234173,
+    "lng": -90.904251,
+    "status": "healthy",
+    "note": "[Living Tree] THE HIVE IS IN A FRIENDS BACK YARD.IT BEEN THERE 5 YEARS. IT WAS IN A LIVE OAK TREEAND THE ENTRANCE OF THE HIVE WAS 12 FT.HURRICANE GUSTAV KNOCKED DOWN THE TREE. ITS A LARGE HIVE.I WILL ADD THEM TO MY COLONYS.THIS IS THE 4TH HIVE I GOT FROM FALLEN TREES",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 203,
+    "lat": 35.315975,
+    "lng": -90.844597,
+    "status": "healthy",
+    "note": "[Living Tree] In a live tree entrance is about 17 foot up. Do not know how large of a hive it is but know they have been there for 2 years now.",
+    "date": "2011-02-14"
+  },
+  {
+    "id": 204,
+    "lat": 29.423199,
+    "lng": -90.765839,
+    "status": "healthy",
+    "note": "[Manmade structure] There are two hives located in Bayou DuLarge Baptist Church building at the above location. These hives have been there for many years. They are thriving. I have spoken to the pastor of that church and he says there are several more feral hives in that area.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 205,
+    "lat": 33.747959,
+    "lng": -90.721321,
+    "status": "healthy",
+    "note": "[Manmade structure] 1.5 feet off of the ground in brick wall where bricks are missing wall covered in trumpet vine. Behind Hey Joes in the gravel parking lot between Hey Joes and the Warehouse.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 206,
+    "lat": 36.766861,
+    "lng": -90.439888,
+    "status": "warning",
+    "note": "[Dead Tree] The colony is in a tree approximately 20 off the ground. Time there unknown. Discovered when the tree was blown over in a severe windstorm and a yard service came to cut up and remove the downed tree.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 207,
+    "lat": 39.710587,
+    "lng": -90.250725,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"15 feet above ground tulip popular tree\\r20 feet from mausoleum in diamond grove cemetery been there 2 years swarmed in june of 2010 ( i captured swarm )still alive march 2011\\\"",
+    "date": "2011-03-07"
+  },
+  {
+    "id": 208,
+    "lat": 40.516998,
+    "lng": -89.910004,
+    "status": "healthy",
+    "note": "[Living Tree] it is in a wild cherry tree about 4 foot above the ground. it is on the sw side of the tree. the hive has been there at least 3 years",
+    "date": "2010-07-24"
+  },
+  {
+    "id": 209,
+    "lat": 40.539585,
+    "lng": -89.886803,
+    "status": "healthy",
+    "note": "[Living Tree] Cherry tree about 8ft. up 3 years old.",
+    "date": "2008-10-01"
+  },
+  {
+    "id": 210,
+    "lat": 38.78075,
+    "lng": -89.671951,
+    "status": "healthy",
+    "note": "[Living Tree] I just discovered the hive three days ago. Its in a maple tree in my yard. The hole is approximately seven feet from the ground facing east.",
+    "date": "2009-05-18"
+  },
+  {
+    "id": 211,
+    "lat": 34.529186,
+    "lng": -89.604492,
+    "status": "healthy",
+    "note": "[Living Tree] This colony is in a large cypress tree main entrance is about 8 feet from ground with a smaller second entrance about 7 feet from ground. Bees are not agressive. Owner asked if we would like to remove them from his woods but we are not able to trasport them 500 miles after educating the owner on bees he is happy letting them just bee there. We visited this tbee tree in Dec 07 March 08 and May 08 we will check on them again in August. [healthy]",
+    "date": "2008-06-24"
+  },
+  {
+    "id": 212,
+    "lat": 37.737175,
+    "lng": -89.583092,
+    "status": "healthy",
+    "note": "[Living Tree] Entance at base of tree. Been there at least 4 years.",
+    "date": "2010-01-03"
+  },
+  {
+    "id": 213,
+    "lat": 37.762608,
+    "lng": -89.351562,
+    "status": "healthy",
+    "note": "[Living Tree] Hive in live tree north of the school bus garage. Entrance is at least 10 feet off the ground large tree maybe 28+ inches DBH. Hive has been there for at least three years.",
+    "date": "2010-01-03"
+  },
+  {
+    "id": 214,
+    "lat": 33.606972,
+    "lng": -88.876137,
+    "status": "healthy",
+    "note": "[Living Tree] the hive is at ground level at the base of a (hollow) mature cedar tree.",
+    "date": "2012-06-12"
+  },
+  {
+    "id": 215,
+    "lat": 40.010788,
+    "lng": -88.791504,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"hive # 1 in a tree about 4 ft obove the ground\\r\\rhive # 2 in a hive ( I captured a swarm)\\r\\rI now have two hives + the tree hive\\\"",
+    "date": "2010-05-21"
+  },
+  {
+    "id": 216,
+    "lat": 44.260521,
+    "lng": -88.372421,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is inside a small cedar birdhouse approx. 6x6x8 mounted on the fence about 5 feet off the ground facing south in our backyard. Its in the midst of my wifes flower garden. Weve had birds here previous years but noticed the bees here this summer.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 217,
+    "lat": 36.080181,
+    "lng": -88.371277,
+    "status": "warning",
+    "note": "[Dead Tree] this feral colony is in a huge log that was erected by the owner as a squirrel tree. the owner wanted it moved out but not killed..we moved log and all to our apiary some miles south..near Natchez Trace State Park. i guess the bees didnt like there new location and left taking everything with them. so we know there is a feral colony near us.",
+    "date": "2008-10-29"
+  },
+  {
+    "id": 218,
+    "lat": 41.872395,
+    "lng": -88.341194,
+    "status": "healthy",
+    "note": "[Living Tree] Near top of evergreen tree about the size of a football. Formed afternoon of 5/10/12",
+    "date": "2012-05-12"
+  },
+  {
+    "id": 219,
+    "lat": 44.527351,
+    "lng": -88.049751,
+    "status": "healthy",
+    "note": "[In the ground] Has only been there for a few days. The bees are underground.",
+    "date": "2010-04-12"
+  },
+  {
+    "id": 220,
+    "lat": 35.634975,
+    "lng": -87.973022,
+    "status": "healthy",
+    "note": "[Living Tree] about 10 feet high in a black locust tree measuring 35 inches diameter at breast height.just found it this march.",
+    "date": "2009-04-21"
+  },
+  {
+    "id": 221,
+    "lat": 35.599682,
+    "lng": -87.959686,
+    "status": "healthy",
+    "note": "[Living Tree] about 30 feet high in hollow red oak.found it 3 years ago. lots of bees going in and out.looks like a strong colony. located in large red oak directly beside marsh creek road on property owned by the tennessee valley authority (tva)",
+    "date": "2009-01-21"
+  },
+  {
+    "id": 222,
+    "lat": 44.480831,
+    "lng": -87.868652,
+    "status": "healthy",
+    "note": "[Living Tree] a swarm on a branch of our plum tree!",
+    "date": "2012-06-15"
+  },
+  {
+    "id": 223,
+    "lat": 44.348526,
+    "lng": -87.834145,
+    "status": "healthy",
+    "note": "[Manmade structure] 16 feet plus off the ground been around about 2.5 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 224,
+    "lat": 30.461399,
+    "lng": -87.332558,
+    "status": "healthy",
+    "note": "[Living Tree] Hive entrance at base of large live oak tree. Convinced property owner to leave it alone away from traffic. Not known how long they have been there.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 225,
+    "lat": 40.416225,
+    "lng": -87.325241,
+    "status": "warning",
+    "note": "[Dead Tree] The hive is located in a dead oak tree with a circumference of approximately 100inches at the entrances. We first noticed the hive in the spring of 2006. The tree has been dead since spring 2004. The tree is located at the end of a fence row at the south end of our property. It is a solitary tree. The hive entrances (2) are on the south side of the tree and are approximately 6ft from the ground. The two holes lie in a vertical line about 10in apart. The lower hole is about 2in in diameter and the upper is about 1.5in long x .5in wide. Michelles father identified the bees as Italian honey bees. They seem to be a very robust and mild tempered colony.",
+    "date": "2008-11-26"
+  },
+  {
+    "id": 226,
+    "lat": 34.807549,
+    "lng": -86.964317,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in old cedar tree 8ft off ground behind Athens State Univ. Library. Approximately 100 to 150 yards behind building",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 227,
+    "lat": 33.1007,
+    "lng": -86.864197,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a cedar tree in Orr Park in Montevallo AL. In Orr Park cross the footbridge at the far end of the park. The hive is located next to the paved walking trail opposite the artesian well.",
+    "date": "2010-07-04"
+  },
+  {
+    "id": 228,
+    "lat": 33.519215,
+    "lng": -86.771393,
+    "status": "healthy",
+    "note": "[In the ground] This hive is at the back of Avondale park. It is right where the old spring used to come out of the ground. The spring has now been capped. Once one of the most important places in Jefferson Countynow it is forgotten and hard to find if you dont know where it is. Go to Avondale Park the hive located at the baseball field beyond the outfield fence left field. RIght where the spring used to emerge. There is a shallow cave and the hive is right at the entrance.",
+    "date": "2011-05-14"
+  },
+  {
+    "id": 229,
+    "lat": 36.164974,
+    "lng": -86.66494,
+    "status": "healthy",
+    "note": "[Living Tree] 20 off ground in fence row hackberry tree 2diameter been there 4-5 years rear/right side of lot behind house.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 230,
+    "lat": 37.185543,
+    "lng": -86.633965,
+    "status": "healthy",
+    "note": "[Manmade structure] I a Garage building in the walls. Bees enter in a crack in a window frame. It has been there for around 8-10 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 231,
+    "lat": 43.95591,
+    "lng": -86.395798,
+    "status": "healthy",
+    "note": "[Living Tree] feral hive in a Maple tree 10 ft off the ground in the middle of motel parking lot",
+    "date": "2008-10-20"
+  },
+  {
+    "id": 232,
+    "lat": 39.863491,
+    "lng": -86.21978,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located inside a plastic compost bin full of sticks. Lots of foraging activity...bees are active and appear very healthy. Want to keep them that was! Everything in the garden gets pollinated.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 233,
+    "lat": 42.739384,
+    "lng": -86.161308,
+    "status": "healthy",
+    "note": "[Living Tree] Entrance to the hive is at the base of a tree that is located close to the road on 144th Ave between Beeline rd and 64th Street.",
+    "date": "2009-11-09"
+  },
+  {
+    "id": 234,
+    "lat": 37.888943,
+    "lng": -85.750694,
+    "status": "healthy",
+    "note": "[Living Tree] 2-3 ft off ground4+ yrs. follow creek past pond 60-70yrds. on left of crk bank",
+    "date": "2008-10-18"
+  },
+  {
+    "id": 235,
+    "lat": 37.885082,
+    "lng": -85.750145,
+    "status": "healthy",
+    "note": "[Living Tree] 2 ft from ground 4 yrs tree size12-14 dia",
+    "date": "2008-10-18"
+  },
+  {
+    "id": 236,
+    "lat": 42.753613,
+    "lng": -85.67038,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a tree on the south side of road on the south side of treejust on other side of ditch about 50 feet from gate on north side of road.I found it about a year ago",
+    "date": "2009-10-14"
+  },
+  {
+    "id": 237,
+    "lat": 30.311871,
+    "lng": -85.614471,
+    "status": "healthy",
+    "note": "[Manmade structure] In my bay window about 15 of ground. Returns every year for past 6 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 238,
+    "lat": 42.990334,
+    "lng": -85.327805,
+    "status": "warning",
+    "note": "[Dead Tree] Fallen Tree - Tree has fallen across the north coutry trail and has exposed a large hive",
+    "date": "2009-12-20"
+  },
+  {
+    "id": 239,
+    "lat": 35.095314,
+    "lng": -85.313591,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Looks like a very active hive. They have settled in the house. Looks like between the outside/inside walls. Approx. 12-15ft high.",
+    "date": "2010-05-08"
+  },
+  {
+    "id": 240,
+    "lat": 35.054996,
+    "lng": -85.305435,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive located in the Hunter Mansion been there for several years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 241,
+    "lat": 35.128632,
+    "lng": -85.251534,
+    "status": "healthy",
+    "note": "[Manmade structure] Swarmed today bees likely in floor joists. Residence called said they noticed large amounts of bees on outside oh house. When I got there most of them had made their way into house. Plan to cut-ou this weekend maybe.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 242,
+    "lat": 38.186386,
+    "lng": -85.198975,
+    "status": "healthy",
+    "note": "[In the ground] underground in a tobacco barn. hive has been here for many years.",
+    "date": "2011-07-28"
+  },
+  {
+    "id": 243,
+    "lat": 39.824547,
+    "lng": -84.912239,
+    "status": "healthy",
+    "note": "[Living Tree] 60 feet up in large Sycamore tree between LBC and Tyler Hall on Earlham College campus. 5/20/08",
+    "date": "2009-08-21"
+  },
+  {
+    "id": 244,
+    "lat": 32.426338,
+    "lng": -84.869385,
+    "status": "healthy",
+    "note": "[Living Tree] Thirty feet off ground on tree limb out in the snow wind sleet and rainy weather. No protection. Residents/People thought it was a hornet nest. The outer (two) combs were white. Eight combs wider than deep hive frame and deeper. Most honey was goldenrod. Extremely smelly.",
+    "date": "2011-01-24"
+  },
+  {
+    "id": 245,
+    "lat": 39.128994,
+    "lng": -84.789391,
+    "status": "healthy",
+    "note": "[Living Tree] Bee Tree approximately 15 feet up.",
+    "date": "2008-12-15"
+  },
+  {
+    "id": 246,
+    "lat": 39.133121,
+    "lng": -84.782181,
+    "status": "healthy",
+    "note": "[Living Tree] Bee Tree. Vertical opening heavily propolized about 5 to 7 feet off the ground running 2 feet long.",
+    "date": "2008-12-15"
+  },
+  {
+    "id": 247,
+    "lat": 39.148735,
+    "lng": -84.742188,
+    "status": "healthy",
+    "note": "[Manmade structure] A gluten and brewers grain warehouse.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 248,
+    "lat": 40.206749,
+    "lng": -84.687424,
+    "status": "healthy",
+    "note": "[Living Tree] About six feet up in a very large pine tree located in the Old tea garden cemetery on state route 49 found while placing geo caches",
+    "date": "2010-10-11"
+  },
+  {
+    "id": 249,
+    "lat": 42.646568,
+    "lng": -84.681419,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-10-18"
+  },
+  {
+    "id": 250,
+    "lat": 39.113705,
+    "lng": -84.57476,
+    "status": "healthy",
+    "note": "[Living Tree] Large oak tree approximately 40 feet up in the top.",
+    "date": "2008-12-15"
+  },
+  {
+    "id": 251,
+    "lat": 44.123085,
+    "lng": -84.490356,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"15 feet above ground. Its been there off and on for years.\\rNorthwest of Gladwin Michigan\\\"",
+    "date": "2008-12-31"
+  },
+  {
+    "id": 252,
+    "lat": 39.23605,
+    "lng": -84.481476,
+    "status": "healthy",
+    "note": "[Living Tree] Large tree splits into two trunks about 10 off ground. Hive is in that crotch. Tree is found half way along pedestrian walkway between the west end of forest ave. and brayton rd. Found it Sept. 2008",
+    "date": "2008-10-20"
+  },
+  {
+    "id": 253,
+    "lat": 33.091793,
+    "lng": -84.18045,
+    "status": "healthy",
+    "note": "[Living Tree] Well established colony in the base of an oak tree. Entrance is located approx 1 foot off the ground facing south. Tree is located behind a small storage building on the north side of the property.",
+    "date": "2011-10-13"
+  },
+  {
+    "id": 254,
+    "lat": 33.053135,
+    "lng": -84.166435,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony of bees inhabiting the boxing on the west side of the house. Hive is approx 15 feet off the ground. Hive entrance is directly above where the electrical wiring enters the house from the power pole.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 255,
+    "lat": 33.153477,
+    "lng": -84.135948,
+    "status": "healthy",
+    "note": "[Manmade structure] Established colony (+2 yrs) located in the rafters on southwest corner of the main building. Entrance is located approx 15 ft above the ground facing southwest.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 256,
+    "lat": 33.83091,
+    "lng": -84.117668,
+    "status": "healthy",
+    "note": "[Living Tree] \\\" There is a clump of 3 trees (around 10 ft away from the house) that are very close together. Id say that at 10-12 up which is where the major bee activity is the trees are only about 3 feet away from each other and all are covered in ivy. The ivy had been covered in a berry bloom so there were a lot - and I mean a lot - of honey bees doing a lot of work in the general area. Very hard to tell exactly.\\r \\\"",
+    "date": "2008-10-31"
+  },
+  {
+    "id": 257,
+    "lat": 33.085266,
+    "lng": -84.061707,
+    "status": "healthy",
+    "note": "[Living Tree] Well established hive in a black walnut tree just off the north shoulder of the road. Entrance is about 1 ft off the ground facing south.",
+    "date": "2011-10-13"
+  },
+  {
+    "id": 258,
+    "lat": 36.048012,
+    "lng": -83.918945,
+    "status": "healthy",
+    "note": "[Living Tree] This is an establihed colony that is about 50 feet off of the ground in a live but hollow oak tree size and age are unknown. The tree is in the back yard and when a storm came through it broke a limb out of the tree and brought down a couple of small combs.",
+    "date": "2009-06-09"
+  },
+  {
+    "id": 259,
+    "lat": 38.843544,
+    "lng": -83.890938,
+    "status": "healthy",
+    "note": "[Living Tree] I found it in a large blackberry bush in the back field. Its a beautiful un-disterbed hive on the side of a recentley bushogged field. I noticed that the berries were brighter in that area and when I went to pick them I uncovererd the hive. Wow so cool!",
+    "date": "2012-06-10"
+  },
+  {
+    "id": 260,
+    "lat": 42.577103,
+    "lng": -83.829636,
+    "status": "warning",
+    "note": "[Living Tree] In large oak tree about 35 feet above ground. Convinced homeowner not to removed the bees or the tree",
+    "date": "2009-06-09"
+  },
+  {
+    "id": 261,
+    "lat": 30.79829,
+    "lng": -83.809502,
+    "status": "healthy",
+    "note": "[Living Tree] I have know about this hive since 2007. It is in the hollow of a pecan tree in my backdoor neighbors yard about 15 feet up. It seems to be a very strong hive. I have not physically examined the hollow to see how large the hive is but there is a lot of traffic in and out of the hive.",
+    "date": "2009-05-11"
+  },
+  {
+    "id": 262,
+    "lat": 35.652119,
+    "lng": -83.780685,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Aaron and Kellie Burns Apiary",
+    "date": "2010-03-01"
+  },
+  {
+    "id": 263,
+    "lat": 42.170532,
+    "lng": -83.747955,
+    "status": "healthy",
+    "note": "[Manmade structure] In an outbuilding on my property for over 25 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 264,
+    "lat": 42.375015,
+    "lng": -83.650085,
+    "status": "healthy",
+    "note": "[Living Tree] Living in black walnut tree about 10 off ground. Has been there about 10 years. In the back yard of a house. CANNOT BE VISITED.",
+    "date": "2008-10-19"
+  },
+  {
+    "id": 265,
+    "lat": 34.522736,
+    "lng": -83.639648,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a large oak 40 feet up. Tree is approx. 30ft from roadway and on my property line. It has been there for a little over a year.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 266,
+    "lat": 42.746002,
+    "lng": -83.472061,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is in an old stone house and has been there at least 4 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 267,
+    "lat": 42.473145,
+    "lng": -83.437065,
+    "status": "healthy",
+    "note": "[Manmade structure] Business owner called me to see if I could remove a swarm of honeybees that had just swarmed from the colony within the wall of their building the mother colony is still their approximately 18 off the ground in the NE corner of their cinderblock building. Discovered June 2008. I chose not to remove them.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 268,
+    "lat": 41.677528,
+    "lng": -83.389664,
+    "status": "warning",
+    "note": "[Manmade structure] Located just off nature trail boardwalk in Maumee Bay State Park. About 10 ft high in and on outside of birdhouse hanging on dead tree. It was active in September 2008. I attempted to get permission from park management to capture it and try to establish it in an unused observation hive which was located in nature center. As of 1-5-09 I do not know the status of it",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 269,
+    "lat": 42.657497,
+    "lng": -83.369133,
+    "status": "healthy",
+    "note": "[Living Tree] Resident called me to see if I could remove a swarm that had just entered a knot in her tree approximately 20 up in her maple in the back yard. I convinced her to let them stay.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 270,
+    "lat": 42.581959,
+    "lng": -83.350296,
+    "status": "healthy",
+    "note": "[Living Tree] Resident called me to see if I could remove a colony of honeybees that had just been discovered in a knot in her tree approximately 12 off the ground in the back yard. Discovered June 2008. I chose not to remove them.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 271,
+    "lat": 40.044437,
+    "lng": -83.320312,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is approximately 5 1/2 feet off the ground in a live tree. Ive seen the hive for 8 years which is as long as we have lived at the address of where the hive is located.",
+    "date": "2011-08-22"
+  },
+  {
+    "id": 272,
+    "lat": 35.292446,
+    "lng": -83.248024,
+    "status": "healthy",
+    "note": "[Living Tree] 15 feet up a tree in a hollow about 3 inches in diameter",
+    "date": "2011-02-28"
+  },
+  {
+    "id": 273,
+    "lat": 35.292938,
+    "lng": -83.245758,
+    "status": "healthy",
+    "note": "[Living Tree] About 18 feet up in a large locust tree.",
+    "date": "2012-05-13"
+  },
+  {
+    "id": 274,
+    "lat": 35.250885,
+    "lng": -83.131004,
+    "status": "healthy",
+    "note": "[Manmade Beehive] beehive",
+    "date": "2010-01-13"
+  },
+  {
+    "id": 275,
+    "lat": 35.277298,
+    "lng": -83.123741,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 man made hives",
+    "date": "2010-01-14"
+  },
+  {
+    "id": 276,
+    "lat": 35.001492,
+    "lng": -83.108849,
+    "status": "healthy",
+    "note": "[Living Tree] Hive in tree on island in Chatooga River just upstream from NC SC Ga border intersection. Entrance approximately 3 feet from ground.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 277,
+    "lat": 35.257481,
+    "lng": -83.074036,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 5 managed hives",
+    "date": "2010-01-05"
+  },
+  {
+    "id": 278,
+    "lat": 36.683872,
+    "lng": -83.048615,
+    "status": "healthy",
+    "note": "[Living Tree] 3 feral hives",
+    "date": "2012-05-16"
+  },
+  {
+    "id": 279,
+    "lat": 35.669567,
+    "lng": -82.937164,
+    "status": "healthy",
+    "note": "[Living Tree] This bee tree was disocvered when winds blew the tree down. The tree is now on the ground hanging off the edge of a rural mountain side road.",
+    "date": "2008-07-29"
+  },
+  {
+    "id": 280,
+    "lat": 36.721001,
+    "lng": -82.797256,
+    "status": "warning",
+    "note": "[Dead Tree] beehive",
+    "date": "2008-10-08"
+  },
+  {
+    "id": 281,
+    "lat": 27.754322,
+    "lng": -82.705101,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located in an Oak tree facing the street right next to the sidewalk. It can be accessed from the sidewalk with a ladder without going into the fence. I am the owner of the tree and property.",
+    "date": "2009-07-24"
+  },
+  {
+    "id": 282,
+    "lat": 35.556808,
+    "lng": -82.6474,
+    "status": "healthy",
+    "note": "[Living Tree] This colony is in a large old growth Oak tree. Entrance is about 25 feet up at the main fork. Hive swarmed 7/3/08 swarm captured by me.",
+    "date": "2008-07-03"
+  },
+  {
+    "id": 283,
+    "lat": 35.729462,
+    "lng": -82.637764,
+    "status": "healthy",
+    "note": "[Living Tree] It has been here at least 5 years. It is about 3 off the ground in a huge Pine tree.I would have to guide someone in to find it.",
+    "date": "2009-04-06"
+  },
+  {
+    "id": 284,
+    "lat": 35.586269,
+    "lng": -82.623451,
+    "status": "healthy",
+    "note": "[Living Tree] In the trunk of an old silver maple by my back deck. The opening is at the crown where the main trunk and upper limbs meet about twelve feet above ground. A one and a half inch knothole appears to open into a cavity about 12 x 18. This swarm arrived April 1 2006 . The bees were noticeably smaller and of a darker coloration than locally managed hives (at that time)",
+    "date": "2008-06-25"
+  },
+  {
+    "id": 285,
+    "lat": 27.421602,
+    "lng": -82.591904,
+    "status": "healthy",
+    "note": "[Manmade structure] Under corner of shed",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 286,
+    "lat": 42.605442,
+    "lng": -82.576889,
+    "status": "healthy",
+    "note": "[Living Tree] In a hollow tree. Entrance 20 off ground. First observed in 2007.",
+    "date": "2008-10-19"
+  },
+  {
+    "id": 287,
+    "lat": 42.605598,
+    "lng": -82.576546,
+    "status": "healthy",
+    "note": "[Living Tree] In a tree. Entrance at ground level. Observed active 1999 - 2007. During the winter of 07-08 an animal ravaged the hive and no bee activity observed in 2008.",
+    "date": "2008-10-19"
+  },
+  {
+    "id": 288,
+    "lat": 35.526203,
+    "lng": -82.53273,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 years plus thriving feral colony. 15 off ground in siding along chimney - Private property -",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 289,
+    "lat": 35.514492,
+    "lng": -82.529846,
+    "status": "warning",
+    "note": "[Manmade structure] 20 feet off ground in wooden beam on house. Not that familiar with bees but know its not a yellow jacket or hornets nest. Many bees around when active. More than one entrance to hive. Owners want bees removed.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 290,
+    "lat": 35.563511,
+    "lng": -82.529297,
+    "status": "healthy",
+    "note": "[Manmade structure] About 15 feet heigh off ground has been there a couple of years",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 291,
+    "lat": 35.563511,
+    "lng": -82.529297,
+    "status": "warning",
+    "note": "[Manmade structure] Colony is the the attic of a 4 story older castle has been then more than 10 years runns the entire lenght of one wall bees are visible in attic and exiting both from both front and back of the house at the eaves. Historically home and does not want them removed. I have catupered two swarms from them very gentle bees",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 292,
+    "lat": 27.304634,
+    "lng": -82.520775,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Feral bees moved into an outside wall of our house. We have moved them into a beehive where they are thriving. I never planned on becoming a beekeeper but Ive come to love them.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 293,
+    "lat": 38.982136,
+    "lng": -82.514931,
+    "status": "healthy",
+    "note": "[Manmade structure] In the gas tank of an old pickup truck. The bees were in the truck when it was moved from McArthur Ohio. They have been there a number of years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 294,
+    "lat": 27.931255,
+    "lng": -82.474899,
+    "status": "healthy",
+    "note": "[Living Tree] In an oak tree. Been there for years.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 295,
+    "lat": 40.129951,
+    "lng": -82.344849,
+    "status": "healthy",
+    "note": "[Manmade structure] Located in wall of unoccupied rural store building. Hive entrance is located about 7 ft. above ground close to the upper corner of the main entrance under a porch roof. Size of colony is unknown. Has had consistent activity since at least 2002 (when property was acquired by current owner).",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 296,
+    "lat": 26.884205,
+    "lng": -82.289864,
+    "status": "healthy",
+    "note": "[Living Tree] About 10 ft off the ground in a semi live oak tree. new this year 2012.",
+    "date": "2012-02-29"
+  },
+  {
+    "id": 297,
+    "lat": 39.090168,
+    "lng": -82.199081,
+    "status": "healthy",
+    "note": "[Living Tree] Newly establish colony (May 2009) in old hollow oak tree. The entrance is about 30 ft off the ground.",
+    "date": "2009-05-29"
+  },
+  {
+    "id": 298,
+    "lat": 28.285809,
+    "lng": -82.181252,
+    "status": "healthy",
+    "note": "[Living Tree] in a tree in the backyard. up about 3 stories highlooks like 8 or 9 layers.reminds me of mushrooms",
+    "date": "2012-01-08"
+  },
+  {
+    "id": 299,
+    "lat": 41.259426,
+    "lng": -82.179626,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"known to be active at least 15 years\\rlocated in wall of old no longer in use hen house\\rlocation is surrounded by corn beans hay fields\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 300,
+    "lat": 34.944489,
+    "lng": -82.114563,
+    "status": "healthy",
+    "note": "[Living Tree] in live tree about 15 feet off ground. 4 years now",
+    "date": "2011-05-29"
+  },
+  {
+    "id": 301,
+    "lat": 40.334507,
+    "lng": -82.10495,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located in a cavity of a maple tree which is atop a hill. We have been watching it for two years very busy.",
+    "date": "2008-10-26"
+  },
+  {
+    "id": 302,
+    "lat": 39.084789,
+    "lng": -82.006943,
+    "status": "healthy",
+    "note": "[Living Tree] 6-8 feet off the ground two entrances in a hollow walnut tree been there for at least 2 years",
+    "date": "2011-06-04"
+  },
+  {
+    "id": 303,
+    "lat": 39.905972,
+    "lng": -81.978027,
+    "status": "healthy",
+    "note": "[Living Tree] 2nd Feral Hive in a maple tree 6 ft off ground center of tree slot in tree one year old swarm from 1st hive. About 5000 bees.",
+    "date": "2011-08-17"
+  },
+  {
+    "id": 304,
+    "lat": 39.905945,
+    "lng": -81.977173,
+    "status": "healthy",
+    "note": "[Manmade structure] 1st hive 600 ft off roadway from second hive in our old tool shed wall. Has about 15000 bees.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 305,
+    "lat": 37.825367,
+    "lng": -81.968727,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2012-06-09"
+  },
+  {
+    "id": 306,
+    "lat": 39.984486,
+    "lng": -81.932945,
+    "status": "healthy",
+    "note": "[Living Tree] Second summer since the colony moved into the tree. Population seems down from last year but building again after a prolonged and cold winter. They enter and leave through a small crack into an interior cavity covered by vines.",
+    "date": "2010-05-26"
+  },
+  {
+    "id": 307,
+    "lat": 33.439587,
+    "lng": -81.914902,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 308,
+    "lat": 34.458622,
+    "lng": -81.883331,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 309,
+    "lat": 40.344761,
+    "lng": -81.857353,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are 2 colonies of russian bees here that moved into some old bee boxes that were sitting outside of a barn. I was asked if I wanted the bees. The problem was that they were in York Pennsylvania. I had the hives inspected by the York county bee inspector and went over to get the bees. I really wanted some russian bees so I thought that it was worth the journey. The bees are now sitting in my bee yard and are doing really well still in the original boxes that they moved into.",
+    "date": "2008-11-12"
+  },
+  {
+    "id": 310,
+    "lat": 40.345432,
+    "lng": -81.857246,
+    "status": "healthy",
+    "note": "[Manmade structure] My neighbour has a hive in her house between the first and second level. They are nesting in the floor space of the second level. been there 1 year.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 311,
+    "lat": 40.345104,
+    "lng": -81.857201,
+    "status": "warning",
+    "note": "[Dead Tree] \\\"I was contacted by a local farmer who came across a hie in a cataba tree when he was mowing his pasture. He is very alergic to bees and asked if I could remove the bees. I set a bait hive out in 2007 no luck with that. So the farmer asked if I could cut the tree down and get it out of there. I did just that and you can see the video here. http://www.youtube.com/watch?v=oy-V3u7vSMY\\rI took the tree to my bee yard and that is where it is sitting right now. I plan to have the hive draw comb on some hive bodys in 2009 and hopefully draw the queen out. It may take a while we will see.\\\"",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 312,
+    "lat": 40.34576,
+    "lng": -81.837502,
+    "status": "healthy",
+    "note": "[Living Tree] This is a large birch tree that has a hollow V starting at ground level and going up about 2 feet. It is in a very wooded area cool and dark. I was alerted to the tree when a friend said that he heard a loud buzzing noise in that area. I went to invetigate and found the hive. It is very active. dont know how long it has been there.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 313,
+    "lat": 35.356979,
+    "lng": -81.796036,
+    "status": "healthy",
+    "note": "[Manmade structure] The bees have built in the front of the church front porch about 12-14 ft off of the ground. This hive has been there for 20+ years. They are weak this year.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 314,
+    "lat": 26.101189,
+    "lng": -81.77536,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 feet off the ground in attic of built on porch addition--this section of building primarily wood.Been here about 3 years (since 2006) Had some die offs (possibly excessive heat?)but seems healthy and busystrong.basically to find it come to the listed address.Reporter(me) lives there and is property owner(large garden prop. of duplexes).",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 315,
+    "lat": 36.208374,
+    "lng": -81.762611,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is about 30 Feet from the ground in the side of a house. I found them about 3 weeks ago. I have no idea how long they have been there but they look to be well established.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 316,
+    "lat": 40.292095,
+    "lng": -81.752014,
+    "status": "healthy",
+    "note": "[Living Tree] I heard about this hive after a wind storm that went throught the area. It brought down a tree in a trailer park. The bee hive was in the tree 8 feet above ground. Dont really know how long it has been there.",
+    "date": "2008-10-29"
+  },
+  {
+    "id": 317,
+    "lat": 40.387184,
+    "lng": -81.744942,
+    "status": "healthy",
+    "note": "[Living Tree] This hive was discovered by a friend that was digging a pond and pushed over a tree that was in the middle of the area that he was digging. the hive was in a soft maple tree and about 25 feet from the ground. I cut the hive from the tree and placed it at this location. Just 200 yards from the first hive another hive was noticed in a tree that was loying down in the woods. that hive was also cut out of the tree and place at this present location. Both hives were very strong. One Italian and the other Carniolan bees.",
+    "date": "2009-08-04"
+  },
+  {
+    "id": 318,
+    "lat": 33.858086,
+    "lng": -81.736435,
+    "status": "healthy",
+    "note": "[Living Tree] in tree",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 319,
+    "lat": 33.495598,
+    "lng": -81.727295,
+    "status": "healthy",
+    "note": "[Manmade structure] They are located on the second floor of our house. The bottom half of the house is brick the second floor is wood the bees have their home between on the outside of course.The first time I noticed them was 2 years ago but they could have been there longer.Seems there are more of them now. I dont mind them staying there but someone at the farmers market told me they were bad bees well theyve never misbehaved around me or Mom.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 320,
+    "lat": 40.314091,
+    "lng": -81.697769,
+    "status": "healthy",
+    "note": "[Manmade structure] I was contacted by a painter that was painting this house. Bees have been there 2 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 321,
+    "lat": 40.186611,
+    "lng": -81.692619,
+    "status": "healthy",
+    "note": "[Manmade structure] The game warden told me that there is a hive in this house. Been there about 4 years. The farmer wants to put new siding on so I will remove them in the spring of 09.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 322,
+    "lat": 30.068333,
+    "lng": -81.663803,
+    "status": "healthy",
+    "note": "[Living Tree] 50 off the ground in the leaf canopy of an oak tree. Noticed it about 1 year ago when much of it fell to the ground. The size changes. On private property.",
+    "date": "2011-03-28"
+  },
+  {
+    "id": 323,
+    "lat": 35.953815,
+    "lng": -81.549171,
+    "status": "healthy",
+    "note": "[Manmade structure] About 1ft above ground in the bottom of a building.its been there for over five years. its out off sight but appers to be a strong hive.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 324,
+    "lat": 39.26841,
+    "lng": -81.538811,
+    "status": "healthy",
+    "note": "[Living Tree] In a huge white oak near the center of Parkersburg City Park about 30 above ground.",
+    "date": "2008-10-08"
+  },
+  {
+    "id": 325,
+    "lat": 37.120052,
+    "lng": -81.511749,
+    "status": "healthy",
+    "note": "[Living Tree] This is a Live Tree between several mail boxes right on Fincastle Street just before you get to Jefferson Street The Entrance is only 2 1/2 feet off the ground. The bee space in the tree is approx. 22 inches straight in 19 inches wide and 3 ft up into the heart of the tree.",
+    "date": "2012-05-02"
+  },
+  {
+    "id": 326,
+    "lat": 40.377937,
+    "lng": -81.496582,
+    "status": "healthy",
+    "note": "[Manmade structure] My local mail lady saw that I was doing bees and asked if I would remove some bees from her Grandmas house. I went to take a look. They are in an old farm house in the country. They are on the second level going in under the window probably nesting under the floor between the two levels. They have been there at least 7 or 8 years. I plan to extract them in the spring.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 327,
+    "lat": 28.488533,
+    "lng": -81.496048,
+    "status": "healthy",
+    "note": "[Manmade structure] Owl box side of tree 9 off ground. two years. located on private property. Die off in fall reduces population to minimum spring population explodes. Docile honey bee comb stretching limit of owl box and now pushing open maintenance door.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 328,
+    "lat": 37.134781,
+    "lng": -81.493317,
+    "status": "healthy",
+    "note": "[Manmade structure] It has been in this concrete wall for 4-6 years by the estimates of business people here. The entrance is 5-6 ft off the ground into a concrete block wall 15-18 ft tall. Back wall of a small mall with businesses in the building.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 329,
+    "lat": 39.845978,
+    "lng": -81.457016,
+    "status": "warning",
+    "note": "[Dead Tree] \\\"Found 2009 when swarming (?) Then the entry was covered by bees and I found them by the sound. They seemed to be gone a few days later. The next spring bees were back. The opening to the hive is a foot off the ground obscured by plants in an old locust tree. It is on my property surrounded by rarely mown fields and mixed woodlands. No aggressive behavior I could stand five feet away for hours and watch them. \\r\\\"",
+    "date": "2011-08-23"
+  },
+  {
+    "id": 330,
+    "lat": 28.993727,
+    "lng": -81.419678,
+    "status": "healthy",
+    "note": "[Manmade structure] Approx. 1 year",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 331,
+    "lat": 28.690456,
+    "lng": -81.41198,
+    "status": "healthy",
+    "note": "[In the ground] the hive has been in the water valve box in our front yard for about 18 months. I am trying to move it to the back yard.",
+    "date": "2010-12-05"
+  },
+  {
+    "id": 332,
+    "lat": 29.874811,
+    "lng": -81.322861,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"4ft off the ground in a live oak tree.\\rTree hole is only 3inch circle. \\rLocated in Target store parking lot area.\\rNice active hive. Out of the general publics area but can be viewed without getting out of the car. \\\"",
+    "date": "2009-07-26"
+  },
+  {
+    "id": 333,
+    "lat": 29.89735,
+    "lng": -81.318077,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"25 feet of the ground. Free form construction on the side of a large Cedar Tree. Size is 12 x 24 \\rBees are gentle blond Italian. Some drones are solid Black. \\rIn front of Kettilinus School on City property.\\rA great open air colony. First sighting: 2006\\r\\\"",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 334,
+    "lat": 29.87682,
+    "lng": -81.311012,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"15ft off the ground in a live oak tree.\\rlocated in Willie Gallamor Playground area.\\rNice active hive. \\\"",
+    "date": "2009-07-26"
+  },
+  {
+    "id": 335,
+    "lat": 36.452496,
+    "lng": -81.310677,
+    "status": "healthy",
+    "note": "[Living Tree] Hive has built nest in the summer of 2010 exposed attached to a tree branch of a live tree.",
+    "date": "2010-11-11"
+  },
+  {
+    "id": 336,
+    "lat": 37.050812,
+    "lng": -81.291321,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are more than 10 Langstroth BeeHives near this location all doing fine. Elevation is between 2930 ft. and 2980 ft. Excellent Honey with Sourwood Locust Tulip Poplar Apple Basswood Peach Clover and Blueberry present.",
+    "date": "2011-05-21"
+  },
+  {
+    "id": 337,
+    "lat": 36.828007,
+    "lng": -81.290993,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"This hive covers approximately 15X 20 feet in the back or South wall of an old store and is located about 10 feet above the ground.\\r Drive South of Rural Retreat on bike route 76 for 4 miles at which point the road splits left to Speedwell and Rt.21 and right on St Rt. 614 to Sugar Grove. Bear right and the store is 30 yards in and on the left.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 338,
+    "lat": 28.578756,
+    "lng": -81.249069,
+    "status": "healthy",
+    "note": "[Living Tree] 35 feet up in a pine tree trunk.",
+    "date": "2010-09-27"
+  },
+  {
+    "id": 339,
+    "lat": 41.447742,
+    "lng": -81.228607,
+    "status": "healthy",
+    "note": "[Living Tree] In a hollow pine next to drive way. About 8 feet off ground. Honey bees have used this tree for at least 10 years. Honey bees were first brought to this farm in the 1920s.",
+    "date": "2008-09-27"
+  },
+  {
+    "id": 340,
+    "lat": 35.271355,
+    "lng": -81.099045,
+    "status": "healthy",
+    "note": "[Living Tree] In bottom of hollow poplar tree almost ground level immediately adjacent to my driveway. It has been there for about 6 years.",
+    "date": "2012-03-30"
+  },
+  {
+    "id": 341,
+    "lat": 36.944096,
+    "lng": -81.084297,
+    "status": "warning",
+    "note": "[Living Tree] 6 feet above the ground level in a pine tree with forked trunk. The pine is in the SW corner of the lot adjacent to a dead pine and is second in line N on the NS boundry",
+    "date": "2009-06-08"
+  },
+  {
+    "id": 342,
+    "lat": 33.557625,
+    "lng": -80.939865,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a large live oak tree 15 ft. off the ground and the swarm located there in April 2009. The tree is at our homeplace at the end of our driveway.",
+    "date": "2009-08-16"
+  },
+  {
+    "id": 343,
+    "lat": 37.002914,
+    "lng": -80.91703,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a Large Red Oak Tree approximately 35 ft. off the ground just up hill from a small pond at the left of pasture just in the woods and down hill from last house on the road Property Owner does not want the tree cut down. They are well established for last 4 years.",
+    "date": "2011-05-04"
+  },
+  {
+    "id": 344,
+    "lat": 26.751282,
+    "lng": -80.915016,
+    "status": "healthy",
+    "note": "[Living Tree] 10-15on Oak tree branch in our back yard noticed a year ago after tropical storm it had 2 cones then and 1 on the groundunknowen how many cones now over foot wide and long maybe 4-6 cones now_. Really dont want to get up there and exact measure.",
+    "date": "2009-10-12"
+  },
+  {
+    "id": 345,
+    "lat": 26.751282,
+    "lng": -80.915016,
+    "status": "healthy",
+    "note": "[Living Tree] 10-15on Oak tree branch in our back yard noticed a year ago after tropical storm it had 2 cones then and 1 on the groundunknowen how many cones now over foot wide and long maybe 4-6 cones now_. Really dont want to get up there and exact measure.",
+    "date": "2009-10-12"
+  },
+  {
+    "id": 346,
+    "lat": 36.52121,
+    "lng": -80.89473,
+    "status": "warning",
+    "note": "[Dead Tree] beehive",
+    "date": "2010-05-05"
+  },
+  {
+    "id": 347,
+    "lat": 35.229633,
+    "lng": -80.846497,
+    "status": "healthy",
+    "note": "[Living Tree] 10 feet off the ground in a living oak tree. Hive is directly outside the fence of the Federal Courthouse. Standing outside the courthouse looking towards the street the hive is in the first oak tree to the right. Been there about 6 months moved in early summer 08",
+    "date": "2008-09-25"
+  },
+  {
+    "id": 348,
+    "lat": 35.282112,
+    "lng": -80.832443,
+    "status": "healthy",
+    "note": "[Manmade structure] Eight hives on custom made medal stands one foot off ground. I am just now in the process of setting up and establishing.I just read Beekeeping A Practial Guide by Richard E.Bonneyand am now reading a first edition copy of A.I.RootABCandXYZ of Bee Culture given to me by my mentor Mr. Woodrow Trull who gave me all of his bee equipment and supplies to include a complete extracting apparitis. Mr. Trull is 93 yrs.young.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 349,
+    "lat": 35.605785,
+    "lng": -80.81237,
+    "status": "healthy",
+    "note": "[Manmade structure] I havent seen the hive myself it is under my house. The bees come and go under the door to my laundry room.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 350,
+    "lat": 35.164913,
+    "lng": -80.782288,
+    "status": "healthy",
+    "note": "[Living Tree] 6 feet off ground in tree near the road. Easy to see. Issued a swarm this month - 4-2009.",
+    "date": "2009-04-21"
+  },
+  {
+    "id": 351,
+    "lat": 34.921673,
+    "lng": -80.741158,
+    "status": "healthy",
+    "note": "[Living Tree] at least 2 years old",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 352,
+    "lat": 43.101482,
+    "lng": -80.734062,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2010-06-14"
+  },
+  {
+    "id": 353,
+    "lat": 35.111,
+    "lng": -80.718002,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is between the brick facade and walls of our house approximately 10 feet off the ground. The entrance is a hole in the mortar where the fireplace juts out and the brick meets the upper siding.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 354,
+    "lat": 40.992245,
+    "lng": -80.708839,
+    "status": "healthy",
+    "note": "[Living Tree] 30 or so feet off the ground has been around for at least the past 4 years size = unknown It is on the property of Mill Creek Preserve next to a small east-west running creek if you climb the hill across the creek and look north for a pair of trees joined at the trunk you will find the hive (well at least the opening in the tree). In the summer the bees can be found collecting water in a rocky bend in the creek and if it is warm enough a large mass of bees can be seen hanging from the entrance. PLEASE NOTE: The preserve is not open to the public in that area...permission may be needed before accessing the hive location. I am willing to show the location of the hive is anyone wants to call or email..",
+    "date": "2011-01-07"
+  },
+  {
+    "id": 355,
+    "lat": 36.403599,
+    "lng": -80.700073,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in a hollow oak tree. Entrance hole is approx. 15 feet off the ground.",
+    "date": "2008-10-03"
+  },
+  {
+    "id": 356,
+    "lat": 41.082615,
+    "lng": -80.680077,
+    "status": "healthy",
+    "note": "[Manmade structure] Entrance is around 40+ feet off the ground and is at a juncture between the wood siding and the stone chimney of a structure this hive has been around for years and years and is HUGE..It is located on the west side Pioneer Pavilion of Mill Creek Park. Mill Creek would very much love for this hive to be relocated without too much damage to the structure.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 357,
+    "lat": 37.145199,
+    "lng": -80.676727,
+    "status": "healthy",
+    "note": "[Manmade structure] hive is about 10 foot off ground in the south side of old farm house it is at least 10 years old very strong hive.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 358,
+    "lat": 32.915462,
+    "lng": -80.664284,
+    "status": "warning",
+    "note": "[Dead Tree] \\\"Dead hollow tree 30 ft off ground\\rdeep in tree\\\"",
+    "date": "2010-02-16"
+  },
+  {
+    "id": 359,
+    "lat": 35.140915,
+    "lng": -80.623253,
+    "status": "healthy",
+    "note": "[Living Tree] It is in a hollow of a tree approx 12-15 feet up next to the parking lot of a daycare",
+    "date": "2009-02-17"
+  },
+  {
+    "id": 360,
+    "lat": 28.027138,
+    "lng": -80.597076,
+    "status": "healthy",
+    "note": "[Manmade structure] hive in cinder blocks with a shed on top it..unsure how long it has been there ... are not aggressive ..smallish bees",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 361,
+    "lat": 36.056595,
+    "lng": -80.580597,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is about three feet off the ground in an oak tree. Tree is adjacent to our driveway. Vertical hole in the tree is about three inches wide and about eighteen inches tall. The bees have been there about four months.",
+    "date": "2008-08-28"
+  },
+  {
+    "id": 362,
+    "lat": 37.105961,
+    "lng": -80.53833,
+    "status": "healthy",
+    "note": "[Living Tree] The colony is about 12 feet off the ground in a knot on the trunk of a black oak tree. Unsure of age of hive. Tree located in old family cemetary at top of hill.",
+    "date": "2009-11-09"
+  },
+  {
+    "id": 363,
+    "lat": 36.856361,
+    "lng": -80.48613,
+    "status": "healthy",
+    "note": "[Manmade structure] Located in a thick wall of an old farmhouse. The owner says the colony has been there for many years as reported by his elderly mother. Bees spill over into a recess accesible from the attic. They appear to be Italian race.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 364,
+    "lat": 37.235107,
+    "lng": -80.420631,
+    "status": "healthy",
+    "note": "[Living Tree] I found this hive late last Fall walking home from class I havent had an opportunity to check on them since it warmed back up though. The hive is in a cavity in a tree immediately adjacent to the sidewalk five feet off the ground at the corner of Main and Prices Fork.",
+    "date": "2010-03-30"
+  },
+  {
+    "id": 365,
+    "lat": 37.268147,
+    "lng": -80.412651,
+    "status": "warning",
+    "note": "[Dead Tree] This is the same hive and log from the tree on Prices Fork and N Main St. In June 2010 it was cut for road expansion and we moved it to the local community gardens where it is still thriving a year and half later. 7 tall x 2 diameter locust log.",
+    "date": "2011-10-13"
+  },
+  {
+    "id": 366,
+    "lat": 35.163914,
+    "lng": -80.397781,
+    "status": "healthy",
+    "note": "[Manmade structure] 5 feet off ground 10 years old size unknown side of old abandoned house near Rocky River on Hwy. 200 North of Monroe just inside Union County.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 367,
+    "lat": 37.246181,
+    "lng": -80.384216,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two colonies living in stored bee boxes under shed. One has been there since 1997 the other since 2000. Both colonies swarm most years and appear to be very strong. They have had no management from me in the time that they have lived there.",
+    "date": "2010-02-06"
+  },
+  {
+    "id": 368,
+    "lat": 35.502438,
+    "lng": -80.304825,
+    "status": "warning",
+    "note": "[Manmade structure] The hive is located in an abandoned house. entrance is about 5 off ground in the exterior wall toward the rear of the house. It appears that the hive has been there for some time and had plenty of working bee activity and honey smell during warm weather. The house has been empty for a number of years and appears to be used as storage. Owner should be easily located on county GIS system.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 369,
+    "lat": 36.053783,
+    "lng": -80.303413,
+    "status": "healthy",
+    "note": "[Living Tree] In cavity of large white oak on church grounds. Approximately 20 off ground. First noticed in 2006.",
+    "date": "2008-11-30"
+  },
+  {
+    "id": 370,
+    "lat": 35.051571,
+    "lng": -80.302116,
+    "status": "healthy",
+    "note": "[Manmade structure] On the ground in what looks like an oil barrel. Active hive found it 3 years ago. Private Property",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 371,
+    "lat": 36.153988,
+    "lng": -80.298599,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-06-24"
+  },
+  {
+    "id": 372,
+    "lat": 35.811062,
+    "lng": -80.285812,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is in a hollowed out tree still alive about 20 feet above ground. I think its been there for several years with a steady stream of bees during summer-behind field of mobile homes on Sink Inn Rd (Service Recovery Corp)",
+    "date": "2008-12-04"
+  },
+  {
+    "id": 373,
+    "lat": 35.846413,
+    "lng": -80.277443,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is located in an old house. As you look at the house from the front the hive entrance is located in the last pillar on the left. The owner of the property will be accomadating.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 374,
+    "lat": 26.016556,
+    "lng": -80.262352,
+    "status": "healthy",
+    "note": "[Living Tree] Hive built in our back yard using a NC gourd as a base to build on. Hive arrived in 3/09 - built up hive to hang off gourd to within 3 feet of ground - about 4 or 5 rows of hive roughly 4 feet from top to bottom. In our back yard on the right by our fence opening toward the back.",
+    "date": "2009-11-13"
+  },
+  {
+    "id": 375,
+    "lat": 36.54126,
+    "lng": -80.225212,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located in the hollow of an old oak tree beside Peters Creek Baptist church. The tree is next to the churchs picnic shelter at the edge of the parking area and graveyard and stands over a brick housing for an outdoor water faucet. The bees enter the hollow about 20 - 30 feet above.",
+    "date": "2008-11-11"
+  },
+  {
+    "id": 376,
+    "lat": 35.058849,
+    "lng": -80.217949,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 ft off the ground in an old house on private property. The hive has been there 3 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 377,
+    "lat": 26.311016,
+    "lng": -80.187523,
+    "status": "healthy",
+    "note": "[Manmade structure] it has been here for about a month now and set up home in a wooden reel which local code enforcement had just told us that we have to get rid of the reel that the honey bee hive is in. the nest is about 1ft x 1 ft and there is allot of them coming and going it is located at the rear of our building.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 378,
+    "lat": 26.108549,
+    "lng": -80.178391,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"15-20 ft. \\rsix months\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 379,
+    "lat": 36.106297,
+    "lng": -80.13591,
+    "status": "healthy",
+    "note": "[Living Tree] 30 ft off the ground - in a hole in a living oak tree....very active hive",
+    "date": "2009-05-03"
+  },
+  {
+    "id": 380,
+    "lat": 26.622908,
+    "lng": -80.126556,
+    "status": "healthy",
+    "note": "[Manmade structure] underneath a house large hive extracted for saftey.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 381,
+    "lat": 36.080093,
+    "lng": -80.12484,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 10 feet off the ground inside a somewhat enclosed split in a living tulip tree (I believe the scientific name would be tulipfera grandiflora or something like that.) in my back yard. It has been there about three years. I have no way of knowing how large it is.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 382,
+    "lat": 39.568977,
+    "lng": -80.124451,
+    "status": "healthy",
+    "note": "[Manmade structure] A hive we owned swarmed in the spring of 2004 and entered the side of our house through an old small hole once used to run cable TV. They live between the outer and inner wall in our living room. They have been there ever since with no medication no human intervention. They seemed to be very strong this summer and are apparently doing very well - actually better than other hives we manage. They are approximately 3 from the ground and very gentle. Weve never been stung although we pass by their entrance often.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 383,
+    "lat": 34.965405,
+    "lng": -80.069077,
+    "status": "healthy",
+    "note": "[Manmade structure] In a old out building .2 hives in the walls said have been there for 12 yrs. 12 ft. off the ground.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 384,
+    "lat": 39.535831,
+    "lng": -80.012222,
+    "status": "healthy",
+    "note": "[Living Tree] \\\" height app. 12 feet\\r app. 2 years\\r large hickory tree\\\"",
+    "date": "2008-11-03"
+  },
+  {
+    "id": 385,
+    "lat": 34.962406,
+    "lng": -79.996994,
+    "status": "healthy",
+    "note": "[Manmade structure] hive in a wall of a old house east of Lilesville on old hwy 74. 1/2 miles east of town. about 5 ft off the ground next to a window.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 386,
+    "lat": 34.967457,
+    "lng": -79.984909,
+    "status": "healthy",
+    "note": "[Manmade structure] 20 ft of the ground in a block wall old gas station 1 feral hive. how long it been there is unknown",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 387,
+    "lat": 35.317368,
+    "lng": -79.980469,
+    "status": "healthy",
+    "note": "[Living Tree] We built our house 2 years ago and the bees were in a hollow tree and we had the land 1 year before that so they have been there at least 3 years. Both of my hives have swarmed this year so I hope the new queen mated with the drones from this colony. I know they have been hearty for at least 3 years but most likely a lot longer. I call them my 3rd hive. I am in Rowan County and am a member of the county club here where I am program Director. Feel free to contact me. As a matter of fact I might call on you to speak at one of our meetings! Thanks....",
+    "date": "2008-07-08"
+  },
+  {
+    "id": 388,
+    "lat": 39.622868,
+    "lng": -79.953865,
+    "status": "healthy",
+    "note": "[Living Tree] tree next to sidewalk 10 high. hive has been active for over 3 years",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 389,
+    "lat": 36.06171,
+    "lng": -79.882233,
+    "status": "healthy",
+    "note": "[Manmade structure] In the side of an old outside storage building. There are two entrances to the hive. Both about 3 feet off the ground. On private property. No Trespassing.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 390,
+    "lat": 36.129139,
+    "lng": -79.851852,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located about 20 feet above the ground in a Sycamore tree. They recently swarmed and divided. This is the third straight year they have lived in the same location.",
+    "date": "2008-07-01"
+  },
+  {
+    "id": 391,
+    "lat": 36.068283,
+    "lng": -79.851547,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"hive is located in tree behind apartment complex next to fence of office park off Walker Entrance is a cut-off branch stump on trunk about 20 high. Highly active. Threw several swarms off in April/May 2008.\\rSecretary in Councilmans office can point it out.\\\"",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 392,
+    "lat": 35.681431,
+    "lng": -79.815468,
+    "status": "healthy",
+    "note": "[Living Tree] 5 feet off of ground hollow tree---not sure how long its been there--the tree is in front yard of 201 Foster St in Asheboro NC. Very strong colony.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 393,
+    "lat": 36.093983,
+    "lng": -79.801384,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is located in the seam of the trunk of what I believe to be a variety of oak tree. It is approximately 3-4 feet off the ground on the northwest side of the tree facing Nottingham Road. It is only a few feet from the road and close to a nearby stream. It has been active for at least two years.",
+    "date": "2009-03-17"
+  },
+  {
+    "id": 394,
+    "lat": 36.235058,
+    "lng": -79.772301,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Bees in unused hive boxes stored in a shed about eight feet above ground. Hive established about three or four weeks. Size unknown at this time.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 395,
+    "lat": 36.100471,
+    "lng": -79.538834,
+    "status": "healthy",
+    "note": "[Living Tree] this hive is located in the front yard of our house in a live tree hive is about 25 feet off ground it is at least 2 years old during the warm months there are an extremely large amount of bees surrounding opening my family and I are very excited about the hive",
+    "date": "2008-12-02"
+  },
+  {
+    "id": 396,
+    "lat": 36.250237,
+    "lng": -79.524559,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-12-03"
+  },
+  {
+    "id": 397,
+    "lat": 35.547314,
+    "lng": -79.51561,
+    "status": "warning",
+    "note": "[Dead Tree] Hive is living in a dead sweetgum tree on the edge of a cornfield using an entrance at ground-level. We have been watching the hive for 4 years now and it is still going strong.",
+    "date": "2008-07-03"
+  },
+  {
+    "id": 398,
+    "lat": 35.546196,
+    "lng": -79.514923,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is about 20 feet up a large sweetgum tree. Bees have been seen in this tree for over 10 years but I dont know if they are the same hive or are recent move-ins.",
+    "date": "2008-07-03"
+  },
+  {
+    "id": 399,
+    "lat": 35.128342,
+    "lng": -79.508484,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"First noticed 5 June 2009\\rin red oak tree 4 foot circumference\\rentrance is 6 inches from ground\\rfacing north 20 yards from log barn\\r.6 miles from state road\\\"",
+    "date": "2009-06-05"
+  },
+  {
+    "id": 400,
+    "lat": 35.558159,
+    "lng": -79.50708,
+    "status": "healthy",
+    "note": "[Living Tree] Colony in a maple tree about 15 ft. up. They have been there at least 3 years. Another colony was in a old stump near by. They died out this past winter; yet there is a swarm in there now. I captured a swarm from the stump two years ago. They are doing well.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 401,
+    "lat": 36.102932,
+    "lng": -79.501701,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-03-29"
+  },
+  {
+    "id": 402,
+    "lat": 35.025497,
+    "lng": -79.50119,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a a cut in the tree next to the Air Traffic Control tower. Its been there approxamently 1.5 years. Personal are instructed to remain clear. Hive is located inside a perimeter gated compound.",
+    "date": "2009-12-30"
+  },
+  {
+    "id": 403,
+    "lat": 35.488281,
+    "lng": -79.436256,
+    "status": "healthy",
+    "note": "[Manmade structure] 6 ft off ground in wall of old house been there about 3 yrs",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 404,
+    "lat": 36.507099,
+    "lng": -79.296257,
+    "status": "healthy",
+    "note": "[Living Tree] Bottom of a tree is hollow. Bees are entering at almost ground level.",
+    "date": "2009-04-16"
+  },
+  {
+    "id": 405,
+    "lat": 35.713486,
+    "lng": -79.285286,
+    "status": "healthy",
+    "note": "[Manmade structure] Five feet up between studs under rotting pine clapboard siding on north wall of old house. Several thousand bees new this year. A larger hive was present in same wall from ~2000 to ~2004. Possibly the old blown insulation has had some protective effect.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 406,
+    "lat": 35.635674,
+    "lng": -79.229538,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is located in the wall of a smoke house moved from Kernersville. The local colony recolonized an abandoned hive after the building was moved. It has been there 3-4 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 407,
+    "lat": 35.761532,
+    "lng": -79.214165,
+    "status": "healthy",
+    "note": "[Living Tree] HIve is in old Oak tree one of few trees left standing in field clear cut for impending development. Brought Don Hopkins and our entymologist friend from Columbia (forgothis name)to see about 3 years ago. Don thinks bees may be Italian descendents of deceased Master beekeeper in area. There is a hole near the ground and at least one more higher up. Discovered ~ 4 yrs.ago by dear friends whose neighbor was caretaking land before owner sold for development. Further clearing of land on hold due do econonmy; have attempted to contact attys for developer to no avail. Will be happy to show tree.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 408,
+    "lat": 35.48304,
+    "lng": -79.189453,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"This is Woodbrige off of Lee Ave Exit.House address is 1309 First Pointe\\rSanford N.C. 27332.The hive is in a Big White oak tree about 20 feet off the ground.Its been hear about five or six years.Two diffident times a colony has left the tree.We Found someone to come and get one of them but the lest one got gone before we could get someone to get them.There is a lot of them it looks like.\\\"",
+    "date": "2008-10-02"
+  },
+  {
+    "id": 409,
+    "lat": 35.839428,
+    "lng": -79.180519,
+    "status": "healthy",
+    "note": "[Living Tree] Owner of 81 Oak Bluff Greg Huckabee called to inform of hive in tree next to back deck. On inspection found honeybees entering tiny crack in wounded area about 15ft. off ground. Owner amenable to sampling before trapping out of tree. Mapquest mislabled nearest road is Jones ferry NOT Crawford Dairy.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 410,
+    "lat": 35.371765,
+    "lng": -79.171608,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is in the exterior walls behind clapboard siding of occupied residence the only two story house on Shaw Pond Road. By my personal knowledge it has been continually active since before 1940 and was still there this spring despite the house having been sandblasted and restored some 8 or 10 years ago.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 411,
+    "lat": 35.820667,
+    "lng": -79.164589,
+    "status": "healthy",
+    "note": "[Living Tree] Hive in a large very old Sweet Gum Tree with hollow cavity from base of ground to about 9 feet that you can see. Cavity in tree suspected to be much larger. Two openings on opposite sides of tree. Strong smell of honey on hot humid day. We do not know how long hive has been here but there are lots of very active bees.",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 412,
+    "lat": 35.719479,
+    "lng": -79.16198,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in Sweet Gum located at Circle City Screen Printing 919-542-5512 mgr.s name is RAy; . Bees were trapped out last year and tree hole boarded up by beekeeper John Strickland; newe hole chewed in by bees this spring. Definately honeybees; told John Strickland 2 weeks ago to see if he was interested in retrapping. Owners do not want to get rid of tree open to sampling.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 413,
+    "lat": 37.135139,
+    "lng": -79.123878,
+    "status": "healthy",
+    "note": "[Living Tree] IN A HOLLOW SWEET GUM LOCATED ON A STEEP BLUFF OVERLOOKING SENECA CREEK. VERY LARGE ACTIVE HIVE. AGE ?",
+    "date": "2009-07-20"
+  },
+  {
+    "id": 414,
+    "lat": 40.687267,
+    "lng": -79.093636,
+    "status": "warning",
+    "note": "[Dead Tree] In a dead tree about 20 feet off the ground.",
+    "date": "2012-06-19"
+  },
+  {
+    "id": 415,
+    "lat": 35.968613,
+    "lng": -79.080467,
+    "status": "healthy",
+    "note": "[Living Tree] In the roots of a tree in the 75 foot buffer of the new Orange County Solid Waste Facility. It is approximately 75 feet to the west of the entrance drive to the new building. It is 50 feet from Eubanks road",
+    "date": "2008-07-03"
+  },
+  {
+    "id": 416,
+    "lat": 35.858013,
+    "lng": -79.078926,
+    "status": "healthy",
+    "note": "[Living Tree] In a crack of an old cedar tree in my yard. Maybe 12 feet high. Has been there for years.",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 417,
+    "lat": 35.909977,
+    "lng": -79.072006,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"Bumble Bees\\rUp under a gutter in building.\\r8 off ground\\rNear Osmanthus bushes\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 418,
+    "lat": 35.479706,
+    "lng": -79.06028,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"hive is below the floor of anold pack house \\rowner and worker said it has been there 20 years. \\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 419,
+    "lat": 35.479771,
+    "lng": -79.060211,
+    "status": "healthy",
+    "note": "[Manmade structure] hive is below the floor of an old pack house land ower said it has been here for many years",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 420,
+    "lat": 35.915485,
+    "lng": -79.058281,
+    "status": "healthy",
+    "note": "[Living Tree] It appears that a smallish colony has made its home in an opening at the very bottom of a tree facing Carr Street. They are active and seem healthy. I have seen activity several times in June while walking my dog.",
+    "date": "2008-07-04"
+  },
+  {
+    "id": 421,
+    "lat": 35.886547,
+    "lng": -79.055222,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 35 feet high up in a hollow tree. It has been there at least 5 years. I am not sure of the size. The tree is located on the edge of our lawn.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 422,
+    "lat": 35.119629,
+    "lng": -79.041138,
+    "status": "healthy",
+    "note": "[Living Tree] Hive located in tree on 6th fairway of the golf course. Tree is live and grounds staff is aware of and watches the progress of the hive. Ryder Golf Course is a registerd and certified autobon wildlife sanctuary.",
+    "date": "2009-05-25"
+  },
+  {
+    "id": 423,
+    "lat": 35.759575,
+    "lng": -79.019302,
+    "status": "healthy",
+    "note": "[Manmade Beehive] this is a managed hive for the federal college of forestry ibadan it is about 4 feet off the groundit has been there for about 5 years nowthe structure is a kenyan top bar hiveit located behind the ornamental Nursery of the federal college of Forestry",
+    "date": "2011-06-03"
+  },
+  {
+    "id": 424,
+    "lat": 36.574368,
+    "lng": -79.011574,
+    "status": "healthy",
+    "note": "[Manmade structure] People and bees living peacefully together in family home.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 425,
+    "lat": 35.822319,
+    "lng": -78.972,
+    "status": "healthy",
+    "note": "[Living Tree] Directly on the left of the path entrance one foot off the ground in a living Sweet Gum tree.",
+    "date": "2008-06-24"
+  },
+  {
+    "id": 426,
+    "lat": 35.754105,
+    "lng": -78.958138,
+    "status": "healthy",
+    "note": "[Living Tree] A large hive . Been here for at least nine years. In a tree trunk. Just on the edge of the game lands at our property.",
+    "date": "2008-07-01"
+  },
+  {
+    "id": 427,
+    "lat": 35.785271,
+    "lng": -78.956268,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located in an old potato storage building. One group is in the ceiling and enters at the south gable end. The second group is located on the eastern wall. They have been there ~60 years. The building will fall down soon so we are planning to move to hives by the end of Jun 2009.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 428,
+    "lat": 36.090187,
+    "lng": -78.926529,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is approximately 2 feet off the ground in a natural split or opening of a double Tulip Poplar tree. The hive is inside the tree and not visible to the eye but many common honey bees come and go and congregate on the outside of the tree.",
+    "date": "2008-07-01"
+  },
+  {
+    "id": 429,
+    "lat": 36.106007,
+    "lng": -78.917892,
+    "status": "healthy",
+    "note": "[Manmade structure] In the siding of my porch. About 9 feet off the ground. Hive has been there at least three years is very healthy and swarms at least annually. Happy to show interested parties.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 430,
+    "lat": 36.405361,
+    "lng": -78.910423,
+    "status": "healthy",
+    "note": "[Manmade structure] In soffit at highest point of roofline of log cabin home. At least one year.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 431,
+    "lat": 36.226551,
+    "lng": -78.903809,
+    "status": "healthy",
+    "note": "[Living Tree] Our feral bee hive is about 30 feet in the air in a sweet gum on our property. It seems to be a large hive that swarmed spring and late summer of 2007 (I have pictures of the first swarm to give an idea of numbers).",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 432,
+    "lat": 35.986897,
+    "lng": -78.898315,
+    "status": "healthy",
+    "note": "[Living Tree] 20 foot up in a tree",
+    "date": "2009-04-23"
+  },
+  {
+    "id": 433,
+    "lat": 35.978004,
+    "lng": -78.892822,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-07-24"
+  },
+  {
+    "id": 434,
+    "lat": 35.707912,
+    "lng": -78.883385,
+    "status": "warning",
+    "note": "[Dead Tree] Hive in a pine tree about 15 to 20 feet above the ground. Been in tree for about 40 Years.",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 435,
+    "lat": 35.742916,
+    "lng": -78.88147,
+    "status": "healthy",
+    "note": "[Living Tree] 2-3 feet high inside a living tree near the greenway and wetlands area. At least 5 years old.",
+    "date": "2010-06-03"
+  },
+  {
+    "id": 436,
+    "lat": 35.742096,
+    "lng": -78.880989,
+    "status": "warning",
+    "note": "[Dead Tree] Half dead treeat base. Cant miss the flury of bees going to and fro",
+    "date": "2009-04-13"
+  },
+  {
+    "id": 437,
+    "lat": 35.985531,
+    "lng": -78.873016,
+    "status": "healthy",
+    "note": "[Living Tree] It is in a Durham Park in a small Oak tree in a 5 branch about 15 off the ground. This is at Piedmont Wildlife Center. The tree is located in the front yard of the house.",
+    "date": "2010-08-18"
+  },
+  {
+    "id": 438,
+    "lat": 36.14922,
+    "lng": -78.872032,
+    "status": "healthy",
+    "note": "[In the ground] beehive",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 439,
+    "lat": 35.083611,
+    "lng": -78.867355,
+    "status": "healthy",
+    "note": "[Manmade structure] 5-6 off the ground -unknown how long it has been there but 1 year -3 ~2 holes in a concrete block wall at the abandoned texfi plant in Fayetteville NC. Thousands of bees have been seen entering and exiting the wall. The plant has been abandoned for approx. 9 years. -I have a degree in environmental studies and a minor in biology from Elon University. -I work for an environmental consulting company who has been doing work on the site and noticed the be hive. A coworked had noticed the bee hive last summer and warned me about it. In the next few years the bldg will be demolished and it may be pertinent to remove this behive to save the colony from destruction.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 440,
+    "lat": 36.117355,
+    "lng": -78.862267,
+    "status": "healthy",
+    "note": "[Manmade structure] One location is in a stone facade.about 10 feet off the ground.It has been here 2+ years.pretty large number of bees.the next colony is in an eave.about 12 feet off the ground it has been here 3+ years.Its a medium size colony",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 441,
+    "lat": 36.016182,
+    "lng": -78.856453,
+    "status": "healthy",
+    "note": "[Living Tree] 25 FT OFF GROUND IN OAK TREEAT A FRIENDS HOUSE. 1925 WATSON RD. TREE IN BACK YARD. OWNER IS MARK MCCOWAN",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 442,
+    "lat": 35.580879,
+    "lng": -78.855377,
+    "status": "warning",
+    "note": "[Dead Tree] This is a rescued bee tree that was provided by Nancy Young from Austin TX (originally from Fuquay-Varina. The bee tree was originally located on Ballentine Dairy RD Fuquay-Varina. The tree died and Nancy and her husband paid to have a tree crew disassemble the tree on August 8 2008 and using a crane/truck moved over to our property. The tree originally was probably 60 tall and the section containing the bees is about 8 high. It is this section that is on our property. The tree is anchored with stakes and guy wires to keep it stable and from falling over.",
+    "date": "2008-11-21"
+  },
+  {
+    "id": 443,
+    "lat": 36.207939,
+    "lng": -78.845505,
+    "status": "healthy",
+    "note": "[Living Tree] THIS HIVE WAS CUT DOWN LAST WEEK AT 600 WATTS ST IN DURHAM. I GOT THE WHOLE LOG AT MY HOUSE. I CAPTURED THE BEES AND PUT IN A NEW QUEEN THIS WEEK.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 444,
+    "lat": 35.90134,
+    "lng": -78.81823,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive was located in the floor joist of between the first and second floor of a vacant house. The house was being sold to be moved so a local man asked me to remove the hive. The queen survived and the hive is currently living in my backyard. There may be more feral hives in this area.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 445,
+    "lat": 42.97147,
+    "lng": -78.800407,
+    "status": "healthy",
+    "note": "[Living Tree] Feral honeybee hive. In branch cavity of silver maple tree in backyard of 255 Ivyhurst Cir along wooden boundary fence. Hive est about 2005. Cavity entrance: 3long2 wide. Ht: 10.5 Aspect: S60W - excellent for winter sun. At least 2 swarms.",
+    "date": "2010-04-29"
+  },
+  {
+    "id": 446,
+    "lat": 36.050194,
+    "lng": -78.800117,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a hole in large Red Oak tree approximately 20-30 ft. high. The hole is not visible from the ground (it apparently points upwards). I just noticed it in Spring 2008 due to numbers of bees flying in and out of tree.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 447,
+    "lat": 38.326611,
+    "lng": -78.780472,
+    "status": "warning",
+    "note": "[Living Tree] \\\"TWO COLONIES!!\\r#1 Base of dead 20 locust tree 10 feet inside of NE corner of woodlot. Previously a feral colony (3 yrs) did not survive Feb 09. Current colony is swarm arrived Mar/Apr 09. Entrance is 6 above ground shaded and overgrown. Activity as of Sep 09 is weak.\\r#2: Scarlet oak 24alive but dying former squirrel cavity 25 high open edge of woodlot facing east. Colony is 3rd 2008 (late June) swarm from locust tree #1 above. Cavity is packed with comb. Beginning June 09 colony has ~1000 bees surrounding round entrance hole fanning constantly. Bees remain outside even at night!! Activity as of Sep 09 is strong. Great for observation and photos! 540-249-4063.\\\"",
+    "date": "2009-09-26"
+  },
+  {
+    "id": 448,
+    "lat": 39.721809,
+    "lng": -78.775322,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 449,
+    "lat": 35.797054,
+    "lng": -78.770699,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a curved tree in our backyard. Its about 30 feet off the ground. Its been there for at least 3 years. Its a large colony.",
+    "date": "2008-08-17"
+  },
+  {
+    "id": 450,
+    "lat": 35.830029,
+    "lng": -78.764084,
+    "status": "healthy",
+    "note": "[Manmade Beehive] I wish Id found I hive but I didnt and I realize bees can travel but at the Umstead Hotel in Cary NC theyve planted a lot of flowers that are appealing to butterflies and bees. There were honeybees everywhere particularly on some flowering thyme in their herb garden. I asked the hotel if they keep their own hive and they dont so perhaps this is a wild one. I hope this helps a little!",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 451,
+    "lat": 35.764202,
+    "lng": -78.759789,
+    "status": "healthy",
+    "note": "[Living Tree] I have not located the hive but we have many many honey bees on our cucumbers and Russian sage especially and have for the past couple years. The type of hive is unknown but that is not a choice. I dont know if this is helpful information or not. At one time there was a beekeeper in our neighborhood (Mr. Turnipseed I believe) but he died several years ago.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 452,
+    "lat": 35.867142,
+    "lng": -78.749359,
+    "status": "healthy",
+    "note": "[Manmade structure] Look for details on a beelining clinic coming soon!",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 453,
+    "lat": 35.63475,
+    "lng": -78.749283,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a tree and is about 3 feet off the ground. This is the hives 3rd year.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 454,
+    "lat": 35.762238,
+    "lng": -78.742622,
+    "status": "healthy",
+    "note": "[Manmade structure] 20 unknown",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 455,
+    "lat": 36.074631,
+    "lng": -78.736954,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in hole in tree. Second time the hives has returned to this try after leaving.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 456,
+    "lat": 35.52203,
+    "lng": -78.720901,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 457,
+    "lat": 35.657192,
+    "lng": -78.707985,
+    "status": "healthy",
+    "note": "[Manmade structure] I have 2 colonies living in my house.They enter under the siding and appear to be between the inner and outer wall. One colony has been here for 25 years. The other split from it a year ago.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 458,
+    "lat": 35.685997,
+    "lng": -78.699852,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is under the roof of my house. The entry is in a gap between the roof and chimney where the roofing tar has deteriorated. I havent noticed it before this spring. There appears to be a lot of bees. Will they move eventually? Can they be moved without tearing up my roof?",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 459,
+    "lat": 35.951496,
+    "lng": -78.692795,
+    "status": "warning",
+    "note": "[Manmade structure] Roseington swarm N. Raleigh. Was found on the side of a garage high on the peak. It was eventually removed by a wake county beekeeper.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 460,
+    "lat": 35.308578,
+    "lng": -78.673309,
+    "status": "healthy",
+    "note": "[Manmade structure] It is in a foundation vent of my fathers home. It has been there over a year.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 461,
+    "lat": 35.905876,
+    "lng": -78.672409,
+    "status": "healthy",
+    "note": "[Manmade structure] Located in the eave of our home. Probably 30 feet up. The hive has been present for at least 11 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 462,
+    "lat": 35.740311,
+    "lng": -78.671371,
+    "status": "healthy",
+    "note": "[Manmade structure] Test: 8 managed hives",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 463,
+    "lat": 36.26302,
+    "lng": -78.662292,
+    "status": "healthy",
+    "note": "[Living Tree] Healthy colony living in a live pin oak tree. The hive is about 18 off the ground in a hollow.",
+    "date": "2009-09-01"
+  },
+  {
+    "id": 464,
+    "lat": 35.787453,
+    "lng": -78.662033,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is inside the eave return of my house about 18 above the ground. Hives have come and gone from this location for many decades.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 465,
+    "lat": 35.749004,
+    "lng": -78.652039,
+    "status": "healthy",
+    "note": "[In the ground] There is a hive located in the ground where my sidewalk and driveway meet. Its been there at least 2 months. I have no idea how big the colony is. This is the 3rd colony in three years that Ive noticed in my yard however they are always in a different part of my yard but always in the ground. I count 15-20 bees per minute leaving the hive.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 466,
+    "lat": 35.773056,
+    "lng": -78.651604,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located under 2nd floor back porch floor of a buddies apartment. It is a huge hive and has been there for way over 5 years. Swarms 2-3 times a year at least.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 467,
+    "lat": 35.782936,
+    "lng": -78.642944,
+    "status": "healthy",
+    "note": "[Living Tree] This active hive is nestled in an old Black Walnut Tree near the southwest corner of the Old Health Building. The entrance is about 10 feet off the ground and faces east. Look for the walnut tree closest to the building. You can easily see the bees flying from the sidewalk along Jones Street. It has been active for over 5 years and may have origins for the North Carolina Museum of Natural Sciences Discovery Room located three blocks away which maintains an observation hive which swarms from time to time.",
+    "date": "2008-07-07"
+  },
+  {
+    "id": 468,
+    "lat": 35.955845,
+    "lng": -78.638161,
+    "status": "healthy",
+    "note": "[Living Tree] Ground Level in base of Oak Tree in Back Yard of 6033 Crescent Knoll Drive. We noticed it in the last month...it is probably 1 to 2 months old.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 469,
+    "lat": 35.822487,
+    "lng": -78.637543,
+    "status": "healthy",
+    "note": "[Manmade structure] Located in an old duck house on my property about 12 feet off the ground. Duck house is 15x12x12 cedar boards. Hive has been there since 2004. UPDATE: 3/1/08 Comments : The duck house failed and I could not locate and activity in the hive... just want to keep the data base current.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 470,
+    "lat": 35.913479,
+    "lng": -78.637039,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is 40ft from ground in the trunk of a living oak tree. It has been there at least two years. We cannot tell the size but the bees are always swarming around the hole in the tree. It is visible from our kitchen.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 471,
+    "lat": 35.784946,
+    "lng": -78.636551,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony is in the north wall of the house located on the NW corner of Blount St.& North St. Entrance is approximately 12 ft above the ground.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 472,
+    "lat": 35.691322,
+    "lng": -78.63121,
+    "status": "healthy",
+    "note": "[In the ground] in the ground",
+    "date": "2008-09-11"
+  },
+  {
+    "id": 473,
+    "lat": 35.843708,
+    "lng": -78.624825,
+    "status": "healthy",
+    "note": "[Living Tree] The honey bees are in a crack of the hickory tree in the far southwest corner of my property. They are about 10 up in the trunk of the tree. We discovered them in the Spring of 2008 but have no idea how long they have been there.",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 474,
+    "lat": 35.782169,
+    "lng": -78.618164,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in a beech tree in our yard about 20 feet off ground in a split in the trunk. Weve lived here 2 1/2 years and neighbors say it has been here for some time. A local beekeeper tried to use a vaccum contraption to get them out but was unsuccessful.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 475,
+    "lat": 36.274796,
+    "lng": -78.576859,
+    "status": "healthy",
+    "note": "[Manmade structure] A colony had been in the exterior wall of this house for about four years. Comb was in cavity 9 high X 16 wide. There was about 20lbs of honey and four combs of brood. The contractor had destroyed many of the bees before he called me.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 476,
+    "lat": 35.961056,
+    "lng": -78.575935,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in a large oak tree in my yard. It has been there at least 4 yrs. It is about 12-14ft off the ground in the forks of the tree.My address is 6200 Rocky Creek way Wake Forest 27587",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 477,
+    "lat": 35.832916,
+    "lng": -78.552704,
+    "status": "warning",
+    "note": "[Living Tree] Honeybees are in a partially dead tree in the front yard of the property on Castlebrook Dr. The entrance is at the base of the tree. Discovered in 2011.",
+    "date": "2012-01-20"
+  },
+  {
+    "id": 478,
+    "lat": 35.963428,
+    "lng": -78.55233,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hanging from a live tree about 5 off the ground. I just noticed it. It looks big to me and may have honey on it.",
+    "date": "2012-05-09"
+  },
+  {
+    "id": 479,
+    "lat": 36.016808,
+    "lng": -78.546471,
+    "status": "healthy",
+    "note": "[Living Tree] Found hive when our home was under construction 3 years ago. Hollow places in tree. Hive has grown in size. Bees cover approx. 3/4 Square Foot on outside of tree. about 6 feet above ground.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 480,
+    "lat": 35.5583,
+    "lng": -78.532082,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are 7 hives at this location that have not been tended for the past 2 years. The owner wants to keep them but has no knowledge of beekeeping. They were her husbands. They look pretty good at this time.",
+    "date": "2008-07-17"
+  },
+  {
+    "id": 481,
+    "lat": 35.46455,
+    "lng": -78.531097,
+    "status": "healthy",
+    "note": "[Living Tree] 3 feet off ground inside a tree tree is in the edge of woods surrounding my home. Hive has been here at least 4 years",
+    "date": "2008-07-08"
+  },
+  {
+    "id": 482,
+    "lat": 35.888371,
+    "lng": -78.509163,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in my backyard about 12ft off the ground in a hollow tree. Hive has been there for a least 3 yrs.",
+    "date": "2008-07-21"
+  },
+  {
+    "id": 483,
+    "lat": 35.566147,
+    "lng": -78.503624,
+    "status": "warning",
+    "note": "[Manmade structure] The hive is at the farm where I live. It was removed from inside the wall of a house in Clayton NC in late May. There were 3 seperate areas of comb and brood in the wall. One queen was located and all the bees were combined in one hive when I moved them to my property.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 484,
+    "lat": 35.34676,
+    "lng": -78.482933,
+    "status": "healthy",
+    "note": "[Living Tree] Nest is in normal hive body now in the exact spot where the tree it used to reside in was cut down.",
+    "date": "2008-08-08"
+  },
+  {
+    "id": 485,
+    "lat": 35.786785,
+    "lng": -78.481133,
+    "status": "warning",
+    "note": "[Manmade structure] This hive is located in the north gable of a brick home on the corner of Smithfield Rd. and Park Ave. in Knightdale. This location is across the street from a hobby beekeeper who has kept bees for 4 years. The occupant of the house has considered having the bees removed because she had honey running down her dining room wall after that hot spell of June 2008.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 486,
+    "lat": 36.072548,
+    "lng": -78.478256,
+    "status": "healthy",
+    "note": "[Living Tree] 20 foot high17 years.size unknownin huge beech tree at spring house.",
+    "date": "2008-07-20"
+  },
+  {
+    "id": 487,
+    "lat": 36.067787,
+    "lng": -78.473511,
+    "status": "healthy",
+    "note": "[Living Tree] 6foot #13 years; 8 foot high #2 5 yearsdeclining number bees seen. wonder if relocating to tree #1.",
+    "date": "2008-07-20"
+  },
+  {
+    "id": 488,
+    "lat": 36.067787,
+    "lng": -78.473412,
+    "status": "healthy",
+    "note": "[Living Tree] Update 3-23-09. No activity seen since Dec. Animal has enlarged opening in upper enterance this winter and appears to have taken over. Lower enterance shows no signs of life at this time. Hive in beech at well still active.",
+    "date": "2009-03-23"
+  },
+  {
+    "id": 489,
+    "lat": 36.071026,
+    "lng": -78.468735,
+    "status": "healthy",
+    "note": "[Living Tree] About 5 feet off ground. Between railroad and pasture. We moved the fence back so it no longer includes the tree. Discovered when doing repairs to fence after hurricane in 1996. Have been watching it and the activity on the upper opening has almost stopped The one on the lower part of v is still active.",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 490,
+    "lat": 35.37294,
+    "lng": -78.464767,
+    "status": "healthy",
+    "note": "[Living Tree] Found at the base of large Oak tree",
+    "date": "2008-08-08"
+  },
+  {
+    "id": 491,
+    "lat": 36.102375,
+    "lng": -78.453369,
+    "status": "healthy",
+    "note": "[Manmade structure] approx. 35 feet off ground in the eaves of the Franklinton Methodist Church in Franklinton. Been there for about 50 years when I was in the first grade.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 492,
+    "lat": 35.446415,
+    "lng": -78.431999,
+    "status": "healthy",
+    "note": "[Manmade structure] At the top of s two story column. Bees have beenpresent in this column for about 25 years. Linwood and Sandra Allen home.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 493,
+    "lat": 35.911575,
+    "lng": -78.424187,
+    "status": "healthy",
+    "note": "[Living Tree] located about 5 feet off the ground in a hollow in the trunk of a living oak standing alone beside a dirt path. Found Oct 08",
+    "date": "2008-09-12"
+  },
+  {
+    "id": 494,
+    "lat": 36.057407,
+    "lng": -78.408531,
+    "status": "healthy",
+    "note": "[Living Tree] Hive discovered in hollow live oak tree when cut down.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 495,
+    "lat": 35.349098,
+    "lng": -78.394257,
+    "status": "warning",
+    "note": "[Dead Tree] In old tree stump about 5 ft off the ground.",
+    "date": "2008-08-08"
+  },
+  {
+    "id": 496,
+    "lat": 35.380322,
+    "lng": -78.378738,
+    "status": "healthy",
+    "note": "[Living Tree] Nest is located at the very bottom of a large old maple tree. Very gentle bees.",
+    "date": "2008-08-08"
+  },
+  {
+    "id": 497,
+    "lat": 35.890579,
+    "lng": -78.375175,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is in a very old oak with the entrance about 10 feet above Mike and Maris deck. These bees have been there since spring 2008.",
+    "date": "2009-03-30"
+  },
+  {
+    "id": 498,
+    "lat": 34.795841,
+    "lng": -78.363647,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is 15-20 ft off the ground in a 100+ year old oak that is hollow. Bees can be seen swarming in and out of hollows in the tree. The tree is behind my home.",
+    "date": "2008-11-29"
+  },
+  {
+    "id": 499,
+    "lat": 35.399055,
+    "lng": -78.346725,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-02-24"
+  },
+  {
+    "id": 500,
+    "lat": 35.399124,
+    "lng": -78.346596,
+    "status": "healthy",
+    "note": "[Manmade structure] Found in barn wall in 2oo7. Moved to hive box about 300 ft away from orginal location. Been using Bees for fun/hobbist. Have given no pest treatments of any type. They are untouched except for modern hive box",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 501,
+    "lat": 38.023212,
+    "lng": -78.346252,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Locally captured swarm of feral bees set up in beehive",
+    "date": "2010-07-23"
+  },
+  {
+    "id": 502,
+    "lat": 35.46067,
+    "lng": -78.33252,
+    "status": "healthy",
+    "note": "[Living Tree] 25ft up in my house. Its been there fof over 16 yrs",
+    "date": "2011-11-06"
+  },
+  {
+    "id": 503,
+    "lat": 35.830376,
+    "lng": -78.314987,
+    "status": "warning",
+    "note": "[Dead Tree] This is a hive that was in a tree that fell through my house on Jan. 7th 2009... Hive is in a log about 6 feet long and about a foot in diameter...",
+    "date": "2009-07-11"
+  },
+  {
+    "id": 504,
+    "lat": 34.359947,
+    "lng": -78.218369,
+    "status": "healthy",
+    "note": "[Living Tree] In a large oak 7 feet off the ground.",
+    "date": "2012-05-13"
+  },
+  {
+    "id": 505,
+    "lat": 36.003609,
+    "lng": -78.187225,
+    "status": "healthy",
+    "note": "[Living Tree] 8 feet up in a cedar tree. age unknown.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 506,
+    "lat": 36.164948,
+    "lng": -78.161652,
+    "status": "warning",
+    "note": "[Manmade structure] The hives are 18-20ft above ground in the soffit/ceilings of the building. To date there are four small colonies and one large colony. The color of the comb indicates many years of use and reuse by feral swarms. The colonies are being removed and relocated. According to members of the church bees have been coming and going for 25+ years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 507,
+    "lat": 35.227673,
+    "lng": -78.134766,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is located in between the walls of old hog house. 8-10 years",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 508,
+    "lat": 35.421745,
+    "lng": -78.102356,
+    "status": "warning",
+    "note": "[Living Tree] Tree in back yard of home near the garden height off ground-8 feet three foot gap opening in side of tree age of colony- unknown size estimate- small. Homeowner said that a swarm was removed from a bench near the tree this spring.",
+    "date": "2009-05-27"
+  },
+  {
+    "id": 509,
+    "lat": 36.642166,
+    "lng": -78.101639,
+    "status": "healthy",
+    "note": "[Living Tree] appro. 3 off the ground in a living tree. The tree has a split going up the trunk ~ 3 long. No idea how long its been there. To find please contact me.",
+    "date": "2008-06-30"
+  },
+  {
+    "id": 510,
+    "lat": 35.408703,
+    "lng": -78.099876,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 feet off ground in the top of a stone column at the driveway entrance on the SW corner of the front yard. The hive is 18 months old started about april 2007.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 511,
+    "lat": 35.401543,
+    "lng": -78.099419,
+    "status": "healthy",
+    "note": "[Living Tree] Oak tree near ditch height off ground-15 feet top opening of two openings on side of tree facing a field Age of colony- unknown Size estimate- small. The inactive lower hole of the two holes has staining.",
+    "date": "2009-05-27"
+  },
+  {
+    "id": 512,
+    "lat": 35.580685,
+    "lng": -78.080177,
+    "status": "healthy",
+    "note": "[Living Tree] in an old milk del truck",
+    "date": "2010-04-05"
+  },
+  {
+    "id": 513,
+    "lat": 35.196705,
+    "lng": -78.079811,
+    "status": "healthy",
+    "note": "[Living Tree] This Colony is living in the large oak tree in the back yard. It is about 26 feet above the ground and has been there about two years.",
+    "date": "2008-07-13"
+  },
+  {
+    "id": 514,
+    "lat": 34.941288,
+    "lng": -78.001183,
+    "status": "healthy",
+    "note": "[Manmade structure] There are two hives located inside the north wall of an old farm house on private property behind a locked gate. Approx. 6 to 10 ft. above ground. Access must be obtained from Murray Agriculture LLC by contacting either Dan Murray at (919) 880-5885 or Bill Murray at (434) 977-7046. These hives have been at this location for at least 20 or 30 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 515,
+    "lat": 35.382015,
+    "lng": -77.994408,
+    "status": "healthy",
+    "note": "[Manmade structure] This colony is in the eave of the county courthouse and has been for several years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 516,
+    "lat": 35.576447,
+    "lng": -77.947716,
+    "status": "healthy",
+    "note": "[Manmade structure] There is a colony in the North East corner of this house. The house has not been used in 20 years but the grass is kept up by the owner. He claims that the bees have been in the wall by the chimney about 5above the ground for the last dozen years or so.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 517,
+    "lat": 35.468899,
+    "lng": -77.927162,
+    "status": "healthy",
+    "note": "[Manmade structure] There is a colony of bees in the south east side of the abandoned house. The farmer that tends the land found them last summer (2008) No idea on how long they have been there.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 518,
+    "lat": 35.320473,
+    "lng": -77.916046,
+    "status": "healthy",
+    "note": "[Manmade structure] These bees are in a cinder block auto center wall about 14 feet above the ground floor. They ahve been there about 10 years according to the owner.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 519,
+    "lat": 36.430813,
+    "lng": -77.912125,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is at least 4 years old located in a old man made structure",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 520,
+    "lat": 34.043556,
+    "lng": -77.89856,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2012-06-08"
+  },
+  {
+    "id": 521,
+    "lat": 34.195122,
+    "lng": -77.88723,
+    "status": "healthy",
+    "note": "[Living Tree] This honey bee tree is located in the YWCA Outback property inside a large Quercus nigra (water oak). The opening is at ground level. This hive has been active for at least 2 years.",
+    "date": "2009-08-11"
+  },
+  {
+    "id": 522,
+    "lat": 35.539909,
+    "lng": -77.887177,
+    "status": "healthy",
+    "note": "[Manmade structure] This colony is living in the transmission of a old yellow backhoe. The owner reports having seen the bees for about three years possibly longer.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 523,
+    "lat": 36.33836,
+    "lng": -77.88517,
+    "status": "healthy",
+    "note": "[Manmade structure] old church bldg- years",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 524,
+    "lat": 34.052658,
+    "lng": -77.88208,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is in a water meter box in the ground and is fulll of honey!",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 525,
+    "lat": 35.308651,
+    "lng": -77.872612,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony is in the back left corner of the residence about 8 feet above the ground behind the fascia board. Owner says that they have been there about three years and there was another colony in the peak of this house in previous years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 526,
+    "lat": 34.223335,
+    "lng": -77.871307,
+    "status": "healthy",
+    "note": "[Living Tree] This honey bee hive is inside the trunk of a large tree. The opening is at ground level. The hive has been active for at least 3 years. This bee tree is located beside the trail inside the Bluethenthal Wildflower Preserve on the campus of UNCW.",
+    "date": "2009-08-11"
+  },
+  {
+    "id": 527,
+    "lat": 38.132397,
+    "lng": -77.871094,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located in wall of a structure. Said to have been present for 10 years. Will be doing extraction in spring 2010.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 528,
+    "lat": 35.547905,
+    "lng": -77.864014,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony is inside an old bulldozer on the ground in a junkyard. They were first seen in March of 2007 but this is a large old yard and could easily have been there for years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 529,
+    "lat": 34.210419,
+    "lng": -77.836502,
+    "status": "healthy",
+    "note": "[Living Tree] This honey bee hive is located inside a large branch of a large tree in the New Hanover County Arboretum/Cooperative Extension Center. Not sure how long it has been there but it is active and producing honey. Enter the Arboretum by the main front gate. Turn right through the rose garden pass through the Ability Garden turn right up the trail toward the Vegetable Garden. Look for a large deck to the left of the path. Look for a puddle of honey that has dripped from the hive. Look above your head to find the hive inside the branch of the large tree.",
+    "date": "2009-08-11"
+  },
+  {
+    "id": 530,
+    "lat": 34.512943,
+    "lng": -77.803413,
+    "status": "healthy",
+    "note": "[Living Tree] In hole in oak tree about 10 feet above ground on private land in deer hunting woods. Dont know how long its been there newly made road beside it. .",
+    "date": "2008-09-21"
+  },
+  {
+    "id": 531,
+    "lat": 35.767548,
+    "lng": -77.75531,
+    "status": "healthy",
+    "note": "[Manmade structure] there are 3 hives on all.2 of the hives are located in a old white house. those bee hives were in that house when my grandfather and father both lived in the house.so that hive has been there for close to 100 yrs. the other hive is in a tree 30ft. away.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 532,
+    "lat": 38.86414,
+    "lng": -77.752151,
+    "status": "healthy",
+    "note": "[Living Tree] Third year we have been aware of this hive five feet off the ground inside a hollow tree. Second feral hive found on the farm. We moved one out of a barn wall into a hive this spring. It is doing well so far (2008)and will see if the girls make it through the winter.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 533,
+    "lat": 35.300961,
+    "lng": -77.677322,
+    "status": "healthy",
+    "note": "[Living Tree] In Detas Fields Subdivision. Located in hollow oak tree on cul-de-sac. 3 off ground. Trapping attempt unsuccessful. Bees absconded.",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 534,
+    "lat": 37.483635,
+    "lng": -77.636536,
+    "status": "healthy",
+    "note": "[Living Tree] Located in a large oak tree approximately 12 feet above the ground in a hole on the back side of the tree towards the woods and is approximately 2 to 2 1/2 inches in diameter. It started near the end of May or the beginning of June it appears to have several hundred bees.",
+    "date": "2011-07-25"
+  },
+  {
+    "id": 535,
+    "lat": 35.779804,
+    "lng": -77.604759,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is locaed in an abondoned farm house. It is 10 ft off the ground in the rear wall of the house. Known to have been present for 3 years. House is located on Hwy 258 abput 100 yards from intersection with Hwy 42.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 536,
+    "lat": 35.272671,
+    "lng": -77.580711,
+    "status": "warning",
+    "note": "[Manmade structure] NOT LOOKING TO HAVE THE BEES REMOVED!!   We live in a large two story mansion that was built in 1904 with six white 25 foot west facing columns and we have two hives -the oldest active for 40 years or so is in the top of the north column a second newer hive is in the top of the third column from the north. The north column hive died out last fall and has been slow to recover or find new bees but seems to now (5/25/2011) be going gangbusters as usual. The bees are not aggressive. An old pest control man in town reported to me that he had seen them there 30 years ago (said that in 2001). We rent the home so I have no authority to remove or repair damage from a removal project. We are happy to share the building and the homeowners arent anxious about it either. Our yard always has one of the first blooming azaleas in town. http://digital.lib.ecu.edu/192",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 537,
+    "lat": 34.937359,
+    "lng": -77.557915,
+    "status": "healthy",
+    "note": "[Living Tree] Hive in live tree in cemetery.",
+    "date": "2008-06-29"
+  },
+  {
+    "id": 538,
+    "lat": 34.942158,
+    "lng": -77.555344,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive in wall of abandoned house.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 539,
+    "lat": 35.904747,
+    "lng": -77.544907,
+    "status": "healthy",
+    "note": "[Manmade structure] This wild colony is located in the residence on the second floor near the window. It is reported to have been there 10 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 540,
+    "lat": 35.898731,
+    "lng": -77.535751,
+    "status": "healthy",
+    "note": "[Manmade structure] This colony is between the walls of the Colonial Theater and the Constantine building. Accessible from the roof of the Constantine building. This colony is reported to have been present for 7-8 years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 541,
+    "lat": 36.393307,
+    "lng": -77.531548,
+    "status": "healthy",
+    "note": "[Living Tree] approx 7-8ft off ground in old cedar tree-at least 2 years",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 542,
+    "lat": 35.317139,
+    "lng": -77.527313,
+    "status": "healthy",
+    "note": "[Living Tree] Colony is hollow gum tree blown over in tropical storm 09/05/08 absconded 09/06/08",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 543,
+    "lat": 35.32605,
+    "lng": -77.492455,
+    "status": "healthy",
+    "note": "[Living Tree] Colony formerly in small hollow gum tree about 5 off ground near small ditch. Bees died or absconded sometime around 2004 [healthy]",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 544,
+    "lat": 38.741062,
+    "lng": -77.482452,
+    "status": "warning",
+    "note": "[Dead Tree] Old termite/ant destroyed tree. Hollowed out. Height of tree was about 9 feet. Hole in side of tree (3incharound) is entrance. Tree/bees has since been cut and moved to my local apiary (four miles away)",
+    "date": "2009-09-27"
+  },
+  {
+    "id": 545,
+    "lat": 37.522388,
+    "lng": -77.466614,
+    "status": "healthy",
+    "note": "[Living Tree] 15-20 feet off the ground in the hole of a tree in our backyard close to our shed. Noticed it yesterday for the first time.",
+    "date": "2010-07-05"
+  },
+  {
+    "id": 546,
+    "lat": 37.53709,
+    "lng": -77.455505,
+    "status": "healthy",
+    "note": "[Living Tree] 20 ft. off ground in large living tree. Swarmed from an existing hobbyist hive. Followed into cemetery where we saw the bees go into the tree. It was established in May of 2008. Last time I looked at it was August of 2008 and is still there.",
+    "date": "2008-10-22"
+  },
+  {
+    "id": 547,
+    "lat": 38.722855,
+    "lng": -77.445915,
+    "status": "warning",
+    "note": "[Dead Tree] Old tree leaning up against large live pine tree",
+    "date": "2010-04-22"
+  },
+  {
+    "id": 548,
+    "lat": 34.781101,
+    "lng": -77.432587,
+    "status": "healthy",
+    "note": "[Manmade structure] Height of entrance is about 10 ft off ground in an exterior wall of my home I just moved in late last summer neighbors tell me the hive has been around quite some time despite previous owners attempts to be rid of them.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 549,
+    "lat": 36.41349,
+    "lng": -77.432526,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is only a foot or two off the ground. I dont know how long it has been there but I have know about it for at least 3 years. The size is hard to judge but there always some bees around the opening. This hive is in a mostly blown over tree beside the road.",
+    "date": "2008-07-18"
+  },
+  {
+    "id": 550,
+    "lat": 35.393528,
+    "lng": -77.399727,
+    "status": "healthy",
+    "note": "[Living Tree] Colony in the base of 100-year-old oak tree south side of house",
+    "date": "2008-09-10"
+  },
+  {
+    "id": 551,
+    "lat": 36.513775,
+    "lng": -77.337646,
+    "status": "healthy",
+    "note": "[Manmade structure] North East corner 2nd floor of the house",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 552,
+    "lat": 42.919193,
+    "lng": -77.258308,
+    "status": "healthy",
+    "note": "[Living Tree] 7 off the ground in the trunk of a catalpa tree. There have been bees in this tree every summer for the 6 years Ive lived here. The current colony came in the spring of 06 and is entering its third winter. There is also another colony in the tree next to this one but they have not survied any winters.  This is on private property. No tresspassing please.",
+    "date": "2008-09-19"
+  },
+  {
+    "id": 553,
+    "lat": 38.958607,
+    "lng": -77.215431,
+    "status": "healthy",
+    "note": "[Manmade structure] Colony nesting in exterior wall of home a few feet off ground; homeowner just noticed it this year so it must be relatively new; Master beekeeper advised homeowners to leave colony alone to see if it survives over the winter. If so he will remove it in the spring.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 554,
+    "lat": 40.177364,
+    "lng": -77.118576,
+    "status": "healthy",
+    "note": "[Living Tree] The hiveis in an old blacj cherry tree and is about breast height in a tree which is appx 14-18 inches in diameter. Hive has been there at least two years.",
+    "date": "2008-12-26"
+  },
+  {
+    "id": 555,
+    "lat": 35.052063,
+    "lng": -77.045235,
+    "status": "healthy",
+    "note": "[Living Tree] What I think are bees are flying in and out of a cavity in the main trunk of an old Spanish Red Oak (Quercus falcata)The cavity is between 30 and 35 feet off the ground. The cavity is old and the bees could have been there unnoticed for years as it can only be seen from one area in the yard. Two years ago there was a swarm collected by bee keepers in the same yard. Bees are often seen in the garden",
+    "date": "2009-03-24"
+  },
+  {
+    "id": 556,
+    "lat": 38.899117,
+    "lng": -77.037659,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"Hive is in a big live cypress tree located in the SW corner of Lafayette Park. The entrance is about 15ft off the ground and faces north.\\rIt appears to have a strong population judging by flight activity at the entrance.\\\"",
+    "date": "2011-08-23"
+  },
+  {
+    "id": 557,
+    "lat": 37.171124,
+    "lng": -76.875282,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Abandoned standard double deep at least 5yr...in headrow weeds and vines. surviving with out top. Found Oct 2008 very heavy with stores.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 558,
+    "lat": 34.723854,
+    "lng": -76.763161,
+    "status": "healthy",
+    "note": "[Living Tree] Inside the branch of a Live Oak tree. Had a swarm arrive in April 2007. This seemed to slowly disappear in the early spring of 2008 then in April 2008 had another swarm arrive. The tree is in my front yard; the branch is about 10 above the ground. The swarm may have split again recently as there seem to be fewer bees as of about mid-June. There are always bees outside the hive--could it be getting full and too crowded?",
+    "date": "2008-06-28"
+  },
+  {
+    "id": 559,
+    "lat": 39.86179,
+    "lng": -76.737099,
+    "status": "healthy",
+    "note": "[Living Tree] 4 off the ground in a black walnut tree behind the large white barn. Been there for at least two years.",
+    "date": "2008-10-11"
+  },
+  {
+    "id": 560,
+    "lat": 39.423637,
+    "lng": -76.635559,
+    "status": "healthy",
+    "note": "[Manmade structure] Approx. 10 feet off the ground wooden structure.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 561,
+    "lat": 39.341198,
+    "lng": -76.634918,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive entrance is located within the wall of the historic Roland Park Water Tower. The entrance is approx. 20 feet off the ground on the north east facing side (building is octagonal) of the building.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 562,
+    "lat": 39.350494,
+    "lng": -76.629517,
+    "status": "healthy",
+    "note": "[Manmade structure] In the north wall of a house about 15 feet above the ground. Been there at least since summer of 2009.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 563,
+    "lat": 39.350319,
+    "lng": -76.629013,
+    "status": "healthy",
+    "note": "[Living Tree] 25 above ground in a 24 diam. living tree entrance is a split in the trunk.",
+    "date": "2008-11-01"
+  },
+  {
+    "id": 564,
+    "lat": 36.960968,
+    "lng": -76.623848,
+    "status": "healthy",
+    "note": "[Living Tree] This hive is located on the 10th Hole at Cypress Creek Golf Course in SmithfieldVirginia. The hive is in a tree about 10 feet to the right of the cartpath about 125 yds. from the green. The hive access is about 3 feet off the ground. There are a limited number of trees in the area of the hive and isnt hard to find. If one follows the cartpath from the teeing area you will for about 150 yds go through an open area. The golf hole makes a small turn to the right and there are trees lining the right hand side of the hole. From the first trees that one encounters on the cartpath the bee tree is at most 20 trees from the beginning of the stand of trees. [healthy]",
+    "date": "2010-03-17"
+  },
+  {
+    "id": 565,
+    "lat": 35.180542,
+    "lng": -76.604919,
+    "status": "healthy",
+    "note": "[Manmade structure] hive is very large and has been there a long time - years?? hive is located in a house outer wall.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 566,
+    "lat": 35.180542,
+    "lng": -76.604919,
+    "status": "healthy",
+    "note": "[Manmade structure] hive is very large and has been there a long time - years?? hive is located in a house outer wall.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 567,
+    "lat": 34.727222,
+    "lng": -76.571487,
+    "status": "healthy",
+    "note": "[Living Tree] ITS BEEN IN THE TREE FOR A FEW YEARS",
+    "date": "2010-02-15"
+  },
+  {
+    "id": 568,
+    "lat": 34.7757,
+    "lng": -76.557983,
+    "status": "healthy",
+    "note": "[Living Tree] 5 off ground in tree. Its been there for at least two years and the opening faces Otway Hardware. Everyone knows its there and are pleased to have it! If you cant find it ask anyone at Otway Hardware; theyll help you.",
+    "date": "2010-11-22"
+  },
+  {
+    "id": 569,
+    "lat": 43.42749,
+    "lng": -76.521286,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is at ground level in a maple tree previously occupied by carpenter ants. Swarmed into the tree this past May.",
+    "date": "2010-09-15"
+  },
+  {
+    "id": 570,
+    "lat": 37.238953,
+    "lng": -76.509293,
+    "status": "healthy",
+    "note": "[Living Tree] about 3 off ground in a tree by walking trail leading down to river near Yorktown Visitor Center",
+    "date": "2011-11-17"
+  },
+  {
+    "id": 571,
+    "lat": 36.450562,
+    "lng": -76.428192,
+    "status": "healthy",
+    "note": "[Living Tree] Bees are located in a large Oak tree in the front yard of a residential home. Bees are about fourteen feet off the ground and have been in this tree for several years according to homeowner.",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 572,
+    "lat": 42.956047,
+    "lng": -76.382103,
+    "status": "healthy",
+    "note": "[Manmade structure] two colonies6 feet off groundin old houseone on east side one on north",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 573,
+    "lat": 41.857307,
+    "lng": -76.34243,
+    "status": "warning",
+    "note": "[Living Tree] \\\"sycamore tree approx. 15 ft. above ground\\r(photo available)\\rLast visit revealed that it had been removed from location\\\"",
+    "date": "2009-01-16"
+  },
+  {
+    "id": 574,
+    "lat": 36.243027,
+    "lng": -76.331291,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in the base of a walnut tree along the side of a creek. According to landowner bees have been there several years.",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 575,
+    "lat": 36.242889,
+    "lng": -76.330948,
+    "status": "warning",
+    "note": "[Living Tree] Hive is located in a fallen tree due to hurricane Isabel in 2003. It is located in deep underbrush in a swamp. This is the second hive located on farmers property of 20 acres. Farmer does not want it removed.",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 576,
+    "lat": 42.922478,
+    "lng": -76.329041,
+    "status": "healthy",
+    "note": "[Living Tree] 10 feet high in a hickory tree 5 yearsswarms every year",
+    "date": "2010-07-28"
+  },
+  {
+    "id": 577,
+    "lat": 36.245796,
+    "lng": -76.323914,
+    "status": "warning",
+    "note": "[Manmade structure] Homeowner said bees showed up summmer of 2008. A colony of bees were removed by me in summer of 2007 at same location. Homeowner would like them removed once samples are taken. Bees are located B/T first and second floor of a two story house.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 578,
+    "lat": 36.274422,
+    "lng": -76.315147,
+    "status": "healthy",
+    "note": "[Living Tree] Colony located 2ft. from ground in the base of a live tree. Its been there for 3-4 yrs.",
+    "date": "2009-07-01"
+  },
+  {
+    "id": 579,
+    "lat": 36.835735,
+    "lng": -76.305672,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"2 colonies are located within the structure of the apartment building.\\rOne very large colony is located within a decorative pediment above the glassed in main entrance bees can be heard in the wall of the stairwell between 1st and 2nd floor. The 2nd colony is in a 3rd floor outer wall and enter thru mortar on Green St. One colony is believed to have been there perhaps 5 years.\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 580,
+    "lat": 36.838451,
+    "lng": -76.301506,
+    "status": "healthy",
+    "note": "[Manmade structure] If standing on Court St facing the appartment building there will be an alley way to the right side of the building. Within the alley you will find porches/decks accedded from the alley. The bees are located within the deck floor of the 3rd floor appartment above the second floor deck. Bees can be seen coming and going from the decking while standing at ground level.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 581,
+    "lat": 36.862694,
+    "lng": -76.283401,
+    "status": "healthy",
+    "note": "[Living Tree] Hive located in large live pin oak along main drive toward the back wall within Elmwood Cemetary. Colony is perhaps 15 to 20 feet from the ground and bees enter thru large knot hole. Appears to be very large active colony that has probably been there for years and years.",
+    "date": "2011-07-02"
+  },
+  {
+    "id": 582,
+    "lat": 36.300529,
+    "lng": -76.2257,
+    "status": "healthy",
+    "note": "[Manmade structure] hive is located in the sofit area of the east side of the house approx. 30ft off the ground. This house is the oldest registered home in the city dated 1853.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 583,
+    "lat": 36.640652,
+    "lng": -76.225258,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in a living tree it has two entrances. The bottom entrance is about 3 feet off the ground and the upper entrance is about 12 feet off the ground. Bees have been in that tree for nearly 20 years according to reports.",
+    "date": "2011-10-27"
+  },
+  {
+    "id": 584,
+    "lat": 43.060905,
+    "lng": -76.213692,
+    "status": "healthy",
+    "note": "[Manmade structure] sw corner of home 12 ft 3yrs",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 585,
+    "lat": 36.274864,
+    "lng": -76.210793,
+    "status": "warning",
+    "note": "[Manmade structure] Hive was located 20ft off the ground in the A frame pitch of the roof line structure of the contemporary home. It was removed by the request of the homeowner July 2 2008.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 586,
+    "lat": 36.888958,
+    "lng": -76.209412,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is located in the wall of a garage/shed. The entrance is approx. 18 inches above the ground.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 587,
+    "lat": 36.487499,
+    "lng": -76.203888,
+    "status": "healthy",
+    "note": "[Manmade structure] In the wall of a structure eight ft. up; about a year old. Nest about 2 ft. by 3 ft. between the wall studs. Located in a remote private area of Camden Co.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 588,
+    "lat": 36.484245,
+    "lng": -76.195503,
+    "status": "warning",
+    "note": "[Manmade structure] Bees arrived in summer of 2008. They are located B/T first a second floor of two story home in the wall. Homeowner would like them removed.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 589,
+    "lat": 41.854858,
+    "lng": -76.191216,
+    "status": "warning",
+    "note": "[Manmade structure] \\\"ferel hive located in the basement rafters of the house at the above location. \\r now removed & installed into boxes & moved to 589 walker rd endicott ny\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 590,
+    "lat": 36.250801,
+    "lng": -76.175713,
+    "status": "warning",
+    "note": "[Dead Tree] Located in a 92 acre logging operation. Bees were in an old rotten Oak. Nest about 2X5. Tree cut down broke apart bees and combs scattered.",
+    "date": "2009-08-18"
+  },
+  {
+    "id": 591,
+    "lat": 36.52121,
+    "lng": -76.160957,
+    "status": "warning",
+    "note": "[In the ground] Small swarm about 1 1/2 lbs. located in the ground in a water meter box. Bees removed joined with another swarm and requeened.",
+    "date": "2009-06-09"
+  },
+  {
+    "id": 592,
+    "lat": 36.482174,
+    "lng": -76.150536,
+    "status": "warning",
+    "note": "[Manmade structure] Hive was located in a birdhouse nailed on a tree limb approx. 14ft up. Bees have been in the birdhouse for two years. Customer wanted it removed because bees were getting into her house. Birdhouse was removed Sep. 14th.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 593,
+    "lat": 36.48811,
+    "lng": -76.147873,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 594,
+    "lat": 36.48811,
+    "lng": -76.147873,
+    "status": "warning",
+    "note": "[Living Tree] Hive was located in base of gum tree in the backyard of the property which they were in the process of clearing. Homeowner wanted it removed. Removal started April 25 2009 and was completed June 2 2009.",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 595,
+    "lat": 36.482658,
+    "lng": -76.141258,
+    "status": "healthy",
+    "note": "[Manmade structure] Between floor joists under a Doublewide home... Been there 1 year. Vacuumed out approx. 16 lbs. of bees",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 596,
+    "lat": 42.190182,
+    "lng": -76.140747,
+    "status": "healthy",
+    "note": "[Living Tree] hive entrance is 8 off the ground in a 75 yr old maple tree it has been here at least 4 yrs & swarms every yr with a good size swarm it is on private property so access is not allowed.",
+    "date": "2009-07-25"
+  },
+  {
+    "id": 597,
+    "lat": 36.409611,
+    "lng": -76.114311,
+    "status": "warning",
+    "note": "[In the ground] Removed last year 8/08. Small swarm located in an in-ground water meter box. About a 1 1/2 lb. swarm and small amount of brood. Been there 1 month. Removed joined with other small cluster and requeened.",
+    "date": "2009-06-07"
+  },
+  {
+    "id": 598,
+    "lat": 36.847782,
+    "lng": -76.112381,
+    "status": "healthy",
+    "note": "[Living Tree] 25 ft up a huge Oak tree inside the main trunk 5 years old size unknown entrance is above a burl on the bark.",
+    "date": "2008-07-01"
+  },
+  {
+    "id": 599,
+    "lat": 36.381096,
+    "lng": -76.08696,
+    "status": "warning",
+    "note": "[In the ground] Swarm about 1 1/2 lbs. located in the ground in a water meter box. I removed a swarm from same location past 6/08.",
+    "date": "2009-06-29"
+  },
+  {
+    "id": 600,
+    "lat": 36.382252,
+    "lng": -76.086761,
+    "status": "warning",
+    "note": "[In the ground] Located in an in-ground water meter box. Been there about a month. Small cluster about 1.5 lbs. of bees. Removed/relocated... Later absconded",
+    "date": "2009-06-07"
+  },
+  {
+    "id": 601,
+    "lat": 43.068413,
+    "lng": -76.067451,
+    "status": "healthy",
+    "note": "[Living Tree] tree is between road & sidewalk 12 ft high entrance faces east",
+    "date": "2008-10-25"
+  },
+  {
+    "id": 602,
+    "lat": 36.476963,
+    "lng": -76.043198,
+    "status": "healthy",
+    "note": "[In the ground] Located in an in-ground water meter box. About 3 lbs. bees plus brood. Been there 1 mo. Relocated to apiary.",
+    "date": "2009-06-07"
+  },
+  {
+    "id": 603,
+    "lat": 36.471958,
+    "lng": -76.03698,
+    "status": "warning",
+    "note": "[Living Tree] About 8 ft. up a Cherry tree. Been there a few hours. Small Cluster about 2 lbs... Third swarm within 50 ft. radius this year. Removed to apiary.",
+    "date": "2009-06-07"
+  },
+  {
+    "id": 604,
+    "lat": 42.4883,
+    "lng": -76.025391,
+    "status": "healthy",
+    "note": "[Living Tree] Open!Hanging on the branch of a maple tree.Can see 6-7 combs about 10 depth.22-26 from ground. No one noticed it until the leaves fell.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 605,
+    "lat": 36.198158,
+    "lng": -76.009941,
+    "status": "warning",
+    "note": "[Manmade structure] Bees are located behind the back of a house where an addition had been put on the house. Appears they are located in the wall about seven feet. Homeowner wants them removed. Bees were checked in late summer of 2008.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 606,
+    "lat": 36.35025,
+    "lng": -75.949432,
+    "status": "warning",
+    "note": "[Manmade structure] Hive is located about 2-feet off the ground inside a 6inch wood lapsided structure. The structure is an old Coast Guard Building built in 1880 and had been moved to the current location in 1959. Homeowner thinks the bees arrived in the spring of this year 2009 and wants the bees removed. Work on removal will begin mid August.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 607,
+    "lat": 39.220284,
+    "lng": -75.947113,
+    "status": "warning",
+    "note": "[Dead Tree] Large Treewas cut by tree service and brought here. No idea of age. 4x 18. Very healthy and well populated. Began feeding to support for winter. Calm Bees. Many signs of another feral hive nearby.",
+    "date": "2008-10-30"
+  },
+  {
+    "id": 608,
+    "lat": 44.117264,
+    "lng": -75.860123,
+    "status": "healthy",
+    "note": "[Living Tree] It is about 6 feet off the ground we noticed it about 3 days ago. It is a little larger than a 2 liter bottle. It is hanging from a Blue Spruce tree.",
+    "date": "2010-07-19"
+  },
+  {
+    "id": 609,
+    "lat": 43.054634,
+    "lng": -75.834831,
+    "status": "healthy",
+    "note": "[Living Tree] 15 feet off ground has been active for at least 4 years has 4 entrances in an old ash tree beside a small creek [healthy]",
+    "date": "2010-09-27"
+  },
+  {
+    "id": 610,
+    "lat": 40.505222,
+    "lng": -75.792793,
+    "status": "healthy",
+    "note": "[Living Tree] This colony is in a living tree. The opening is about 1 ft. off the ground. It is at the edge of a trail at Kutztown Univ.s ecoplot near the wetland. It has been there for at least 3 years.",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 611,
+    "lat": 39.227467,
+    "lng": -75.72258,
+    "status": "healthy",
+    "note": "[Living Tree] 30 feet up in Red Maple",
+    "date": "2009-07-14"
+  },
+  {
+    "id": 612,
+    "lat": 42.060371,
+    "lng": -75.72049,
+    "status": "warning",
+    "note": "[Manmade structure] 25 feet high living in a house for many years removed a placed in a hive 4 miles away",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 613,
+    "lat": 42.083317,
+    "lng": -75.719666,
+    "status": "healthy",
+    "note": "[Manmade structure] 25 feet high living in a house for many years recovered 2 swarms this yr 3 swarms last year",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 614,
+    "lat": 41.401333,
+    "lng": -75.677605,
+    "status": "healthy",
+    "note": "[Living Tree] Live tree colony. Approx. 8 ft. above ground. Homeowner has observed colony since 2008.",
+    "date": "2010-05-22"
+  },
+  {
+    "id": 615,
+    "lat": 42.098717,
+    "lng": -75.644043,
+    "status": "healthy",
+    "note": "[Living Tree] 6 feet high living in tree for many years",
+    "date": "2010-07-21"
+  },
+  {
+    "id": 616,
+    "lat": 42.076183,
+    "lng": -75.639793,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 feet high off ground In a building",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 617,
+    "lat": 42.089848,
+    "lng": -75.639091,
+    "status": "warning",
+    "note": "[Dead Tree] 10 feet high off ground home owner cut tree down and found bees move to bee hive boxes 1/2 mile away",
+    "date": "2010-07-21"
+  },
+  {
+    "id": 618,
+    "lat": 41.425812,
+    "lng": -75.629211,
+    "status": "healthy",
+    "note": "[Living Tree] Pine tree across the road from cemetery offices. Approx. 15 ft. above ground. western side of tree. Ive observed this colony since 2005.",
+    "date": "2010-05-22"
+  },
+  {
+    "id": 619,
+    "lat": 39.300964,
+    "lng": -75.60508,
+    "status": "healthy",
+    "note": "[Living Tree] In the backyard. there for over 5 years - after bees vacated the walls of the historic home. In a large tree about 8 feet from ground",
+    "date": "2010-03-07"
+  },
+  {
+    "id": 620,
+    "lat": 41.622364,
+    "lng": -75.555496,
+    "status": "healthy",
+    "note": "[Living Tree] Tree colony. Entrance is approx. 7-8 ft. above ground. I believe this colony to be a swarm cast from one of my hives. It has been observed here since 2007.",
+    "date": "2010-05-22"
+  },
+  {
+    "id": 621,
+    "lat": 39.164211,
+    "lng": -75.516174,
+    "status": "warning",
+    "note": "[Dead Tree] Colony in an old tree mostly dead in a hole/rotten spot about 2 meters off the ground. The tree was inside the grounds of the factory but right against the highway - very noisy! Colony was very active (2008).",
+    "date": "2010-07-01"
+  },
+  {
+    "id": 622,
+    "lat": 41.571861,
+    "lng": -75.498848,
+    "status": "healthy",
+    "note": "[Living Tree] Living tree. Approx 15 ft. above ground. Homeowner reports observing hive since about 2006.",
+    "date": "2010-05-22"
+  },
+  {
+    "id": 623,
+    "lat": 39.080772,
+    "lng": -75.426804,
+    "status": "healthy",
+    "note": "[Manmade structure] A moderate sized hive is found in the north end of the Kingston Upon Hull historical building.It is approx. 12 ft. off the ground between the first and second story of the building. We have noticed the hive for the past year. It seems very well established.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 624,
+    "lat": 39.080772,
+    "lng": -75.426804,
+    "status": "healthy",
+    "note": "[Manmade structure] A moderate sized hive is found in the north end of the Kingston Upon Hull historical building.It is approx. 12 ft. off the ground between the first and second story of the building. We have noticed the hive for the past year. It seems very well established.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 625,
+    "lat": 42.313877,
+    "lng": -75.305786,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is 15 foot from ground in the side of a building. We use the building for a club. I am considering replacing the panaling inside and replacing it with plexiglass. Bees have been here for at least 10 years. The hive will swarm and split at least once a year.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 626,
+    "lat": 39.045322,
+    "lng": -75.254288,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located 18 ft above ground in the walls of the abandoned Kingston Upon Hull building located at the end of the drive of the Ted Harvey Wildlife Area off of Kitts Hummock Rd.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 627,
+    "lat": 40.289444,
+    "lng": -75.050003,
+    "status": "healthy",
+    "note": "[Living Tree] In a hole of a tulip poplar tree about 25 feet off the ground. Its been in our backyard for 3 years.",
+    "date": "2010-05-12"
+  },
+  {
+    "id": 628,
+    "lat": 40.404743,
+    "lng": -74.975533,
+    "status": "healthy",
+    "note": "[Manmade structure] \\\"Bees are in a hive located in the eaves above the 3rd floor of the Parsonage of the Stockton Presbyterian Church. Church members have estimated the bees to be residents there for 20 years.\\rIm a friend of the Pastor family but I have their permission to contact you with this info re: your project\\\"",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 629,
+    "lat": 40.625214,
+    "lng": -74.323265,
+    "status": "healthy",
+    "note": "[Manmade structure] Obtained two honeybee colonies from a beekeeper that passed away in 2007. These hives were acquired during Sept. 2010. They have not had any human interaction since at least 2007. The one colony is very strong for not having any human assistance. I have not treated them with any chemicals and will only feed them sugar water this fall.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 630,
+    "lat": 41.381413,
+    "lng": -74.259041,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is at least 15 feet up in a Walnut Tree that has been partially cut down. Its been there for as long as I can remember.",
+    "date": "2010-04-12"
+  },
+  {
+    "id": 631,
+    "lat": 43.101933,
+    "lng": -74.174568,
+    "status": "healthy",
+    "note": "[Living Tree] In a very large old tree in the back yard theres a hole about 3inch to 5 in diameter and about 12 or so off the ground. The tree is very large maybe 100 tall with two 3 to 4 diameter trunks. I am not a bee person but it seems like there are a lot of bees in this tree.",
+    "date": "2009-08-31"
+  },
+  {
+    "id": 632,
+    "lat": 40.714401,
+    "lng": -74.005997,
+    "status": "healthy",
+    "note": "[Manmade structure] In wall of building 8 feet from ground is entrance of hive facing North. At least 20 years in same location. Several years ago raided by squirrels thought they died out but they rebounded. Healthy nest now. They have a home as long as they want it.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 633,
+    "lat": 42.733932,
+    "lng": -73.992279,
+    "status": "healthy",
+    "note": "[Living Tree] \\\"40 feet off of the ground. Cannot tell size. Unsure as to how long it has been there but found one year ago. Older comb found at site would indicate it is more than one year old.\\r\\\"",
+    "date": "2008-10-09"
+  },
+  {
+    "id": 634,
+    "lat": 40.654999,
+    "lng": -73.991798,
+    "status": "healthy",
+    "note": "[Living Tree] Nest/hive is entered through a hole facing east 25-30 ft up in a mature (red or black) oak tree in Green-Wood Cemetery Brooklyn; first noticed earlier this spring (2010). Location by cemetery roads: intersection of Green-Bough Ave. and Fern Ave by Holly Path.",
+    "date": "2010-06-19"
+  },
+  {
+    "id": 635,
+    "lat": 42.612991,
+    "lng": -73.982018,
+    "status": "healthy",
+    "note": "[Manmade structure] Inside wall of abandoned summer camp. Swarm captured from this hive 6/10/2010",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 636,
+    "lat": 40.690578,
+    "lng": -73.976334,
+    "status": "healthy",
+    "note": "[Living Tree] White ash tree (tree is IDed with stand-alone sign part of old tree ID program) just to west of tennis courts in Fort Green Park. Tree is between courts and path. Hive entrance is in obvious slit in wood about 6 feet up bole east side of tree.",
+    "date": "2010-09-21"
+  },
+  {
+    "id": 637,
+    "lat": 41.726448,
+    "lng": -73.969391,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is in a live pine tree. About twenty feet up. Three inch hole can be seen from the road. On private property.Has been there at least five years.",
+    "date": "2008-10-28"
+  },
+  {
+    "id": 638,
+    "lat": 41.787197,
+    "lng": -73.961617,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive is ten feet up in the wall of a building. Looks very busy.Cannot tell how big it is. Has been there at least three years.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 639,
+    "lat": 41.686172,
+    "lng": -73.895119,
+    "status": "healthy",
+    "note": "[Manmade structure] 15 feet off ground in brick wall south side of Main Building at Vassar College (approximately second floor level). Hive has been in apparent good health for several years and has spawned swarms every spring I have been observing it.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 640,
+    "lat": 42.78318,
+    "lng": -73.718178,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2011-06-26"
+  },
+  {
+    "id": 641,
+    "lat": 43.052834,
+    "lng": -73.509521,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 10 feet off the ground. It is in a decaying tree with an open hollow facing the road. I noticed the hive April 23 2012 while walking my dogs. I heard a lot of buzzing and noticed a lot of bee traffic in and out of the opening.",
+    "date": "2012-04-28"
+  },
+  {
+    "id": 642,
+    "lat": 43.070518,
+    "lng": -73.463776,
+    "status": "healthy",
+    "note": "[Manmade structure] entry hole at 6 above the ground in the wall cavity of an abandoned barn. approximately there one tear. Dark and aggressive bees may be russian or hybrid carnolian but definitely not italian. They appear healthy and actively foraging. Structural removal in progress attempting to rehive the bees. Owner does not want to be stung and they are very defensive about lawnmowing.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 643,
+    "lat": 43.231365,
+    "lng": -71.559715,
+    "status": "healthy",
+    "note": "[Manmade structure] Newly developed hive located in a two story house. Hive consisted of several (4) elephant ear combs at the header of first story wall approx. 10 feet of the ground. Three pounds of bees were taken via bee vac and relocated at apiary north of Concord.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 644,
+    "lat": 43.230999,
+    "lng": -71.558998,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive was located 20 feet of ground. It was within the confines of the gabel end of a roof next to a rock chimney in a log home. The hive was approximately 10 years of age.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 645,
+    "lat": 42.52298,
+    "lng": -71.478859,
+    "status": "healthy",
+    "note": "[Living Tree] In a hole about 15 feet up a tree next to the road on the right hand side as you go between Harwood Ave and Foster Street. I first noticed it in 2007 but may have been there before.",
+    "date": "2008-12-01"
+  },
+  {
+    "id": 646,
+    "lat": 43.238174,
+    "lng": -71.472832,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Beehives next to house.",
+    "date": "2009-06-10"
+  },
+  {
+    "id": 647,
+    "lat": 42.776443,
+    "lng": -71.462997,
+    "status": "warning",
+    "note": "[Living Tree] 20 off the ground in a live Oak on the left at the end of the dead end street just before the driveway begins. About 2 years old. Has swarmed at least once.",
+    "date": "2008-10-04"
+  },
+  {
+    "id": 648,
+    "lat": 42.879929,
+    "lng": -71.347748,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is about 2 feet off the ground in a hollow tree. it is right in the middle of a new building project.It has been there for at least two years that I know of.",
+    "date": "2009-04-05"
+  },
+  {
+    "id": 649,
+    "lat": 42.74802,
+    "lng": -71.115448,
+    "status": "healthy",
+    "note": "[Living Tree] 2 feet off ground live willow tree. Deas end raod near farm field. Hive has been there at least 2 years. Managed hives with in eye shot. Map shows Haverhill as location but Bradford is a part of Haverhill",
+    "date": "2012-03-12"
+  },
+  {
+    "id": 650,
+    "lat": 43.092834,
+    "lng": -71.004379,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located in a hole in a live healthy tree 10 feet off the ground. There are three entrances and the largest is about 18 inches long. Its located behind the second house on the right on Hobbs Road between the house and the river. Its hard to tell how long it has been there but it is very active and you can smell the honey as you as you approach.",
+    "date": "2009-08-24"
+  },
+  {
+    "id": 651,
+    "lat": 43.092834,
+    "lng": -71.004379,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is located in a hole in a live healthy tree 10 feet off the ground. There are three entrances and the largest is about 18 inches long. Its located behind the second house on the right on Hobbs Road between the house and the river. Its hard to tell how long it has been there but it is very active and you can smell the honey as you as you approach.",
+    "date": "2009-08-24"
+  },
+  {
+    "id": 652,
+    "lat": 42.814285,
+    "lng": -70.938019,
+    "status": "healthy",
+    "note": "[Living Tree] The hive is in an old oak tree about 20 feet above the ground. It is on the left hand side of Emery Lane almost at the foot bridge going over the Artichoke River. The hive has been there for at least 3 years (as of the summer of 2008).",
+    "date": "2008-10-10"
+  },
+  {
+    "id": 653,
+    "lat": 42.818203,
+    "lng": -70.925034,
+    "status": "healthy",
+    "note": "[Manmade structure] These bees are in my wall in the kitchen south side of the house. Ive been in contact with the local beekeeper association in Essex County and they are going to help me move them in the spring to a new home.",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 654,
+    "lat": 43.676254,
+    "lng": -70.314857,
+    "status": "healthy",
+    "note": "[Living Tree] Swarm issued from backyard beekeeper (first year) colony. Issuing colony was an overwintered nuc purchased from New England beekeeper.",
+    "date": "2008-12-22"
+  },
+  {
+    "id": 655,
+    "lat": 43.676254,
+    "lng": -70.314857,
+    "status": "healthy",
+    "note": "[Living Tree] beehive",
+    "date": "2008-12-22"
+  },
+  {
+    "id": 656,
+    "lat": 44.087299,
+    "lng": -69.191101,
+    "status": "healthy",
+    "note": "[Living Tree] Entrance about 5 feet from ground in an old white rine tree about 18 diameter. tree is on edge of proposed building lot. Possibly would be cut down",
+    "date": "2008-10-27"
+  },
+  {
+    "id": 657,
+    "lat": 18.222586,
+    "lng": -67.141655,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 658,
+    "lat": 18.187973,
+    "lng": -67.067841,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 659,
+    "lat": 18.122196,
+    "lng": -67.019646,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 660,
+    "lat": 18.184345,
+    "lng": -66.980507,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 661,
+    "lat": 18.198044,
+    "lng": -66.876526,
+    "status": "healthy",
+    "note": "[Manmade Beehive] beehive",
+    "date": "2009-06-04"
+  },
+  {
+    "id": 662,
+    "lat": 18.264158,
+    "lng": -66.855797,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-22"
+  },
+  {
+    "id": 663,
+    "lat": 18.268967,
+    "lng": -66.849831,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch off the ground",
+    "date": "2009-05-28"
+  },
+  {
+    "id": 664,
+    "lat": 18.282373,
+    "lng": -66.845543,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off the Ground",
+    "date": "2009-05-28"
+  },
+  {
+    "id": 665,
+    "lat": 18.108738,
+    "lng": -66.836357,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 666,
+    "lat": 18.247122,
+    "lng": -66.831718,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch off the ground",
+    "date": "2009-05-28"
+  },
+  {
+    "id": 667,
+    "lat": 18.319654,
+    "lng": -66.821678,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18 off ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 668,
+    "lat": 18.285349,
+    "lng": -66.802795,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 669,
+    "lat": 18.282742,
+    "lng": -66.798851,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch off ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 670,
+    "lat": 18.28005,
+    "lng": -66.791298,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 671,
+    "lat": 18.292439,
+    "lng": -66.790955,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 672,
+    "lat": 18.052725,
+    "lng": -66.773529,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 673,
+    "lat": 18.064129,
+    "lng": -66.759712,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 674,
+    "lat": 18.274509,
+    "lng": -66.756363,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 675,
+    "lat": 18.14259,
+    "lng": -66.742546,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 676,
+    "lat": 18.277281,
+    "lng": -66.732162,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch off ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 677,
+    "lat": 18.277199,
+    "lng": -66.730957,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 678,
+    "lat": 18.273857,
+    "lng": -66.725723,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch off ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 679,
+    "lat": 18.281721,
+    "lng": -66.72538,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 680,
+    "lat": 18.246225,
+    "lng": -66.677315,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 681,
+    "lat": 18.262323,
+    "lng": -66.662079,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 682,
+    "lat": 18.256905,
+    "lng": -66.64856,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 683,
+    "lat": 18.23457,
+    "lng": -66.6465,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 684,
+    "lat": 18.299854,
+    "lng": -66.644012,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 685,
+    "lat": 18.201714,
+    "lng": -66.626587,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 686,
+    "lat": 18.19413,
+    "lng": -66.622467,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 687,
+    "lat": 18.200653,
+    "lng": -66.621094,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 688,
+    "lat": 18.203915,
+    "lng": -66.612167,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 689,
+    "lat": 18.215654,
+    "lng": -66.611824,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 690,
+    "lat": 18.2159,
+    "lng": -66.571915,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 691,
+    "lat": 18.2309,
+    "lng": -66.562553,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 692,
+    "lat": 17.954647,
+    "lng": -66.404884,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-16"
+  },
+  {
+    "id": 693,
+    "lat": 18.172358,
+    "lng": -66.361969,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 694,
+    "lat": 18.203671,
+    "lng": -66.310905,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 695,
+    "lat": 18.199675,
+    "lng": -66.258888,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 696,
+    "lat": 18.377651,
+    "lng": -66.066132,
+    "status": "healthy",
+    "note": "[Manmade Beehive] beehive",
+    "date": "2008-12-04"
+  },
+  {
+    "id": 697,
+    "lat": 17.988121,
+    "lng": -66.034744,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 698,
+    "lat": 18.309959,
+    "lng": -66.031181,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 18inch Off Ground",
+    "date": "2009-05-17"
+  },
+  {
+    "id": 699,
+    "lat": 51.473045,
+    "lng": -0.175781,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 700,
+    "lat": 51.474541,
+    "lng": -0.174236,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 701,
+    "lat": 51.46616,
+    "lng": -0.172036,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 702,
+    "lat": 51.500153,
+    "lng": -0.126236,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 703,
+    "lat": 51.531395,
+    "lng": -0.003268,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 704,
+    "lat": 51.5126,
+    "lng": 0.041266,
+    "status": "healthy",
+    "note": "[Manmade structure] beehive",
+    "date": "2012-08-02"
+  },
+  {
+    "id": 705,
+    "lat": 51.521774,
+    "lng": 0.059717,
+    "status": "healthy",
+    "note": "[Manmade Beehive] beehive",
+    "date": "2009-04-23"
+  },
+  {
+    "id": 706,
+    "lat": 47.65789,
+    "lng": -122.030754,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Display hive at Urban Farmer store on Avondale \\r\\nRoad and 128th way",
+    "date": "2012-08-21"
+  },
+  {
+    "id": 707,
+    "lat": 51.031216,
+    "lng": -4.21772,
+    "status": "healthy",
+    "note": "[Manmade structure] WBCs x 8",
+    "date": "2012-09-11"
+  },
+  {
+    "id": 708,
+    "lat": 37.676998,
+    "lng": -120.880661,
+    "status": "healthy",
+    "note": "[Living Tree] Testing west coast entry",
+    "date": "2012-08-22"
+  },
+  {
+    "id": 709,
+    "lat": 47.658051,
+    "lng": -122.030884,
+    "status": "healthy",
+    "note": "[Manmade structure] Honey bees in Clay&amp;#39s garden",
+    "date": "2012-08-22"
+  },
+  {
+    "id": 710,
+    "lat": 47.65781,
+    "lng": -122.030785,
+    "status": "healthy",
+    "note": "[Living Tree] Ipad test",
+    "date": "2012-08-22"
+  },
+  {
+    "id": 711,
+    "lat": 45.928062,
+    "lng": -122.682426,
+    "status": "healthy",
+    "note": "[Living Tree] Just found a honey bee hive yesterday in a \\r\\nlive cedar tree on the back of our \\r\\nproperty. pretty sure its new this year. \\r\\nAbout 15 ft up and beautifully placed. we \\r\\nhope to leave it if it doesn&amp;#39t bother our \\r\\ngoats.already stung hubby!If it does we \\r\\nwell have them rehomed safely and \\r\\nhumanely. wish i could post a pic",
+    "date": "2012-09-11"
+  },
+  {
+    "id": 712,
+    "lat": 40.585159,
+    "lng": -73.817947,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 very productive hives",
+    "date": "2012-09-09"
+  },
+  {
+    "id": 713,
+    "lat": 43.684406,
+    "lng": -72.420097,
+    "status": "healthy",
+    "note": "[Living Tree] Very large hive, can be heard from hiking trail. Have not seen hive, but it can be heard very clearly and while passing on trail, bees will investigate.",
+    "date": "2012-08-25"
+  },
+  {
+    "id": 714,
+    "lat": 36.50779,
+    "lng": -77.831345,
+    "status": "healthy",
+    "note": "[Manmade structure] Neighbors house at LKG has bees along cedar shake \\r\\nsiding",
+    "date": "2012-09-09"
+  },
+  {
+    "id": 715,
+    "lat": 38.603374,
+    "lng": -86.104416,
+    "status": "healthy",
+    "note": "[Manmade structure] In old house on south side",
+    "date": "2012-08-26"
+  },
+  {
+    "id": 716,
+    "lat": 42.73399,
+    "lng": -70.990547,
+    "status": "healthy",
+    "note": "[Manmade structure] One hive in the back yard. Colony is healthy but \\r\\nhas not given extra honey to the owner.",
+    "date": "2012-09-11"
+  },
+  {
+    "id": 717,
+    "lat": 42.734062,
+    "lng": -70.990463,
+    "status": "healthy",
+    "note": "[Manmade structure] One hive located in my back yard. Have a healthy \\r\\nbunch of bees.",
+    "date": "2012-09-11"
+  },
+  {
+    "id": 718,
+    "lat": 34.09153,
+    "lng": -77.889732,
+    "status": "healthy",
+    "note": "[Manmade Beehive] This is a brand new hive but so far so \\r\\ngood!",
+    "date": "2012-09-12"
+  },
+  {
+    "id": 719,
+    "lat": 35.225864,
+    "lng": -80.765106,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives\\r\\njust started June 2012",
+    "date": "2012-09-12"
+  },
+  {
+    "id": 720,
+    "lat": 35.51741,
+    "lng": -83.066025,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 hives",
+    "date": "2012-09-12"
+  },
+  {
+    "id": 721,
+    "lat": 35.225903,
+    "lng": -80.764511,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives just started june 2012",
+    "date": "2012-09-12"
+  },
+  {
+    "id": 722,
+    "lat": 40.812534,
+    "lng": -76.342064,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two standard wood hives located in my back yard",
+    "date": "2012-09-14"
+  },
+  {
+    "id": 723,
+    "lat": 40.576283,
+    "lng": -104.584694,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 - 10 frame hives",
+    "date": "2012-09-14"
+  },
+  {
+    "id": 724,
+    "lat": 43.24807,
+    "lng": -123.344429,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hobby hive",
+    "date": "2012-09-15"
+  },
+  {
+    "id": 725,
+    "lat": 35.956341,
+    "lng": -95.979355,
+    "status": "healthy",
+    "note": "[Manmade Beehive] My first hive. 3/01/12",
+    "date": "2012-09-15"
+  },
+  {
+    "id": 726,
+    "lat": 36.252182,
+    "lng": -81.651169,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 5 Langstroth hives.   1 M. Hygienic.  2 \\r\\nCarniolians.   1 Kelly Hybrid.  1 Italian.",
+    "date": "2012-09-15"
+  },
+  {
+    "id": 727,
+    "lat": 45.484619,
+    "lng": 10.608835,
+    "status": "healthy",
+    "note": "[Manmade structure] As requested..A test from across the pond...in \\r\\nItaly! Feel free to  if it works.",
+    "date": "2012-09-19"
+  },
+  {
+    "id": 728,
+    "lat": 52.873028,
+    "lng": 6.141409,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Type kast: Nederlandse spaarkast \\r\\nBijen ras: Buckfast\\r\\nKoningin: 2011 F1\\r\\nStandplaats: Tuin\\r\\nOmgeving: Bos",
+    "date": "2012-09-20"
+  },
+  {
+    "id": 729,
+    "lat": 41.998695,
+    "lng": -70.076698,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 hives",
+    "date": "2012-09-21"
+  },
+  {
+    "id": 730,
+    "lat": 41.569695,
+    "lng": -71.27018,
+    "status": "healthy",
+    "note": "[Manmade Beehive] First hive to be a part of the Rhode Island \\r\\nCommunity Supported Honeybee program!  See \\r\\nus at www.ricshoneybee.org    We are a not for \\r\\nprofit org that is focused on increasing the \\r\\nhoneybees&amp;#39 sustainability in Rhode Island.",
+    "date": "2012-09-22"
+  },
+  {
+    "id": 731,
+    "lat": 52.873177,
+    "lng": 6.141352,
+    "status": "healthy",
+    "note": "[Manmade structure] Type kast: Nederlandse spaarkast Bijen ras: \\r\\nBuckfast Koningin: 2012 F1 Standplaats: Tuin \\r\\nOmgeving: Bos",
+    "date": "2012-09-22"
+  },
+  {
+    "id": 732,
+    "lat": 40.81118,
+    "lng": -74.613281,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 Italian honeybee Langstroth hives in back and \\r\\nside yard. 2nd &amp; 3rd year hives.",
+    "date": "2012-09-23"
+  },
+  {
+    "id": 733,
+    "lat": 52.873096,
+    "lng": 6.141317,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Type kast: Nederlandse spaarkast \\r\\nBijen ras: Buckfast \\r\\nKoningin: 2012 F1 \\r\\nStandplaats: Tuin \\r\\nOmgeving: Bos",
+    "date": "2012-09-23"
+  },
+  {
+    "id": 734,
+    "lat": 40.838543,
+    "lng": -74.627586,
+    "status": "healthy",
+    "note": "[Manmade structure] Two Langstroth hives. First year.",
+    "date": "2012-09-23"
+  },
+  {
+    "id": 735,
+    "lat": 40.909046,
+    "lng": -74.648918,
+    "status": "healthy",
+    "note": "[Manmade structure] Landing hive",
+    "date": "2012-09-23"
+  },
+  {
+    "id": 736,
+    "lat": -26.172663,
+    "lng": 28.31926,
+    "status": "healthy",
+    "note": "[Living Tree] Single hive high upon old Willow Tree",
+    "date": "2012-09-24"
+  },
+  {
+    "id": 737,
+    "lat": 40.413574,
+    "lng": -104.648727,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 10 frame hives",
+    "date": "2012-10-02"
+  },
+  {
+    "id": 738,
+    "lat": 42.975403,
+    "lng": -89.43541,
+    "status": "healthy",
+    "note": "[Manmade structure] Bees are living in the wall of my house.  I will have \\r\\nhave them relocated in spring.",
+    "date": "2012-10-03"
+  },
+  {
+    "id": 739,
+    "lat": 41.736275,
+    "lng": -92.442833,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 Hives in my backyard",
+    "date": "2012-10-09"
+  },
+  {
+    "id": 740,
+    "lat": 41.877563,
+    "lng": -92.376755,
+    "status": "healthy",
+    "note": "[Manmade structure] 7 Hives",
+    "date": "2012-10-09"
+  },
+  {
+    "id": 741,
+    "lat": 40.824039,
+    "lng": -74.221115,
+    "status": "warning",
+    "note": "[Dead Tree] Wild/feral honeybee hive in old pine tree. Also four Langstrom hives in the woodland area.",
+    "date": "2012-10-10"
+  },
+  {
+    "id": 742,
+    "lat": 37.083992,
+    "lng": -81.48233,
+    "status": "healthy",
+    "note": "[Manmade structure] Multiple hives are located on this \\r\\nfarm/honeybee sanctuary.",
+    "date": "2012-10-17"
+  },
+  {
+    "id": 743,
+    "lat": 43.134132,
+    "lng": -72.449486,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 Hives will be started spring of 2013",
+    "date": "2012-10-21"
+  },
+  {
+    "id": 744,
+    "lat": 33.564129,
+    "lng": -112.283951,
+    "status": "warning",
+    "note": "[Manmade structure] 7 to 8 month old hive under my Tuffshed.  Believe \\r\\nare Erupean Bees.   Have stood very close to \\r\\nwatch them, yrd men cleaned around them.  \\r\\nIncluding a man that forgot that they were there \\r\\nan whacked weeds up tp the entrance.  Plan to \\r\\nstart looking for old dead Bees near rhe entrance, \\r\\nto make sure they are not Afrencan Bees.  I woul \\r\\nbe surprised if they are.  One got in my house, \\r\\nroad outside on my finger.  Wish to keep updated.",
+    "date": "2012-10-25"
+  },
+  {
+    "id": 745,
+    "lat": 26.293858,
+    "lng": -80.204224,
+    "status": "healthy",
+    "note": "[Manmade Beehive] A 10 Frame Hive located in my backyard, started \\r\\nfrom a swarm that arrived in mid October 2012 \\r\\nand started a hive under a bush. Successfuly \\r\\nrelocated into their new home and will see if I can \\r\\nkeep it going.",
+    "date": "2012-10-26"
+  },
+  {
+    "id": 746,
+    "lat": 47.62466,
+    "lng": -121.970795,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 12 hives",
+    "date": "2012-10-30"
+  },
+  {
+    "id": 747,
+    "lat": 39.683182,
+    "lng": -104.972397,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 hives in backyard",
+    "date": "2012-11-01"
+  },
+  {
+    "id": 748,
+    "lat": 42.32093,
+    "lng": -71.206749,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Four hives, Russian Carnolian mix. Have been \\r\\nkeeping bees for eight years.",
+    "date": "2012-11-03"
+  },
+  {
+    "id": 749,
+    "lat": 61.6404,
+    "lng": -149.631348,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 Langstroth hive, with Italian bees",
+    "date": "2012-11-05"
+  },
+  {
+    "id": 750,
+    "lat": 39.402287,
+    "lng": -107.217377,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Original hive brought up from boulder in 2011",
+    "date": "2012-11-06"
+  },
+  {
+    "id": 751,
+    "lat": 39.396191,
+    "lng": -107.211792,
+    "status": "healthy",
+    "note": "[Manmade Beehive] second hive in front yard, top bar style",
+    "date": "2012-11-06"
+  },
+  {
+    "id": 752,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] third hive, temporary location for winter, came from red canyon red near Glenwood Springs",
+    "date": "2012-11-06"
+  },
+  {
+    "id": 753,
+    "lat": 38.757881,
+    "lng": -105.964844,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4th hive temporary location, originally from house in Snowmass village",
+    "date": "2012-11-06"
+  },
+  {
+    "id": 754,
+    "lat": 35.855255,
+    "lng": -78.752876,
+    "status": "healthy",
+    "note": "[Living Tree] Test Hive in Umstead State Park",
+    "date": "2012-11-06"
+  },
+  {
+    "id": 755,
+    "lat": 39.408131,
+    "lng": -107.214539,
+    "status": "warning",
+    "note": "[Manmade Beehive] Hive removed from Red Canyon Rd house summer of 2012. Temporary location till spring.",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 756,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar Hive placed at Community Garden summer of 2011",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 757,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar style hive for community garden placed summer of 2011",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 758,
+    "lat": 39.396671,
+    "lng": -107.217781,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar Style hive located in Community Garden summer of 2011",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 759,
+    "lat": 39.402393,
+    "lng": -107.217461,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive captured from house on Red Canyon rd summer of 2012. Placed in Top Bar style hive.Temp location till spring of 2013",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 760,
+    "lat": 39.406006,
+    "lng": -107.524902,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar Style temp location for hive at Sustainable Settings, will be moved spring of 2013",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 761,
+    "lat": 39.402294,
+    "lng": -107.217438,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar Style, Hive captured and moved from Snowmass Village, temp location will be moved spring 2013",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 762,
+    "lat": 39.402317,
+    "lng": -107.217552,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Caretaking Top Bar Hive for Flash, gave her swarm spring of 2011",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 763,
+    "lat": 39.402325,
+    "lng": -107.217522,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Second Top Bar hive for flash from swarm captured locally.",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 764,
+    "lat": 39.402103,
+    "lng": -107.216682,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive for Roxanne, gave her swarm summer of 2011 Top Bar style.",
+    "date": "2012-11-07"
+  },
+  {
+    "id": 765,
+    "lat": 41.678452,
+    "lng": -70.467445,
+    "status": "healthy",
+    "note": "[Manmade structure] 5hives",
+    "date": "2012-11-14"
+  },
+  {
+    "id": 766,
+    "lat": 35.790405,
+    "lng": -81.424156,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives of italian queens.",
+    "date": "2012-11-19"
+  },
+  {
+    "id": 767,
+    "lat": 35.790405,
+    "lng": -81.424156,
+    "status": "warning",
+    "note": "[Dead Tree] honey bee hive in pine tree not sure of \\r\\ntype of bee.",
+    "date": "2012-11-19"
+  },
+  {
+    "id": 768,
+    "lat": 35.796783,
+    "lng": -81.428909,
+    "status": "healthy",
+    "note": "[Manmade structure] hive in Church Steeple.",
+    "date": "2012-11-19"
+  },
+  {
+    "id": 769,
+    "lat": 35.910416,
+    "lng": -81.599121,
+    "status": "warning",
+    "note": "[Dead Tree] located in dead pine tree on 3170 deer \\r\\nbrook rd at my dads",
+    "date": "2012-11-19"
+  },
+  {
+    "id": 770,
+    "lat": 55.195187,
+    "lng": 10.722064,
+    "status": "healthy",
+    "note": "[Manmade structure] 5 ordinary hives in 12 x10",
+    "date": "2012-11-23"
+  },
+  {
+    "id": 771,
+    "lat": -34.049248,
+    "lng": 22.992537,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive@1",
+    "date": "2012-12-02"
+  },
+  {
+    "id": 772,
+    "lat": 40.629295,
+    "lng": -111.897285,
+    "status": "healthy",
+    "note": "[Manmade structure] Hives in my backyard",
+    "date": "2012-11-26"
+  },
+  {
+    "id": 773,
+    "lat": 40.629295,
+    "lng": -111.897285,
+    "status": "healthy",
+    "note": "[Manmade structure] Community garden hives",
+    "date": "2012-11-26"
+  },
+  {
+    "id": 774,
+    "lat": 40.629295,
+    "lng": -111.897285,
+    "status": "healthy",
+    "note": "[Manmade structure] Cottonwood hives carniolan/open mated",
+    "date": "2012-11-26"
+  },
+  {
+    "id": 775,
+    "lat": -34.04908,
+    "lng": 22.99221,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive1",
+    "date": "2012-12-06"
+  },
+  {
+    "id": 776,
+    "lat": 39.643288,
+    "lng": -75.730469,
+    "status": "healthy",
+    "note": "[Manmade structure] 15 as enter winter\\r\\nalso 5 active nucs",
+    "date": "2012-12-07"
+  },
+  {
+    "id": 777,
+    "lat": 50.731689,
+    "lng": 7.13618,
+    "status": "healthy",
+    "note": "[Manmade structure] Imkerei Fremuth",
+    "date": "2012-12-08"
+  },
+  {
+    "id": 778,
+    "lat": 50.731827,
+    "lng": 7.136284,
+    "status": "healthy",
+    "note": "[Manmade structure] Stand Am Finkenberg",
+    "date": "2012-12-13"
+  },
+  {
+    "id": 779,
+    "lat": 39.440311,
+    "lng": -84.145653,
+    "status": "healthy",
+    "note": "[Manmade structure] Several hives",
+    "date": "2013-01-01"
+  },
+  {
+    "id": 780,
+    "lat": 36.400818,
+    "lng": -79.496452,
+    "status": "healthy",
+    "note": "[Manmade structure] On a farm, in an unused shed.  Colony has been continuously occupying the shed since 1957 according to my friend who has lived on the farm ever since then.",
+    "date": "2013-01-01"
+  },
+  {
+    "id": 781,
+    "lat": 40.626488,
+    "lng": -74.394836,
+    "status": "healthy",
+    "note": "[Manmade structure] Started in 2009",
+    "date": "2013-01-02"
+  },
+  {
+    "id": 782,
+    "lat": 40.805176,
+    "lng": -75.378227,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 6 hive operation for personal honey production \\r\\nand local pollination needs.",
+    "date": "2013-01-02"
+  },
+  {
+    "id": 783,
+    "lat": 38.810181,
+    "lng": -77.24189,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 supers and 1 1/2 super",
+    "date": "2013-01-09"
+  },
+  {
+    "id": 784,
+    "lat": 34.697994,
+    "lng": -82.963486,
+    "status": "healthy",
+    "note": "[Manmade structure] Behind sushi restaurant",
+    "date": "2014-09-13"
+  },
+  {
+    "id": 785,
+    "lat": -34.049316,
+    "lng": 22.992565,
+    "status": "healthy",
+    "note": "[Manmade Beehive] No1",
+    "date": "2013-01-13"
+  },
+  {
+    "id": 786,
+    "lat": 40.182594,
+    "lng": -83.992188,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Fifteen hives surrounded by farmlands.  Farmers primarily growing corn and soybeans  much of the native plant life is gone.   Not many bees in these parts due to pesticle usage.",
+    "date": "2013-01-17"
+  },
+  {
+    "id": 787,
+    "lat": 40.23811,
+    "lng": -83.698898,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 6 hives tended since 2012",
+    "date": "2013-01-20"
+  },
+  {
+    "id": 788,
+    "lat": 35.132633,
+    "lng": -82.713211,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Langstroth and Top Bar hives",
+    "date": "2013-01-21"
+  },
+  {
+    "id": 789,
+    "lat": 35.132633,
+    "lng": -82.713211,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Langstroth and Top Bar hives",
+    "date": "2013-01-21"
+  },
+  {
+    "id": 790,
+    "lat": 40.296425,
+    "lng": -111.740623,
+    "status": "healthy",
+    "note": "[Living Tree] This has been here at least 2 years that I&amp;#39m aware of. It is high up in a very old tree. I set a swarm lure near it last spring but they swarmed in a nearby tree instead. This used to be part of someones back yard before the old homes were torn down.\\r\\n",
+    "date": "2013-01-24"
+  },
+  {
+    "id": 791,
+    "lat": 40.296104,
+    "lng": -111.741539,
+    "status": "healthy",
+    "note": "[Living Tree] This is just west maybe 2-3 trees away from the other one I submitted.  It&amp;#39s from a swarm from the other one.",
+    "date": "2013-01-24"
+  },
+  {
+    "id": 792,
+    "lat": 34.958504,
+    "lng": -79.281738,
+    "status": "healthy",
+    "note": "[Manmade structure] Man made hives",
+    "date": "2013-01-25"
+  },
+  {
+    "id": 793,
+    "lat": 34.957939,
+    "lng": -79.281197,
+    "status": "healthy",
+    "note": "[Manmade structure] Man made hives",
+    "date": "2013-01-25"
+  },
+  {
+    "id": 794,
+    "lat": 30.159321,
+    "lng": -85.567627,
+    "status": "healthy",
+    "note": "[Manmade structure] 1strong hive",
+    "date": "2013-01-27"
+  },
+  {
+    "id": 795,
+    "lat": 40.664021,
+    "lng": -77.622353,
+    "status": "healthy",
+    "note": "[Living Tree] Wild hive lives in the base of a tree.",
+    "date": "2013-01-28"
+  },
+  {
+    "id": 796,
+    "lat": 42.498848,
+    "lng": -88.176437,
+    "status": "healthy",
+    "note": "[Manmade structure] Man made hives",
+    "date": "2013-02-16"
+  },
+  {
+    "id": 797,
+    "lat": 36.066727,
+    "lng": -97.404762,
+    "status": "healthy",
+    "note": "[Manmade structure] Two top bar hives",
+    "date": "2013-02-16"
+  },
+  {
+    "id": 798,
+    "lat": 29.940674,
+    "lng": -89.961639,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Italian hive",
+    "date": "2013-02-17"
+  },
+  {
+    "id": 799,
+    "lat": 42.488163,
+    "lng": -88.109718,
+    "status": "healthy",
+    "note": "[Manmade structure] Beehives",
+    "date": "2013-02-18"
+  },
+  {
+    "id": 800,
+    "lat": 42.535587,
+    "lng": -88.167343,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Beehives",
+    "date": "2013-02-18"
+  },
+  {
+    "id": 801,
+    "lat": 32.019375,
+    "lng": -96.286407,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 hives",
+    "date": "2013-02-18"
+  },
+  {
+    "id": 802,
+    "lat": 42.461098,
+    "lng": -88.099014,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Beehives",
+    "date": "2013-02-19"
+  },
+  {
+    "id": 803,
+    "lat": 39.109734,
+    "lng": -77.952797,
+    "status": "healthy",
+    "note": "[Living Tree] Hive entrance is 5 feet above ground level in a mature black walnut tree. Property owner says it has been active for 2-3 years.",
+    "date": "2013-02-28"
+  },
+  {
+    "id": 804,
+    "lat": 39.304066,
+    "lng": -86.892578,
+    "status": "healthy",
+    "note": "[Manmade structure] thriving hive in wall of house.\\r\\n\\r\\n\\r\\n",
+    "date": "2013-03-01"
+  },
+  {
+    "id": 805,
+    "lat": 35.446621,
+    "lng": -81.274292,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Beehive in the backyard.",
+    "date": "2013-03-04"
+  },
+  {
+    "id": 806,
+    "lat": 35.257027,
+    "lng": -83.073669,
+    "status": "healthy",
+    "note": "[Manmade structure] 9 hives",
+    "date": "2013-03-08"
+  },
+  {
+    "id": 807,
+    "lat": 50.731697,
+    "lng": 7.136327,
+    "status": "healthy",
+    "note": "[Manmade Beehive] K&Atilde;&para;niginnen Zucht\\r\\n",
+    "date": "2013-03-10"
+  },
+  {
+    "id": 808,
+    "lat": 38.23167,
+    "lng": -97.076164,
+    "status": "healthy",
+    "note": "[Manmade Beehive] three 1-year old italian honeybee hives are on this \\r\\nproperty they were all 3lb pkg",
+    "date": "2013-03-10"
+  },
+  {
+    "id": 809,
+    "lat": 44.490349,
+    "lng": 11.219394,
+    "status": "healthy",
+    "note": "[Manmade structure] Casa",
+    "date": "2013-03-13"
+  },
+  {
+    "id": 810,
+    "lat": 36.468491,
+    "lng": -91.569885,
+    "status": "healthy",
+    "note": "[Living Tree] Hive of small black feral bees coursed with anise and lemon grass sugar water.  Found in a deep woods of mixed oak.  Colony in a large hollow canker in a living post oak about 10 feet off the ground. [healthy]",
+    "date": "2013-03-15"
+  },
+  {
+    "id": 811,
+    "lat": 37.971218,
+    "lng": -96.858902,
+    "status": "healthy",
+    "note": "[Manmade structure] observation hive",
+    "date": "2013-03-18"
+  },
+  {
+    "id": 812,
+    "lat": 46.542919,
+    "lng": 6.417468,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 6 Dadant Blatt hives with Carnica Bee",
+    "date": "2013-03-22"
+  },
+  {
+    "id": 813,
+    "lat": 34.369484,
+    "lng": -82.905991,
+    "status": "healthy",
+    "note": "[Manmade structure] Bee yard of ten man made hives owned by \\r\\nmyself, anyone interested in honey or more info \\r\\ncan call me @ (706) 961-3116",
+    "date": "2013-03-26"
+  },
+  {
+    "id": 814,
+    "lat": 47.560444,
+    "lng": 8.254418,
+    "status": "healthy",
+    "note": "[Manmade structure] Geisseloo\\r\\n16-25 hives\\r\\nwww.cremehonig.ch",
+    "date": "2013-03-29"
+  },
+  {
+    "id": 815,
+    "lat": 47.537228,
+    "lng": 8.270149,
+    "status": "healthy",
+    "note": "[Manmade Beehive] D&Atilde;&para;rnlirai - Jungvolkstand\\r\\n11 V&Atilde;&para;lker\\r\\ninfo@cremehonig.ch\\r\\n",
+    "date": "2013-03-29"
+  },
+  {
+    "id": 816,
+    "lat": 38.860401,
+    "lng": -77.184616,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Installed this spring",
+    "date": "2013-04-02"
+  },
+  {
+    "id": 817,
+    "lat": 33.420868,
+    "lng": -93.93985,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 Box hives",
+    "date": "2013-04-03"
+  },
+  {
+    "id": 818,
+    "lat": 29.950691,
+    "lng": -89.939583,
+    "status": "healthy",
+    "note": "[Manmade structure] feral hive",
+    "date": "2013-04-05"
+  },
+  {
+    "id": 819,
+    "lat": 29.940926,
+    "lng": -89.962624,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Italian bees",
+    "date": "2013-04-05"
+  },
+  {
+    "id": 820,
+    "lat": 29.942612,
+    "lng": -90.211128,
+    "status": "warning",
+    "note": "[Dead Tree] feral hive",
+    "date": "2013-04-05"
+  },
+  {
+    "id": 821,
+    "lat": 36.295673,
+    "lng": -79.496758,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is located in the fornt wall of the church. I have been told it has been there for a long time.",
+    "date": "2013-04-07"
+  },
+  {
+    "id": 822,
+    "lat": 38.912785,
+    "lng": -121.990105,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 30 two deep ten frame hives.",
+    "date": "2013-04-08"
+  },
+  {
+    "id": 823,
+    "lat": 38.64534,
+    "lng": -75.604179,
+    "status": "healthy",
+    "note": "[Living Tree] Approx. 20 feet up in a Live Oak tree in front of the Fredrick Douglas Elementary School At 1 Swain Road, Seaford DE 19973. Tree is south of the schools main entrance, closest to the entrance",
+    "date": "2013-04-09"
+  },
+  {
+    "id": 824,
+    "lat": 38.881927,
+    "lng": -121.989525,
+    "status": "healthy",
+    "note": "[Manmade structure] 100 two hive body hives.",
+    "date": "2013-04-09"
+  },
+  {
+    "id": 825,
+    "lat": 38.898064,
+    "lng": -121.97644,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 100 hives.",
+    "date": "2013-04-11"
+  },
+  {
+    "id": 826,
+    "lat": 38.927998,
+    "lng": -121.99794,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 100 hives",
+    "date": "2013-04-11"
+  },
+  {
+    "id": 827,
+    "lat": 51.870247,
+    "lng": 6.445762,
+    "status": "healthy",
+    "note": "[Manmade structure] Carnatica",
+    "date": "2013-04-12"
+  },
+  {
+    "id": 828,
+    "lat": -34.04924,
+    "lng": 22.992485,
+    "status": "healthy",
+    "note": "[Manmade structure] Eddie",
+    "date": "2013-04-13"
+  },
+  {
+    "id": 829,
+    "lat": 47.322067,
+    "lng": -122.267494,
+    "status": "healthy",
+    "note": "[Manmade structure] 6 hives active in cross street area of South 314th \\r\\nStreet and 55 Avenue South in Auburn, WA",
+    "date": "2013-04-13"
+  },
+  {
+    "id": 830,
+    "lat": 41.643494,
+    "lng": -73.96357,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Currently 2 Langstroth hives. Bees were boxed &amp; \\r\\ncame from Georgia.  They were put in hive bodies \\r\\non 4/2/13.",
+    "date": "2013-04-13"
+  },
+  {
+    "id": 831,
+    "lat": 35.956043,
+    "lng": -95.979851,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive #2",
+    "date": "2013-04-21"
+  },
+  {
+    "id": 832,
+    "lat": 47.517128,
+    "lng": -122.641273,
+    "status": "healthy",
+    "note": "[Manmade Beehive] One backyard hive.  Italians.",
+    "date": "2013-04-21"
+  },
+  {
+    "id": 833,
+    "lat": 44.96925,
+    "lng": -123.065414,
+    "status": "healthy",
+    "note": "[Manmade structure] Backyard bee hive",
+    "date": "2013-04-30"
+  },
+  {
+    "id": 834,
+    "lat": 49.538181,
+    "lng": -99.085701,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4",
+    "date": "2013-04-30"
+  },
+  {
+    "id": 835,
+    "lat": 49.458244,
+    "lng": -98.953209,
+    "status": "healthy",
+    "note": "[Manmade structure] Gg",
+    "date": "2013-04-30"
+  },
+  {
+    "id": 836,
+    "lat": 35.884186,
+    "lng": -78.681122,
+    "status": "healthy",
+    "note": "[Manmade structure] Top Bar hive",
+    "date": "2013-05-05"
+  },
+  {
+    "id": 837,
+    "lat": 39.692135,
+    "lng": -75.707863,
+    "status": "healthy",
+    "note": "[Manmade structure] Honey Bee Colony nested in a 1789 Mill locally known as the &amp;#34Red Mill&amp;#34.",
+    "date": "2013-05-08"
+  },
+  {
+    "id": 838,
+    "lat": 35.000725,
+    "lng": -81.030319,
+    "status": "healthy",
+    "note": "[Manmade structure] Moss Bee Farm.",
+    "date": "2013-05-08"
+  },
+  {
+    "id": 839,
+    "lat": 35.784908,
+    "lng": -85.656364,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 5 standard 10 frame hives.",
+    "date": "2013-05-09"
+  },
+  {
+    "id": 840,
+    "lat": 40.706589,
+    "lng": -105.006836,
+    "status": "healthy",
+    "note": "[Manmade structure] a feral hive that has been active for at least 10 years. We moved the small house that the hive is in and they  went for the ride and stayed afterward.",
+    "date": "2013-05-10"
+  },
+  {
+    "id": 841,
+    "lat": 41.847012,
+    "lng": -71.394203,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Backyard",
+    "date": "2013-05-10"
+  },
+  {
+    "id": 842,
+    "lat": 39.916893,
+    "lng": -81.947487,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 new hive   5/11/13",
+    "date": "2013-05-11"
+  },
+  {
+    "id": 843,
+    "lat": 44.965794,
+    "lng": -123.013283,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Work hive\\r\\n",
+    "date": "2013-05-15"
+  },
+  {
+    "id": 844,
+    "lat": 44.979664,
+    "lng": -123.076523,
+    "status": "healthy",
+    "note": "[Manmade Beehive] This is two hives set peacefully in a all organic \\r\\ngarden that for the last few years has been used \\r\\nin the education of grade children in self \\r\\nsustainability",
+    "date": "2013-05-15"
+  },
+  {
+    "id": 845,
+    "lat": 44.988911,
+    "lng": -123.00399,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive at Mnop \\r\\n",
+    "date": "2013-05-15"
+  },
+  {
+    "id": 846,
+    "lat": 44.983513,
+    "lng": -122.757828,
+    "status": "healthy",
+    "note": "[Manmade Beehive] \\r\\n",
+    "date": "2013-05-15"
+  },
+  {
+    "id": 847,
+    "lat": 41.909241,
+    "lng": -74.228653,
+    "status": "healthy",
+    "note": "[Manmade structure] I have 1 hive that i started in May 2012.  They seem \\r\\nvery strong and wintered over well.  May have another \\r\\nthis year.",
+    "date": "2013-05-16"
+  },
+  {
+    "id": 848,
+    "lat": 25.558451,
+    "lng": -76.697411,
+    "status": "healthy",
+    "note": "[In the ground] several feral colonies at mouth/roof of \\r\\npreacher&amp;#39s cave, north eleuthera/bahamas",
+    "date": "2013-05-17"
+  },
+  {
+    "id": 849,
+    "lat": 35.40099,
+    "lng": -89.859123,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 registered hives. One strong, one growing.",
+    "date": "2014-09-06"
+  },
+  {
+    "id": 850,
+    "lat": 39.917934,
+    "lng": -105.38282,
+    "status": "healthy",
+    "note": "[Manmade structure] hobby single hive, high altitude, top bar",
+    "date": "2013-05-19"
+  },
+  {
+    "id": 851,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 42.1561491",
+    "date": "2013-05-19"
+  },
+  {
+    "id": 852,
+    "lat": 47.805782,
+    "lng": -117.337105,
+    "status": "healthy",
+    "note": "[Manmade structure] New hive 4/13/13",
+    "date": "2013-05-19"
+  },
+  {
+    "id": 853,
+    "lat": 25.059999,
+    "lng": -77.345001,
+    "status": "healthy",
+    "note": "[Manmade structure] inside exterior wall of tarpum bay \\r\\nlibrary, south eleuthera, bahamas",
+    "date": "2013-05-20"
+  },
+  {
+    "id": 854,
+    "lat": 25.962423,
+    "lng": -81.487305,
+    "status": "healthy",
+    "note": "[Manmade structure] Large hive in extended &amp;#39attic&amp;#39 of add-on wooden porch.\\r\\nPollinator habitat property.",
+    "date": "2013-05-29"
+  },
+  {
+    "id": 855,
+    "lat": 26.094414,
+    "lng": -81.743881,
+    "status": "healthy",
+    "note": "[Manmade structure] Large hive on pollinator habitat property.",
+    "date": "2013-05-29"
+  },
+  {
+    "id": 856,
+    "lat": 24.971333,
+    "lng": -76.181969,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is inside the walls of a library.",
+    "date": "2013-05-30"
+  },
+  {
+    "id": 857,
+    "lat": 24.971333,
+    "lng": -76.181969,
+    "status": "healthy",
+    "note": "[Manmade structure] The hive is inside the walls of a library.",
+    "date": "2013-05-30"
+  },
+  {
+    "id": 858,
+    "lat": 24.776115,
+    "lng": -76.208488,
+    "status": "healthy",
+    "note": "[In the ground] The bees are inside of a hole in rocks.",
+    "date": "2013-05-30"
+  },
+  {
+    "id": 859,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] We have one strong hive and one hive that is \\r\\ngrowing.",
+    "date": "2014-09-06"
+  },
+  {
+    "id": 860,
+    "lat": 35.555325,
+    "lng": -83.043297,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 hives two that wintered 2012 and two splits from \\r\\nthem.",
+    "date": "2013-06-04"
+  },
+  {
+    "id": 861,
+    "lat": 38.779118,
+    "lng": -77.800705,
+    "status": "healthy",
+    "note": "[Living Tree] Hive has been active within the tree for three years on our field station.",
+    "date": "2013-06-07"
+  },
+  {
+    "id": 862,
+    "lat": 35.821224,
+    "lng": -78.689392,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Sideyard hive - established March 2013",
+    "date": "2013-06-10"
+  },
+  {
+    "id": 863,
+    "lat": 37.529301,
+    "lng": -76.588799,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top Bar Hive established 5/21/2013",
+    "date": "2013-06-10"
+  },
+  {
+    "id": 864,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a cedar tree.",
+    "date": "2013-06-11"
+  },
+  {
+    "id": 865,
+    "lat": 38.696075,
+    "lng": -77.824409,
+    "status": "healthy",
+    "note": "[Living Tree] Hive is located in a live cedar tree.  It is 2 years old.  \\r\\nTwo other cedars had hives in for over 40 years but \\r\\nsaddly the hives are not here this year.",
+    "date": "2013-06-11"
+  },
+  {
+    "id": 866,
+    "lat": 35.221806,
+    "lng": -92.379539,
+    "status": "healthy",
+    "note": "[Living Tree] Flight entrance is about 1 foot off the \\r\\nground, in a hollow tree.  Has been here \\r\\nfor over a year.",
+    "date": "2013-06-12"
+  },
+  {
+    "id": 867,
+    "lat": 34.762039,
+    "lng": -92.394081,
+    "status": "healthy",
+    "note": "[Living Tree] In an oak tree, about 15 feet up.",
+    "date": "2013-06-12"
+  },
+  {
+    "id": 868,
+    "lat": 38.904652,
+    "lng": -76.999939,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Single 8 frame hive from package. 1 medium \\r\\nhoney super on.",
+    "date": "2013-06-13"
+  },
+  {
+    "id": 869,
+    "lat": 40.779289,
+    "lng": -111.926636,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two backyard colonies",
+    "date": "2013-06-20"
+  },
+  {
+    "id": 870,
+    "lat": 40.822948,
+    "lng": -74.186378,
+    "status": "healthy",
+    "note": "[Manmade structure] My hive is to come, not yet established.",
+    "date": "2013-06-26"
+  },
+  {
+    "id": 871,
+    "lat": 38.888783,
+    "lng": -94.852097,
+    "status": "healthy",
+    "note": "[Manmade structure] New hive from a 6 frame nuc as of June 2013",
+    "date": "2013-06-26"
+  },
+  {
+    "id": 872,
+    "lat": 40.138084,
+    "lng": -74.870499,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are three hived\\r\\ncolonies in my back yard.",
+    "date": "2013-06-26"
+  },
+  {
+    "id": 873,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade structure] New beekeepers with first hive. Deep with med. \\r\\nSuper. Open bred italians and karnolian.",
+    "date": "2013-06-29"
+  },
+  {
+    "id": 874,
+    "lat": 41.486477,
+    "lng": -81.818481,
+    "status": "healthy",
+    "note": "[Manmade Beehive] roof top hives - 2",
+    "date": "2013-06-29"
+  },
+  {
+    "id": 875,
+    "lat": 43.595715,
+    "lng": -70.268188,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives",
+    "date": "2013-07-01"
+  },
+  {
+    "id": 876,
+    "lat": 40.138107,
+    "lng": -74.8703,
+    "status": "healthy",
+    "note": "[Manmade structure] At location 39 418 44N,  and74 51 24. 74W. This \\r\\nis in New Jersey.  I am just not at the location as I \\r\\nwrite this up.  It is a very large colony that is \\r\\nembedded in the roof structure.",
+    "date": "2013-07-03"
+  },
+  {
+    "id": 877,
+    "lat": 63.668476,
+    "lng": 20.177343,
+    "status": "healthy",
+    "note": "[Manmade structure] Nordiska bin",
+    "date": "2013-07-05"
+  },
+  {
+    "id": 878,
+    "lat": 63.668476,
+    "lng": 20.177343,
+    "status": "healthy",
+    "note": "[Manmade structure] Nordiska bin",
+    "date": "2013-07-05"
+  },
+  {
+    "id": 879,
+    "lat": 38.561295,
+    "lng": -121.496803,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 hive of Italian honeybees installed spring 2013",
+    "date": "2013-07-06"
+  },
+  {
+    "id": 880,
+    "lat": 36.011379,
+    "lng": -106.054756,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive is in a cinder block wall I think its about 10 years old, they are always painting the wall with graffiti and it still survives.",
+    "date": "2013-07-06"
+  },
+  {
+    "id": 881,
+    "lat": 41.483337,
+    "lng": -81.784264,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 hive w/ open with karnolian/ italian mix. Hive \\r\\nis 1 deep with 2 medium supers. First year hive.",
+    "date": "2013-07-08"
+  },
+  {
+    "id": 882,
+    "lat": 46.986195,
+    "lng": -123.601685,
+    "status": "healthy",
+    "note": "[Living Tree] Chehalis river boat launch.  50 feet right of the \\r\\nhoney buckets about 4 feet up the trunk.  Deep \\r\\nsplit in a big old cottonwood.",
+    "date": "2013-07-08"
+  },
+  {
+    "id": 883,
+    "lat": 46.986195,
+    "lng": -123.601624,
+    "status": "healthy",
+    "note": "[Manmade structure] Roof line along gutter of Trimble residence.  Tried \\r\\na trap out &amp; Left a swarm box.  Could not remove \\r\\nwithout deconstruction.",
+    "date": "2013-07-09"
+  },
+  {
+    "id": 884,
+    "lat": 36.748173,
+    "lng": -76.240448,
+    "status": "healthy",
+    "note": "[Manmade Beehive] First year",
+    "date": "2013-07-14"
+  },
+  {
+    "id": 885,
+    "lat": 35.994034,
+    "lng": -78.898621,
+    "status": "healthy",
+    "note": "[Living Tree] 2013 - bee colony is not longer active originally sighted in 2008, stopped activity around 2011",
+    "date": "2013-07-16"
+  },
+  {
+    "id": 886,
+    "lat": 40.013191,
+    "lng": -83.118813,
+    "status": "healthy",
+    "note": "[Manmade structure] Two hives started in 2013",
+    "date": "2013-07-18"
+  },
+  {
+    "id": 887,
+    "lat": 34.833233,
+    "lng": -80.09613,
+    "status": "healthy",
+    "note": "[Manmade Beehive] there are Three hives total\\r\\nthey are new this year One was a nuc and \\r\\nthe others were packages.",
+    "date": "2013-07-18"
+  },
+  {
+    "id": 888,
+    "lat": 40.118786,
+    "lng": -74.867622,
+    "status": "healthy",
+    "note": "[Living Tree] In a maple tree just off the side walk by the \\r\\ndriveway.",
+    "date": "2013-07-20"
+  },
+  {
+    "id": 889,
+    "lat": 47.926739,
+    "lng": -91.852623,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 8 longstroth beehives, all packaged spring 2013.  (2 NUCs and one observation hive).",
+    "date": "2013-07-24"
+  },
+  {
+    "id": 890,
+    "lat": 47.649265,
+    "lng": -121.909142,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 beehives in yard",
+    "date": "2013-07-25"
+  },
+  {
+    "id": 891,
+    "lat": 47.649738,
+    "lng": -121.909363,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 beehives in yard",
+    "date": "2013-07-25"
+  },
+  {
+    "id": 892,
+    "lat": 30.360102,
+    "lng": -89.735847,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 7 man made hives, feral bees",
+    "date": "2013-07-30"
+  },
+  {
+    "id": 893,
+    "lat": 39.28653,
+    "lng": -119.786331,
+    "status": "healthy",
+    "note": "[Manmade structure] Two hive boxes - Carniolan bees",
+    "date": "2013-07-31"
+  },
+  {
+    "id": 894,
+    "lat": 42.011597,
+    "lng": -88.359985,
+    "status": "healthy",
+    "note": "[Living Tree] In old oak swarm of my bees? Ferrel two years old!",
+    "date": "2013-08-01"
+  },
+  {
+    "id": 895,
+    "lat": 42.008717,
+    "lng": -88.365799,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 langstroth hives",
+    "date": "2013-08-01"
+  },
+  {
+    "id": 896,
+    "lat": 28.884081,
+    "lng": -81.24823,
+    "status": "healthy",
+    "note": "[Manmade Beehive] My Apiaries located at my house I have three \\r\\nestablished hives Of honey bees",
+    "date": "2013-08-02"
+  },
+  {
+    "id": 897,
+    "lat": 46.986195,
+    "lng": -123.601616,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive in eve of old shed behind house on County \\r\\nLine road &amp; Devonshire road.",
+    "date": "2013-08-02"
+  },
+  {
+    "id": 898,
+    "lat": 47.796028,
+    "lng": -122.194099,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 to 4 hives depending on the year.",
+    "date": "2013-08-07"
+  },
+  {
+    "id": 899,
+    "lat": 43.149563,
+    "lng": -80.249863,
+    "status": "healthy",
+    "note": "[Manmade structure] Single hive, double deep, est summer 2013",
+    "date": "2013-08-07"
+  },
+  {
+    "id": 900,
+    "lat": 43.58041,
+    "lng": -71.204239,
+    "status": "healthy",
+    "note": "[Manmade structure] First time beekeeping. Russian bees with 2 deeps \\r\\nand a medium. Bees seem to be doing well.",
+    "date": "2014-08-28"
+  },
+  {
+    "id": 901,
+    "lat": 52.429432,
+    "lng": 4.918796,
+    "status": "healthy",
+    "note": "[Manmade structure] I bee\\r\\n",
+    "date": "2014-08-29"
+  },
+  {
+    "id": 902,
+    "lat": 35.274422,
+    "lng": -83.042221,
+    "status": "healthy",
+    "note": "[Manmade structure] managed hive",
+    "date": "2013-08-29"
+  },
+  {
+    "id": 903,
+    "lat": 35.175495,
+    "lng": -80.843048,
+    "status": "healthy",
+    "note": "[Manmade structure] I keep two hives located in a neighbor&amp;#39s backyard \\r\\na few doors up from me.  I make my hives from \\r\\neastern red cedar and leave them \\r\\nuntreated/unpainted.  I&amp;#39ve had up to four hives in \\r\\nthis location, but it was a bit crowded.  So have \\r\\nmoved two to front yard of a rental home I have.",
+    "date": "2013-09-03"
+  },
+  {
+    "id": 904,
+    "lat": 37.693745,
+    "lng": -97.230148,
+    "status": "healthy",
+    "note": "[Living Tree] wind damaged elm for about 3 years",
+    "date": "2013-09-09"
+  },
+  {
+    "id": 905,
+    "lat": 37.47551,
+    "lng": -122.198715,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Backyard Hives",
+    "date": "2013-09-15"
+  },
+  {
+    "id": 906,
+    "lat": 37.577404,
+    "lng": -122.353416,
+    "status": "healthy",
+    "note": "[Living Tree] Entrance at the base of a living tree off the east side of El Camino Real between Bellevue and Floribunda Ave.",
+    "date": "2013-09-16"
+  },
+  {
+    "id": 907,
+    "lat": 37.577404,
+    "lng": -122.353416,
+    "status": "healthy",
+    "note": "[Living Tree] Entrance at the base of a living tree off the east side of El Camino Real between Bellevue and Floribunda Ave.",
+    "date": "2013-09-16"
+  },
+  {
+    "id": 908,
+    "lat": 37.990761,
+    "lng": -122.104553,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Martinez Apiary",
+    "date": "2013-09-20"
+  },
+  {
+    "id": 909,
+    "lat": 41.529739,
+    "lng": -75.667053,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 hives",
+    "date": "2013-09-24"
+  },
+  {
+    "id": 910,
+    "lat": 37.476532,
+    "lng": -122.198174,
+    "status": "healthy",
+    "note": "[Living Tree] Oak tree. 20 feet of the ground",
+    "date": "2013-10-12"
+  },
+  {
+    "id": 911,
+    "lat": 37.471977,
+    "lng": -122.196396,
+    "status": "healthy",
+    "note": "[Living Tree] Oak tree. 20 feet from the ground.",
+    "date": "2013-10-12"
+  },
+  {
+    "id": 912,
+    "lat": 37.474274,
+    "lng": -122.198692,
+    "status": "healthy",
+    "note": "[Living Tree] Back yard oak tree. 10 feet of the ground.",
+    "date": "2013-10-12"
+  },
+  {
+    "id": 913,
+    "lat": 40.352238,
+    "lng": -80.070824,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 full-size hives",
+    "date": "2013-10-14"
+  },
+  {
+    "id": 914,
+    "lat": 39.964153,
+    "lng": -77.711899,
+    "status": "healthy",
+    "note": "[Manmade structure] Standard 10 frame",
+    "date": "2013-10-15"
+  },
+  {
+    "id": 915,
+    "lat": 35.293041,
+    "lng": -99.639977,
+    "status": "healthy",
+    "note": "[Manmade structure] This bee hive is in the outer wall of an \\r\\nold house.  I would guess that this wild \\r\\nhive has been active for ten to twenty \\r\\nplus years.",
+    "date": "2013-10-17"
+  },
+  {
+    "id": 916,
+    "lat": 39.964199,
+    "lng": -77.711594,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Small bee yard",
+    "date": "2013-10-19"
+  },
+  {
+    "id": 917,
+    "lat": 40.665394,
+    "lng": -74.896652,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives",
+    "date": "2013-10-28"
+  },
+  {
+    "id": 918,
+    "lat": 35.463009,
+    "lng": -82.205872,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 hives, 10 frame, untreated cedar, self made",
+    "date": "2013-11-07"
+  },
+  {
+    "id": 919,
+    "lat": 47.657978,
+    "lng": -122.030884,
+    "status": "healthy",
+    "note": "[Manmade structure] Display hive at store",
+    "date": "2013-11-21"
+  },
+  {
+    "id": 920,
+    "lat": 35.889557,
+    "lng": -106.071304,
+    "status": "healthy",
+    "note": "[Manmade Beehive] North of Pojoaque.\\r\\nwww.nmbees.com\\r\\nwww.wallacefamilyapiry.wordpress.com\\r\\nwww.wallacefamilyapiary.yolasite.com",
+    "date": "2013-11-23"
+  },
+  {
+    "id": 921,
+    "lat": 40.229294,
+    "lng": 0.073784,
+    "status": "healthy",
+    "note": "[Manmade structure] Casa",
+    "date": "2013-12-10"
+  },
+  {
+    "id": 922,
+    "lat": 40.229256,
+    "lng": 0.074105,
+    "status": "healthy",
+    "note": "[Living Tree] Casa, Alex",
+    "date": "2013-12-10"
+  },
+  {
+    "id": 923,
+    "lat": 37.573872,
+    "lng": -121.978745,
+    "status": "healthy",
+    "note": "[Manmade structure] Langstroth hive, organically managed.",
+    "date": "2014-01-04"
+  },
+  {
+    "id": 924,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Living Tree] colony in tree beside road.",
+    "date": "2014-01-06"
+  },
+  {
+    "id": 925,
+    "lat": 38.55397,
+    "lng": -89.069107,
+    "status": "healthy",
+    "note": "[Manmade structure] 4Top bar hives at this location.\\r\\nEach hive is 44&amp;#34 long x 18&amp;#34 w x 12&amp;#34 deep &amp; has\\r\\n25 to 30 bars for comb making",
+    "date": "2014-01-09"
+  },
+  {
+    "id": 926,
+    "lat": 39.251747,
+    "lng": -95.414795,
+    "status": "healthy",
+    "note": "[Manmade structure] Single three super hive behind the house",
+    "date": "2014-01-13"
+  },
+  {
+    "id": 927,
+    "lat": 34.826111,
+    "lng": -80.696053,
+    "status": "healthy",
+    "note": "[Manmade structure] 4 Hives located on northeast corner of property",
+    "date": "2014-01-19"
+  },
+  {
+    "id": 928,
+    "lat": 35.049007,
+    "lng": -80.626961,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 15 Italian hives located at:\\r\\n3405 Hayes Road\\r\\nIndian Trail, NC\\r\\n\\r\\nOn private land. Apiary is one of two of my Italian \\r\\nbreeding yards. \\r\\n\\r\\nContact James Henderson at. \\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com\\r\\nPlease &amp;#34Like&amp;#34 us on our beekeeping Facebook \\r\\npage. \\r\\nhttp://www.facebook.com/pages/Golden-Delight-\\r\\nHoney/299766739899\\r\\nPlease support my beekeeping business \\r\\nhttp://fundrazr.com/campaigns/6MT04#.UFKolOx\\r\\nSqS8.mailto\\r\\n",
+    "date": "2014-01-19"
+  },
+  {
+    "id": 929,
+    "lat": 35.02544,
+    "lng": -80.640884,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Apiary at my older brother&amp;#39s house whom I live.\\r\\n8 Italian hives. \\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com\\r\\nPlease &amp;#34Like&amp;#34 us on our beekeeping Facebook \\r\\npage. \\r\\nhttp://www.facebook.com/pages/Golden-Delight-\\r\\nHoney/299766739899\\r\\nPlease support my beekeeping business \\r\\nhttp://fundrazr.com/campaigns/6MT04#.UFKolOx\\r\\nSqS8.mailto",
+    "date": "2014-01-20"
+  },
+  {
+    "id": 930,
+    "lat": 35.189068,
+    "lng": -80.590973,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Apiary on 500 acre private parcel containing 27 \\r\\nItalian colonies located at:\\r\\n\\r\\n10450 Brief Road\\r\\nMint Hill, NC 28227\\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com\\r\\n",
+    "date": "2014-01-22"
+  },
+  {
+    "id": 931,
+    "lat": 40.979362,
+    "lng": -72.600204,
+    "status": "healthy",
+    "note": "[Living Tree] This is a live oak tree that I think I have gotten at least two swarms from",
+    "date": "2014-01-24"
+  },
+  {
+    "id": 932,
+    "lat": 40.979176,
+    "lng": -72.593216,
+    "status": "healthy",
+    "note": "[Manmade Beehive] I am a beekeeper with six hives at this time",
+    "date": "2014-01-24"
+  },
+  {
+    "id": 933,
+    "lat": 40.966778,
+    "lng": -72.653091,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are two hives here for pollenation",
+    "date": "2014-01-24"
+  },
+  {
+    "id": 934,
+    "lat": 40.966679,
+    "lng": -72.706161,
+    "status": "healthy",
+    "note": "[Manmade Beehive] This man has 8 hives",
+    "date": "2014-01-24"
+  },
+  {
+    "id": 935,
+    "lat": 44.353588,
+    "lng": -88.772118,
+    "status": "healthy",
+    "note": "[Manmade structure] Feral\\r\\n",
+    "date": "2014-01-27"
+  },
+  {
+    "id": 936,
+    "lat": 40.821789,
+    "lng": -74.491653,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 to 4 hives",
+    "date": "2014-01-29"
+  },
+  {
+    "id": 937,
+    "lat": 37.854973,
+    "lng": -77.752373,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two medium 8 frame Italian hives",
+    "date": "2014-02-03"
+  },
+  {
+    "id": 938,
+    "lat": 34.853184,
+    "lng": -80.773941,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Waxhaw Creek Road Apiary #1\\r\\n15 Italian Hives\\r\\nBreeding Yard\\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com",
+    "date": "2014-02-09"
+  },
+  {
+    "id": 939,
+    "lat": 34.851261,
+    "lng": -80.757866,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Walkup Road Drone Yard \\r\\nSupporting Waxhaw Creek Road Apiary #1\\r\\n8 Italian Colonies for both drone &amp; honey \\r\\nproduction. \\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com",
+    "date": "2014-02-09"
+  },
+  {
+    "id": 940,
+    "lat": 34.842487,
+    "lng": -80.770737,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 8 Italian hives for drone production and honey. \\r\\nApiary located at \\r\\n\\r\\n7915 Waxhaw Creek Road\\r\\nWaxhaw&acirc;â‚¬Å½, NC\\r\\n\\r\\nJames Henderson\\r\\nSmall Commercial Beekeeper\\r\\nGolden Delight Honey, LLC\\r\\n2239 Genesis Drive\\r\\nMonroe, NC 28110\\r\\n(225) 803-5406\\r\\nLABeekeeper@earthlink.net\\r\\nhttp://www.GoldenDelightHoney.com",
+    "date": "2014-02-19"
+  },
+  {
+    "id": 941,
+    "lat": 37.1875,
+    "lng": -113.290634,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 top bars and 3 langs",
+    "date": "2014-02-20"
+  },
+  {
+    "id": 942,
+    "lat": 34.956394,
+    "lng": -78.821533,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Active hives in my yard.",
+    "date": "2014-02-20"
+  },
+  {
+    "id": 943,
+    "lat": 34.837387,
+    "lng": -80.749306,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 hives private property",
+    "date": "2014-02-24"
+  },
+  {
+    "id": 944,
+    "lat": 34.848782,
+    "lng": -80.772736,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 Italian hives private property",
+    "date": "2014-02-24"
+  },
+  {
+    "id": 945,
+    "lat": 35.784843,
+    "lng": -85.655029,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Several hives on concrete slabs.",
+    "date": "2014-02-26"
+  },
+  {
+    "id": 946,
+    "lat": 35.784851,
+    "lng": -85.655014,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Several hives on concrete slabs.",
+    "date": "2014-02-26"
+  },
+  {
+    "id": 947,
+    "lat": 45.814781,
+    "lng": -108.405792,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 hives hobbiest",
+    "date": "2014-03-07"
+  },
+  {
+    "id": 948,
+    "lat": 41.232204,
+    "lng": -85.315414,
+    "status": "healthy",
+    "note": "[Manmade structure] Home hive.",
+    "date": "2014-03-09"
+  },
+  {
+    "id": 949,
+    "lat": 37.849937,
+    "lng": -82.604523,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 9 manmade hives",
+    "date": "2014-03-11"
+  },
+  {
+    "id": 950,
+    "lat": 39.534679,
+    "lng": -119.830872,
+    "status": "healthy",
+    "note": "[Manmade Beehive] New nuc installed 3/16/14.Nuc from Randy Oliver.",
+    "date": "2014-03-18"
+  },
+  {
+    "id": 951,
+    "lat": 36.228531,
+    "lng": -115.156883,
+    "status": "healthy",
+    "note": "[Manmade structure] Area beehive,",
+    "date": "2014-03-26"
+  },
+  {
+    "id": 952,
+    "lat": 35.030937,
+    "lng": -89.212082,
+    "status": "healthy",
+    "note": "[Living Tree] Hive in tree",
+    "date": "2014-03-30"
+  },
+  {
+    "id": 953,
+    "lat": 37.757446,
+    "lng": -82.586533,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 Mam Made Hives",
+    "date": "2014-03-31"
+  },
+  {
+    "id": 954,
+    "lat": 50.731689,
+    "lng": 7.136363,
+    "status": "healthy",
+    "note": "[Manmade structure] House Finkenberg\\r\\n",
+    "date": "2014-04-02"
+  },
+  {
+    "id": 955,
+    "lat": 38.937042,
+    "lng": -122.907249,
+    "status": "healthy",
+    "note": "[Living Tree] is aprox ten to fifteen feet up a pine tree just off the trail",
+    "date": "2014-04-04"
+  },
+  {
+    "id": 956,
+    "lat": 37.756378,
+    "lng": -82.586617,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 Manmade Hives",
+    "date": "2014-04-04"
+  },
+  {
+    "id": 957,
+    "lat": 37.707664,
+    "lng": -122.454491,
+    "status": "healthy",
+    "note": "[Manmade structure] Two nucs of italians",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 958,
+    "lat": 42.894863,
+    "lng": -87.888611,
+    "status": "healthy",
+    "note": "[Manmade structure] My first hive established April 2013. Made thru the \\r\\nwinter!!!",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 959,
+    "lat": 42.894802,
+    "lng": -87.887978,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 960,
+    "lat": 42.894775,
+    "lng": -87.888077,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 961,
+    "lat": 42.894756,
+    "lng": -87.888039,
+    "status": "healthy",
+    "note": "[Manmade structure] Frllow gardeners hive 3 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 962,
+    "lat": 42.894756,
+    "lng": -87.888062,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow hardeners hive 4 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 963,
+    "lat": 42.894768,
+    "lng": -87.888191,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive 5 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 964,
+    "lat": 42.894882,
+    "lng": -87.888023,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive 6 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 965,
+    "lat": 42.894836,
+    "lng": -87.888138,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive 7 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 966,
+    "lat": 42.894749,
+    "lng": -87.888214,
+    "status": "healthy",
+    "note": "[Manmade structure] Fellow gardeners hive 3 of 7",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 967,
+    "lat": 42.893131,
+    "lng": -85.895103,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Small Garden 8 frame hive. New this year 2014\\r\\n\\r\\nwww.keepsbees.com\\r\\n\\r\\n",
+    "date": "2014-04-06"
+  },
+  {
+    "id": 968,
+    "lat": 59.959618,
+    "lng": 11.21686,
+    "status": "healthy",
+    "note": "[Manmade structure] 26 Carnica hives",
+    "date": "2014-04-07"
+  },
+  {
+    "id": 969,
+    "lat": 37.708107,
+    "lng": -122.454597,
+    "status": "healthy",
+    "note": "[Manmade structure] Two nucs of italians",
+    "date": "2014-04-08"
+  },
+  {
+    "id": 970,
+    "lat": 35.052521,
+    "lng": -80.749359,
+    "status": "healthy",
+    "note": "[Living Tree] Wild hive in large oak tree.",
+    "date": "2014-04-09"
+  },
+  {
+    "id": 971,
+    "lat": 35.052544,
+    "lng": -80.750038,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive box populated by swarm from nearby \\r\\nwild hive. They found the box on their \\r\\nown.",
+    "date": "2014-04-09"
+  },
+  {
+    "id": 972,
+    "lat": 42.004963,
+    "lng": -71.816338,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives",
+    "date": "2014-04-09"
+  },
+  {
+    "id": 973,
+    "lat": 43.151054,
+    "lng": -87.91037,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Someones backyard hive i see everyday from the \\r\\nhighway on my way to work. This one was one of \\r\\nseveral reasons that inspired me to start my own!",
+    "date": "2014-04-10"
+  },
+  {
+    "id": 974,
+    "lat": 37.400032,
+    "lng": -122.055077,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 domesticated hives (potentially a third) \\r\\non Google&amp;#39s campus.  They are located \\r\\nclose to a water source and seem to be \\r\\nthriving!",
+    "date": "2014-04-14"
+  },
+  {
+    "id": 975,
+    "lat": 34.851849,
+    "lng": -80.756882,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Italian swarm in standard 10-frame hive (3/2014)",
+    "date": "2014-04-16"
+  },
+  {
+    "id": 976,
+    "lat": 29.121618,
+    "lng": -81.323181,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives and 2 nucs hygenic Italians",
+    "date": "2014-04-17"
+  },
+  {
+    "id": 977,
+    "lat": 38.401878,
+    "lng": -120.716766,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Four hives.  Two carniolans and two Italians",
+    "date": "2014-04-19"
+  },
+  {
+    "id": 978,
+    "lat": 36.839378,
+    "lng": -114.076218,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives on side of my house. Desert landscape and acres of dry desert behind house.",
+    "date": "2014-04-20"
+  },
+  {
+    "id": 979,
+    "lat": 38.586704,
+    "lng": -121.321541,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Hive started April 2014.  Italian Honey bee",
+    "date": "2014-04-20"
+  },
+  {
+    "id": 980,
+    "lat": 35.175529,
+    "lng": -80.842987,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 seasonal production hives (moved to Lake Lure \\r\\nmid-May through October)\\r\\n\\r\\n2 permanent nuc breeder colonies",
+    "date": "2014-04-21"
+  },
+  {
+    "id": 981,
+    "lat": 35.71751,
+    "lng": -78.788422,
+    "status": "healthy",
+    "note": "[Living Tree] Feral hive in tree. Active hive for 10 years. Swarmed in 2013. Active still in Spring 2014. Reported by resident.",
+    "date": "2014-04-21"
+  },
+  {
+    "id": 982,
+    "lat": 35.713467,
+    "lng": -78.790352,
+    "status": "healthy",
+    "note": "[Living Tree] Feral hive in tree. Active hive for 10 years. Swarmed in 2013. Active still in Spring 2014. Reported by resident.",
+    "date": "2014-04-21"
+  },
+  {
+    "id": 983,
+    "lat": 47.358501,
+    "lng": -121.974327,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Manmade Beehive in small apiary.",
+    "date": "2014-04-22"
+  },
+  {
+    "id": 984,
+    "lat": 47.358349,
+    "lng": -121.974335,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Manmade Beehive in small apiary.",
+    "date": "2014-04-22"
+  },
+  {
+    "id": 985,
+    "lat": 46.986191,
+    "lng": -123.601707,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Allesandra TopBar Hive",
+    "date": "2014-05-05"
+  },
+  {
+    "id": 986,
+    "lat": 32.649326,
+    "lng": -85.414803,
+    "status": "healthy",
+    "note": "[Manmade structure] This hive located inside of my attic on one side of \\r\\nmy house. It has been there for many \\r\\ngenerations. I will not remove it under any \\r\\ncircumstances because I am aware of the \\r\\nvanishing be problem. However I did see an \\r\\nincredibly large swarm yesterday and I&amp;#39m \\r\\nconcerned that my queen may have left.",
+    "date": "2014-05-05"
+  },
+  {
+    "id": 987,
+    "lat": 42.894424,
+    "lng": -87.888138,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Shawn&amp;#39s first hive@ communitygarden",
+    "date": "2014-05-20"
+  },
+  {
+    "id": 988,
+    "lat": 42.895267,
+    "lng": -87.88884,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Shawn&amp;#39s second hive",
+    "date": "2014-05-20"
+  },
+  {
+    "id": 989,
+    "lat": 42.895325,
+    "lng": -87.888947,
+    "status": "healthy",
+    "note": "[Manmade Beehive] My second hive, rhe bee Cottage, at the \\r\\ncommunity garden",
+    "date": "2014-05-20"
+  },
+  {
+    "id": 990,
+    "lat": 40.186073,
+    "lng": -75.35601,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 colonies",
+    "date": "2014-05-22"
+  },
+  {
+    "id": 991,
+    "lat": 38.058437,
+    "lng": -105.930916,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Single 10 frame hive.  Italian queen. Established \\r\\nMay 1 2014",
+    "date": "2014-05-23"
+  },
+  {
+    "id": 992,
+    "lat": 35.554428,
+    "lng": -81.469696,
+    "status": "healthy",
+    "note": "[Manmade structure] Honeybees.",
+    "date": "2014-05-25"
+  },
+  {
+    "id": 993,
+    "lat": 42.072807,
+    "lng": -72.887962,
+    "status": "healthy",
+    "note": "[Manmade Beehive] We have two hives in 2014, our first year as \\r\\nbeekeepers.",
+    "date": "2014-05-26"
+  },
+  {
+    "id": 994,
+    "lat": 43.471214,
+    "lng": -72.349625,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 Italian 1 Russian hive",
+    "date": "2014-05-29"
+  },
+  {
+    "id": 995,
+    "lat": 41.493881,
+    "lng": -73.06234,
+    "status": "healthy",
+    "note": "[Manmade structure] Two hives just started on May 25 from Nuc&amp;#39s \\r\\npurchased at Cedar Lane Apiaries.",
+    "date": "2014-05-29"
+  },
+  {
+    "id": 996,
+    "lat": 42.43301,
+    "lng": -71.17572,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Italian honeybee colony in a Langstroth hive",
+    "date": "2014-05-29"
+  },
+  {
+    "id": 997,
+    "lat": 35.07885,
+    "lng": -89.799843,
+    "status": "healthy",
+    "note": "[Manmade Beehive] My two new registered beehives!",
+    "date": "2014-06-02"
+  },
+  {
+    "id": 998,
+    "lat": 34.366856,
+    "lng": -83.053215,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives beneath a Pecan tree",
+    "date": "2014-06-05"
+  },
+  {
+    "id": 999,
+    "lat": 35.223389,
+    "lng": 136.934357,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Caught feral swarm 25 April 2014.  300 meters north \\r\\nof hive location. Kenya top bar hive.",
+    "date": "2014-06-08"
+  },
+  {
+    "id": 1000,
+    "lat": 42.008408,
+    "lng": -88.360886,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 5 Langstroth bee hives",
+    "date": "2014-06-12"
+  },
+  {
+    "id": 1001,
+    "lat": 52.429382,
+    "lng": 4.918851,
+    "status": "healthy",
+    "note": "[Manmade Beehive] I-Bee hive",
+    "date": "2014-06-15"
+  },
+  {
+    "id": 1002,
+    "lat": 52.42944,
+    "lng": 4.918996,
+    "status": "healthy",
+    "note": "[Manmade structure] \\r\\nKadoelenweg 175\\r\\n1035 NE Amsterdam\\r\\n",
+    "date": "2014-06-15"
+  },
+  {
+    "id": 1003,
+    "lat": 46.449947,
+    "lng": -92.814949,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives in middle of overgrown field.",
+    "date": "2014-06-16"
+  },
+  {
+    "id": 1004,
+    "lat": 30.187553,
+    "lng": -93.229332,
+    "status": "healthy",
+    "note": "[Living Tree] Large hive in a large, rotting, water oak tree. \\r\\nMight be an AHB hive but hopefully not.",
+    "date": "2014-06-21"
+  },
+  {
+    "id": 1005,
+    "lat": 42.494064,
+    "lng": -71.109596,
+    "status": "healthy",
+    "note": "[Manmade Beehive] One Langstroth hive of Italians. First installed on \\r\\n5/30/2014.",
+    "date": "2014-06-23"
+  },
+  {
+    "id": 1006,
+    "lat": 51.200531,
+    "lng": -2.200693,
+    "status": "healthy",
+    "note": "[Manmade structure] Westbury white horse",
+    "date": "2014-07-04"
+  },
+  {
+    "id": 1007,
+    "lat": 47.668095,
+    "lng": -122.289734,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 Langstroth hive using all medium bodies. On top of a garage.",
+    "date": "2014-07-07"
+  },
+  {
+    "id": 1008,
+    "lat": 47.358345,
+    "lng": -121.974319,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3rd hive added to the apiary. Captured swarm from Kent. Langstroth style in 10 frame mediums.",
+    "date": "2014-07-07"
+  },
+  {
+    "id": 1009,
+    "lat": 42.102211,
+    "lng": -70.701607,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two colonies at this point. Moving to 10 fram \\r\\nmediums and integrating foundationless frames \\r\\nslowly.",
+    "date": "2014-07-15"
+  },
+  {
+    "id": 1010,
+    "lat": 40.374039,
+    "lng": -83.683746,
+    "status": "healthy",
+    "note": "[Manmade Beehive] First year\\r\\n\\r\\nHave a lot to learn",
+    "date": "2014-07-15"
+  },
+  {
+    "id": 1011,
+    "lat": 48.479088,
+    "lng": -123.513985,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 traditional hives",
+    "date": "2014-07-19"
+  },
+  {
+    "id": 1012,
+    "lat": 30.172728,
+    "lng": -85.621063,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 17 hives and growing",
+    "date": "2014-07-22"
+  },
+  {
+    "id": 1013,
+    "lat": 34.85231,
+    "lng": -82.383026,
+    "status": "healthy",
+    "note": "[Manmade structure] Manmade 2-brude boxes",
+    "date": "2014-07-26"
+  },
+  {
+    "id": 1014,
+    "lat": -43.476536,
+    "lng": 172.582153,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Indivisia",
+    "date": "2014-07-27"
+  },
+  {
+    "id": 1015,
+    "lat": 35.601406,
+    "lng": -77.109818,
+    "status": "healthy",
+    "note": "[Manmade structure] 20 lang Hives",
+    "date": "2014-07-31"
+  },
+  {
+    "id": 1016,
+    "lat": 33.782982,
+    "lng": -84.079437,
+    "status": "healthy",
+    "note": "[Manmade structure] One top bar and one langstoth. Hoping to split \\r\\nand continue adding 1-2 per year.  Initial package \\r\\nabsconded in late March and presumably settled \\r\\nsomewhere  in the woods on my 12 acres.",
+    "date": "2014-08-02"
+  },
+  {
+    "id": 1017,
+    "lat": 42.724678,
+    "lng": -75.969635,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Personal hives",
+    "date": "2014-08-19"
+  },
+  {
+    "id": 1018,
+    "lat": 36.149521,
+    "lng": -86.797142,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 10 managed hives in the middle of nashville",
+    "date": "2014-09-21"
+  },
+  {
+    "id": 1019,
+    "lat": 38.820526,
+    "lng": -77.080917,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Chinquapin Organic Garden\\r\\n\\r\\nRussian Honeybees\\r\\n",
+    "date": "2014-09-27"
+  },
+  {
+    "id": 1020,
+    "lat": 41.561234,
+    "lng": -73.070679,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Honey Bees",
+    "date": "2014-09-30"
+  },
+  {
+    "id": 1021,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 managed hives cypress wood stained with \\r\\nlatex. Top. Hive feeder screened bottom \\r\\nboard and I&amp;#39m.",
+    "date": "2014-10-14"
+  },
+  {
+    "id": 1022,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 managed hives cypress wood stained with \\r\\nlatex. Top. Hive feeder screened bottom \\r\\nboard and I&amp;#39m.",
+    "date": "2014-10-14"
+  },
+  {
+    "id": 1023,
+    "lat": 38.255257,
+    "lng": -122.58519,
+    "status": "healthy",
+    "note": "[Living Tree] Feral hive",
+    "date": "2014-10-18"
+  },
+  {
+    "id": 1024,
+    "lat": 36.831692,
+    "lng": -92.326927,
+    "status": "warning",
+    "note": "[Dead Tree] Wild hive in snag\\r\\nOzarks",
+    "date": "2014-10-27"
+  },
+  {
+    "id": 1025,
+    "lat": 35.809769,
+    "lng": -78.638283,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 deep box of Italian bees.",
+    "date": "2014-11-17"
+  },
+  {
+    "id": 1026,
+    "lat": 45.002399,
+    "lng": -93.27021,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Woodstain finish",
+    "date": "2014-12-01"
+  },
+  {
+    "id": 1027,
+    "lat": 34.150215,
+    "lng": -118.007141,
+    "status": "healthy",
+    "note": "[Manmade structure] Healthy bee hive 30 feet up a palm treason the \\r\\ncorner. Safe to people and animals",
+    "date": "2014-12-03"
+  },
+  {
+    "id": 1028,
+    "lat": 43.57296,
+    "lng": -91.227547,
+    "status": "healthy",
+    "note": "[Manmade structure] Hobby hive",
+    "date": "2014-12-09"
+  },
+  {
+    "id": 1029,
+    "lat": 35.613701,
+    "lng": -82.710876,
+    "status": "healthy",
+    "note": "[Manmade Beehive] garden hives ,yellow bees ,and one mixed?.",
+    "date": "2015-01-18"
+  },
+  {
+    "id": 1030,
+    "lat": 35.613754,
+    "lng": -82.71096,
+    "status": "healthy",
+    "note": "[Manmade structure] Three yellow (Italian). And one ferrell, had for a \\r\\nfew years....",
+    "date": "2015-01-18"
+  },
+  {
+    "id": 1031,
+    "lat": 45.951015,
+    "lng": -122.630508,
+    "status": "healthy",
+    "note": "[Manmade structure] 6 hives in apiary with plans of expanding. 3 \\r\\nlangstroth, 2 Kenyan and 1 warre. Bees and \\r\\noffspring all from swarm captured in Portland by \\r\\nBeeThinking.",
+    "date": "2015-01-21"
+  },
+  {
+    "id": 1032,
+    "lat": 35.175453,
+    "lng": -80.842896,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 to 8 hives in backyard seasonally.  Move to \\r\\nLake Lure for spring &amp; summer.",
+    "date": "2015-01-23"
+  },
+  {
+    "id": 1033,
+    "lat": 57.41848,
+    "lng": 27.049118,
+    "status": "healthy",
+    "note": "[Manmade structure] ghj",
+    "date": "2015-01-25"
+  },
+  {
+    "id": 1034,
+    "lat": 34.150311,
+    "lng": -118.007637,
+    "status": "healthy",
+    "note": "[Living Tree] Awesome honeybee hive about 30 feet up in a \\r\\npalm tree on the northeast corner of the \\r\\nintersection",
+    "date": "2015-02-02"
+  },
+  {
+    "id": 1035,
+    "lat": 34.763042,
+    "lng": -80.383514,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 6 Italian hives\\r\\n225-803-5406 (cell)",
+    "date": "2015-02-08"
+  },
+  {
+    "id": 1036,
+    "lat": 40.138042,
+    "lng": -74.870201,
+    "status": "healthy",
+    "note": "[Manmade structure] There are currently five hives at this location.",
+    "date": "2015-02-08"
+  },
+  {
+    "id": 1037,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Top bar beehives",
+    "date": "2015-02-13"
+  },
+  {
+    "id": 1038,
+    "lat": 52.413864,
+    "lng": 4.639781,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 Hyves behind reception Stayokay Haarlem",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1039,
+    "lat": 52.41293,
+    "lng": 4.639457,
+    "status": "healthy",
+    "note": "[Manmade structure] 4hives behind a container in a collective \\r\\nvegatables garden &amp;#34schoter doe tuin&amp;#34",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1040,
+    "lat": 52.379028,
+    "lng": 4.717118,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 to be open field, aardappelboer",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1041,
+    "lat": 52.412506,
+    "lng": 4.63971,
+    "status": "healthy",
+    "note": "[Manmade structure] Behind container",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1042,
+    "lat": 52.413952,
+    "lng": 4.640192,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Reception Stayokay",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1043,
+    "lat": 52.38274,
+    "lng": 4.555064,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 hives, 1 topbar",
+    "date": "2015-03-14"
+  },
+  {
+    "id": 1044,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade structure] Regular Hive",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1045,
+    "lat": 52.414093,
+    "lng": 4.639944,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Reception Stayokay volk 3",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1046,
+    "lat": 52.407604,
+    "lng": 4.624611,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Schooltuin imker vereniging Haarlem volk \\r\\n1",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1047,
+    "lat": 52.405796,
+    "lng": 4.649066,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Schooltuin imker vereniging Haarlem volk \\r\\n2",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1048,
+    "lat": 52.413334,
+    "lng": 4.641867,
+    "status": "healthy",
+    "note": "[Manmade structure] Imker vereniging volk 2",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1049,
+    "lat": 52.412868,
+    "lng": 4.641821,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 3",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1050,
+    "lat": 52.412708,
+    "lng": 4.64084,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 4",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1051,
+    "lat": 52.412506,
+    "lng": 4.641848,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 5",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1052,
+    "lat": 52.412289,
+    "lng": 4.642195,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 6",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1053,
+    "lat": 52.412094,
+    "lng": 4.642041,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 7",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1054,
+    "lat": 52.413132,
+    "lng": 4.641004,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Imker vereniging volk 8",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1055,
+    "lat": 52.363457,
+    "lng": 4.608419,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Tuin vereniging nooit rust volk shirley",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1056,
+    "lat": 52.363838,
+    "lng": 4.607794,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Tuin vereniging nooit rust volk charlotte",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1057,
+    "lat": 52.363838,
+    "lng": 4.607794,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Tuin vereniging nooit rust volk charlotte",
+    "date": "2015-03-15"
+  },
+  {
+    "id": 1058,
+    "lat": 34.748932,
+    "lng": -80.354507,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 Italian hive for backyard pollination services. \\r\\n225-803-5406. Golden Delight Honey on \\r\\nFaceBook.",
+    "date": "2015-03-20"
+  },
+  {
+    "id": 1059,
+    "lat": 35.710888,
+    "lng": -84.006241,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives",
+    "date": "2015-03-20"
+  },
+  {
+    "id": 1060,
+    "lat": 34.765781,
+    "lng": -80.381439,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 7 Italian hives for pollination services. \\r\\n225-803-5406. \\r\\nhttp://www.GoldenDelightHoney.com",
+    "date": "2015-03-20"
+  },
+  {
+    "id": 1061,
+    "lat": 38.015591,
+    "lng": -78.499634,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two Warre hives.  Italian honey bees.  Installed \\r\\n3/26/2015",
+    "date": "2015-03-28"
+  },
+  {
+    "id": 1062,
+    "lat": 35.801758,
+    "lng": -86.425652,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 new hives",
+    "date": "2015-03-29"
+  },
+  {
+    "id": 1063,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] Top bar hives",
+    "date": "2015-04-12"
+  },
+  {
+    "id": 1064,
+    "lat": 35.809666,
+    "lng": -78.638367,
+    "status": "healthy",
+    "note": "[Manmade structure] more Italians",
+    "date": "2015-04-17"
+  },
+  {
+    "id": 1065,
+    "lat": 35.595879,
+    "lng": -78.775009,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives from packaged need Started spring \\r\\n2015",
+    "date": "2015-04-25"
+  },
+  {
+    "id": 1066,
+    "lat": 45.232224,
+    "lng": -123.180099,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Italian hygienic hive.",
+    "date": "2015-04-26"
+  },
+  {
+    "id": 1067,
+    "lat": 38.564774,
+    "lng": -84.468216,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Three Langs. Italians.",
+    "date": "2015-04-29"
+  },
+  {
+    "id": 1068,
+    "lat": 35.20187,
+    "lng": -92.451935,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Currently 2 hives 2 NUCS in yard.",
+    "date": "2015-05-01"
+  },
+  {
+    "id": 1069,
+    "lat": 42.134968,
+    "lng": -70.768776,
+    "status": "healthy",
+    "note": "[Manmade structure] Bobs",
+    "date": "2015-05-04"
+  },
+  {
+    "id": 1070,
+    "lat": 42.137093,
+    "lng": -70.747772,
+    "status": "healthy",
+    "note": "[Manmade structure] oulette",
+    "date": "2015-05-04"
+  },
+  {
+    "id": 1071,
+    "lat": 42.069118,
+    "lng": -70.719986,
+    "status": "healthy",
+    "note": "[Manmade structure] dux",
+    "date": "2015-05-04"
+  },
+  {
+    "id": 1072,
+    "lat": 42.091335,
+    "lng": -70.656227,
+    "status": "healthy",
+    "note": "[Manmade structure] home",
+    "date": "2015-05-04"
+  },
+  {
+    "id": 1073,
+    "lat": 38.725296,
+    "lng": -90.627708,
+    "status": "healthy",
+    "note": "[Manmade structure] Langstroth Hive Cordovan Italians",
+    "date": "2015-05-05"
+  },
+  {
+    "id": 1074,
+    "lat": 38.720226,
+    "lng": -90.610321,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 deep 2 super langstroth hive",
+    "date": "2015-05-05"
+  },
+  {
+    "id": 1075,
+    "lat": 35.328686,
+    "lng": -77.490692,
+    "status": "healthy",
+    "note": "[Manmade structure] aurvivor hive in 3rd floor attic of Dobbs School \\r\\nbuilding, Dobbs Farm rd Kinston NC",
+    "date": "2015-05-06"
+  },
+  {
+    "id": 1076,
+    "lat": 45.707672,
+    "lng": 6.106787,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Six ruches JP Bermond",
+    "date": "2015-05-10"
+  },
+  {
+    "id": 1077,
+    "lat": 36.654114,
+    "lng": -93.967705,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 hives. Italian bees.",
+    "date": "2015-05-17"
+  },
+  {
+    "id": 1078,
+    "lat": 36.303558,
+    "lng": -82.2948,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Personal Apiary",
+    "date": "2015-05-19"
+  },
+  {
+    "id": 1079,
+    "lat": 42.336266,
+    "lng": -71.476715,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 5 hive apiary",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1080,
+    "lat": 42.335648,
+    "lng": -71.471375,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 hives apiary",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1081,
+    "lat": 42.333263,
+    "lng": -71.47052,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 hives apiary",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1082,
+    "lat": 42.325684,
+    "lng": -71.457031,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 4 hives apiary",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1083,
+    "lat": 42.286888,
+    "lng": -71.40123,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 hive",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1084,
+    "lat": 42.307224,
+    "lng": -71.557343,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 hive",
+    "date": "2015-05-23"
+  },
+  {
+    "id": 1085,
+    "lat": 40.517647,
+    "lng": -86.123978,
+    "status": "warning",
+    "note": "[Dead Tree] Very active hive for at least the last 3 \\r\\nyears. Hive entrance on east side of \\r\\ntree about 4&amp;#39 off ground. Tree more dead \\r\\nthan alive. Hive is in a residential \\r\\narea and not wanted at this location!\\r\\nHive within 3&amp;#39 of public sidewalk 10&amp;#39 \\r\\nfrom street.",
+    "date": "2015-05-25"
+  },
+  {
+    "id": 1086,
+    "lat": 40.51775,
+    "lng": -86.127052,
+    "status": "warning",
+    "note": "[Dead Tree] Very healthy and active hive in an \\r\\nunwanted location. Much to close to \\r\\npublic sidewalk and street.",
+    "date": "2015-05-27"
+  },
+  {
+    "id": 1087,
+    "lat": 48.574123,
+    "lng": -93.440407,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 hives with 10,000 bees each",
+    "date": "2015-06-02"
+  },
+  {
+    "id": 1088,
+    "lat": 35.853271,
+    "lng": -79.926689,
+    "status": "healthy",
+    "note": "[Manmade structure] Two first year hives",
+    "date": "2015-06-07"
+  },
+  {
+    "id": 1089,
+    "lat": 30.624542,
+    "lng": -88.543709,
+    "status": "healthy",
+    "note": "[Manmade structure] Garden Hive",
+    "date": "2015-06-07"
+  },
+  {
+    "id": 1090,
+    "lat": 37.189651,
+    "lng": -95.535767,
+    "status": "healthy",
+    "note": "[Manmade structure] I currently have 3 hives",
+    "date": "2015-06-08"
+  },
+  {
+    "id": 1091,
+    "lat": 40.192902,
+    "lng": -85.749146,
+    "status": "healthy",
+    "note": "[Manmade structure] Just starting out.",
+    "date": "2015-06-11"
+  },
+  {
+    "id": 1092,
+    "lat": 35.818317,
+    "lng": -78.751503,
+    "status": "healthy",
+    "note": "[Manmade structure] ben",
+    "date": "2015-06-15"
+  },
+  {
+    "id": 1093,
+    "lat": 35.828262,
+    "lng": -78.761253,
+    "status": "healthy",
+    "note": "[Manmade structure] Test",
+    "date": "2015-06-15"
+  },
+  {
+    "id": 1094,
+    "lat": 41.755505,
+    "lng": -73.051941,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive 1",
+    "date": "2015-06-16"
+  },
+  {
+    "id": 1095,
+    "lat": 41.719963,
+    "lng": -72.801888,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 1 hive just starting in 2015",
+    "date": "2015-06-29"
+  },
+  {
+    "id": 1096,
+    "lat": 35.223343,
+    "lng": 136.93457,
+    "status": "healthy",
+    "note": "[Manmade structure] ktb 2014 a",
+    "date": "2015-07-04"
+  },
+  {
+    "id": 1097,
+    "lat": 33.227787,
+    "lng": -87.109436,
+    "status": "warning",
+    "note": "[Manmade Beehive] 2nd year Bee Keeper with one healthy swarm that \\r\\nI started with and another &amp;#34struggling&amp;#34 swarm \\r\\nremoved from an old house this summer. Both in \\r\\nLangstroth hives.",
+    "date": "2015-07-05"
+  },
+  {
+    "id": 1098,
+    "lat": 40.138134,
+    "lng": -74.870377,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are currently (25 July 2015) six beehives at \\r\\nthis location (67 Idlewild Road).  On any given day \\r\\nthe number ranges from four to eight.",
+    "date": "2015-07-25"
+  },
+  {
+    "id": 1099,
+    "lat": 51.388237,
+    "lng": -2.385355,
+    "status": "healthy",
+    "note": "[Manmade structure] Italian",
+    "date": "2015-07-28"
+  },
+  {
+    "id": 1100,
+    "lat": 30.070341,
+    "lng": -97.293282,
+    "status": "healthy",
+    "note": "[Manmade structure] One hive of Itallian honeybees in a standard \\r\\nlangstroth hive.",
+    "date": "2015-08-04"
+  },
+  {
+    "id": 1101,
+    "lat": 38.496426,
+    "lng": -121.488014,
+    "status": "healthy",
+    "note": "[Manmade structure] Home",
+    "date": "2015-08-08"
+  },
+  {
+    "id": 1102,
+    "lat": 38.496353,
+    "lng": -121.487946,
+    "status": "healthy",
+    "note": "[Manmade structure] Linda bedroom\\r\\n",
+    "date": "2015-08-08"
+  },
+  {
+    "id": 1103,
+    "lat": 37.189518,
+    "lng": -80.083549,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two hives",
+    "date": "2015-09-01"
+  },
+  {
+    "id": 1104,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade Beehive] colva, James M.",
+    "date": "2015-09-14"
+  },
+  {
+    "id": 1105,
+    "lat": 34.61039,
+    "lng": -98.442307,
+    "status": "healthy",
+    "note": "[Manmade structure] 10 Frame Hive",
+    "date": "2015-09-22"
+  },
+  {
+    "id": 1106,
+    "lat": 39.523655,
+    "lng": -119.813416,
+    "status": "healthy",
+    "note": "[Manmade structure] Beehive at 75 Court Street. Beehive use to be \\r\\nexposed on South East corner of courthouse but \\r\\nhas re-establish itself inside structure.",
+    "date": "2015-11-17"
+  },
+  {
+    "id": 1107,
+    "lat": 35.948612,
+    "lng": -86.666534,
+    "status": "healthy",
+    "note": "[Manmade structure] Maintaining about 15 colonies in man made hives.  \\r\\nHoney is produced for commercial retail sales.",
+    "date": "2015-11-30"
+  },
+  {
+    "id": 1108,
+    "lat": 38,
+    "lng": -97,
+    "status": "warning",
+    "note": "[Living Tree] The hive is located in what seems to be a dead \\r\\ntrunk of a multi trucked tree, about 25 to 30 feet \\r\\noff the ground. It is located in someone&amp;#39s yard. I \\r\\nwas contacted to remove the hive, but I don&amp;#39t have \\r\\nthe equipment to access the hive in its location",
+    "date": "2015-12-09"
+  },
+  {
+    "id": 1109,
+    "lat": 38,
+    "lng": -97,
+    "status": "warning",
+    "note": "[Living Tree] The hive is located in what seems to be a dead \\r\\ntrunk of a multi trucked tree, about 25 to 30 feet \\r\\noff the ground. It is located in someone&amp;#39s yard. I \\r\\nwas contacted to remove the hive, but I don&amp;#39t have \\r\\nthe equipment to access the hive in its location. I \\r\\ndon&amp;#39t know how long the colony has been there, \\r\\nbut I suspect it has been there several years, \\r\\njudging from the appearance of the entrance to \\r\\nthe hive.",
+    "date": "2015-12-09"
+  },
+  {
+    "id": 1110,
+    "lat": 35.921474,
+    "lng": -80.536232,
+    "status": "healthy",
+    "note": "[Manmade structure] Starting 2 hives in March 2015",
+    "date": "2015-12-27"
+  },
+  {
+    "id": 1111,
+    "lat": 38,
+    "lng": -97,
+    "status": "healthy",
+    "note": "[Manmade structure] 1717 S 158th Ave, Goodyear, AZ 85338\\r\\nBees in a water shut off thing in play \\r\\narea (park) under a mesquite tree. They \\r\\nkeep getting dirt thrown on them to cover \\r\\nthe hive by landscapers for the park. \\r\\nPlease help them. Dont kill them. We love \\r\\nthem.",
+    "date": "2016-01-09"
+  },
+  {
+    "id": 1112,
+    "lat": 33.429913,
+    "lng": -112.427849,
+    "status": "healthy",
+    "note": "[Manmade structure] 1717 S 158th Ave, Goodyear, AZ 85338\\r\\nBees in a water shut off thing in play \\r\\narea (park) under a mesquite tree. They \\r\\nkeep getting dirt thrown on them to cover \\r\\nthe hive by landscapers for the park. \\r\\nPlease help them. Dont kill them. We love \\r\\nthem.",
+    "date": "2016-01-09"
+  },
+  {
+    "id": 1113,
+    "lat": 48.060898,
+    "lng": -123.457283,
+    "status": "healthy",
+    "note": "[Manmade Beehive] We have 12 hives at 1200 feet south of \\r\\ntown. Been a beekeeper 45 years.Enjoy \\r\\nLearning.",
+    "date": "2016-01-29"
+  },
+  {
+    "id": 1114,
+    "lat": 39.788326,
+    "lng": -75.540863,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 Hives at this location.  Russian Honeybees",
+    "date": "2016-02-14"
+  },
+  {
+    "id": 1115,
+    "lat": 34.010136,
+    "lng": -86.097305,
+    "status": "healthy",
+    "note": "[Manmade structure] I have 4 hives at this location. All hives have over \\r\\nwintered at least 1 year. Some hives are have \\r\\nsurvived more than 1 winter.",
+    "date": "2016-02-19"
+  },
+  {
+    "id": 1116,
+    "lat": 36.124489,
+    "lng": -86.490402,
+    "status": "healthy",
+    "note": "[Manmade structure] Beeyard with 2 hives",
+    "date": "2016-02-22"
+  },
+  {
+    "id": 1117,
+    "lat": 32.843334,
+    "lng": -88.301285,
+    "status": "healthy",
+    "note": "[Manmade structure] Good yd",
+    "date": "2016-03-06"
+  },
+  {
+    "id": 1118,
+    "lat": 35.866032,
+    "lng": -82.734505,
+    "status": "healthy",
+    "note": "[Manmade structure] Bee yard",
+    "date": "2016-03-10"
+  },
+  {
+    "id": 1119,
+    "lat": 35.778824,
+    "lng": -82.719208,
+    "status": "healthy",
+    "note": "[Manmade structure] Bee yard apiary",
+    "date": "2016-03-10"
+  },
+  {
+    "id": 1120,
+    "lat": 61.186447,
+    "lng": -149.738708,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Two over wintered beehives",
+    "date": "2016-03-25"
+  },
+  {
+    "id": 1121,
+    "lat": 45.972363,
+    "lng": 8.973428,
+    "status": "healthy",
+    "note": "[Manmade structure] Campione",
+    "date": "2016-03-25"
+  },
+  {
+    "id": 1122,
+    "lat": 37.785122,
+    "lng": -100.011208,
+    "status": "healthy",
+    "note": "[Manmade structure] Two hives",
+    "date": "2016-04-01"
+  },
+  {
+    "id": 1123,
+    "lat": 35.970982,
+    "lng": -79.936813,
+    "status": "healthy",
+    "note": "[Manmade structure] Horizontal Langstroth w/30 deep frames. Newly \\r\\nestablished.",
+    "date": "2016-04-06"
+  },
+  {
+    "id": 1124,
+    "lat": 30.416283,
+    "lng": -95.719292,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 6 hives, buckfast bees",
+    "date": "2016-04-09"
+  },
+  {
+    "id": 1125,
+    "lat": 55.066467,
+    "lng": -117.28627,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Flow Hive",
+    "date": "2016-04-10"
+  },
+  {
+    "id": 1126,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] Italian Queen Hive.\\r\\nNew hive established 2016",
+    "date": "2016-04-25"
+  },
+  {
+    "id": 1127,
+    "lat": 35.29422,
+    "lng": -82.456924,
+    "status": "healthy",
+    "note": "[Manmade structure] 12 Colonies\\r\\nRooftop Apiary",
+    "date": "2016-04-25"
+  },
+  {
+    "id": 1128,
+    "lat": 33.17802,
+    "lng": -111.574425,
+    "status": "healthy",
+    "note": "[Manmade structure] Hone",
+    "date": "2016-04-27"
+  },
+  {
+    "id": 1129,
+    "lat": 37.064499,
+    "lng": -79.679733,
+    "status": "healthy",
+    "note": "[Manmade structure] Top bar",
+    "date": "2016-05-03"
+  },
+  {
+    "id": 1130,
+    "lat": 36.321987,
+    "lng": -94.140129,
+    "status": "healthy",
+    "note": "[Manmade structure] 2 supers with Apis mellifera ligustica",
+    "date": "2016-05-05"
+  },
+  {
+    "id": 1131,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] Langstroth hive started fom nuc on 5/7/16",
+    "date": "2016-05-14"
+  },
+  {
+    "id": 1132,
+    "lat": 39.452034,
+    "lng": -78.982361,
+    "status": "warning",
+    "note": "[Manmade structure] I was called out on swarm recovery.  I talked with \\r\\nproperty owner who stated the swarm came from a \\r\\ncolony that has been in a vacant building on his \\r\\nproperty for about 30 years.  I was shown where \\r\\nthe colony was coming in and out of the building.   \\r\\nThe property owner does not want the colony \\r\\nremoved but  left alone  to naturally swarm.",
+    "date": "2016-05-18"
+  },
+  {
+    "id": 1133,
+    "lat": 47.657925,
+    "lng": -122.030762,
+    "status": "healthy",
+    "note": "[Manmade structure] Home apiary\\r\\nHorizontal hive structure",
+    "date": "2016-05-24"
+  },
+  {
+    "id": 1134,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] Honeybee hive in an old house trailer. Plan to set \\r\\na trap or go in and catch them to be put in a hive",
+    "date": "2016-05-25"
+  },
+  {
+    "id": 1135,
+    "lat": 36.823982,
+    "lng": -88.59536,
+    "status": "healthy",
+    "note": "[Manmade structure] Hobby beekeeper",
+    "date": "2016-06-02"
+  },
+  {
+    "id": 1136,
+    "lat": 39.854229,
+    "lng": -82.980324,
+    "status": "healthy",
+    "note": "[Manmade structure] This is my second hive. I call it my backyard hive. \\r\\nIt is a swarm I caught in late May of 2016",
+    "date": "2016-06-05"
+  },
+  {
+    "id": 1137,
+    "lat": 40.023769,
+    "lng": -75.422241,
+    "status": "healthy",
+    "note": "[Manmade Beehive] There are usually 5 to 8 hives at this location.",
+    "date": "2016-07-12"
+  },
+  {
+    "id": 1138,
+    "lat": 28.393234,
+    "lng": -82.183891,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 hive",
+    "date": "2016-07-20"
+  },
+  {
+    "id": 1139,
+    "lat": 36.581223,
+    "lng": -78.157364,
+    "status": "healthy",
+    "note": "[Manmade structure] Wild hive that showed up in a live tree with \\r\\nmultiple trunks and a hole at the base.",
+    "date": "2016-07-29"
+  },
+  {
+    "id": 1140,
+    "lat": 39.706955,
+    "lng": -105.016136,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 box garden hive from Brushy Mountain",
+    "date": "2016-08-01"
+  },
+  {
+    "id": 1141,
+    "lat": 30.252592,
+    "lng": -90.850601,
+    "status": "healthy",
+    "note": "[Manmade structure] Hive in barn ne corner of roof of barn",
+    "date": "2016-08-08"
+  },
+  {
+    "id": 1142,
+    "lat": 41.862217,
+    "lng": -92.471642,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 3 Hive colonies",
+    "date": "2016-08-26"
+  },
+  {
+    "id": 1143,
+    "lat": 30.497759,
+    "lng": -91.949577,
+    "status": "healthy",
+    "note": "[Manmade structure] Top bar year old.",
+    "date": "2016-08-30"
+  },
+  {
+    "id": 1144,
+    "lat": 47.130833,
+    "lng": -122.93795,
+    "status": "healthy",
+    "note": "[Manmade structure] Single Langstroth",
+    "date": "2016-09-22"
+  },
+  {
+    "id": 1145,
+    "lat": 36.061245,
+    "lng": -86.86116,
+    "status": "healthy",
+    "note": "[Living Tree] As of 9/2016, feral hive in cedar tree. Been there \\r\\nfor 4+ years.",
+    "date": "2016-09-23"
+  },
+  {
+    "id": 1146,
+    "lat": 49.234184,
+    "lng": -122.893997,
+    "status": "healthy",
+    "note": "[Manmade Beehive] 2 hives",
+    "date": "2016-10-03"
+  },
+  {
+    "id": 1147,
+    "lat": 0,
+    "lng": 0,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 hive box and 2 feral colonies in trees.",
+    "date": "2016-10-06"
+  },
+  {
+    "id": 1148,
+    "lat": 48.901276,
+    "lng": -123.70771,
+    "status": "healthy",
+    "note": "[Manmade structure] 5 hives on a trailer. I keep them between \\r\\nChemanus and Victoria.",
+    "date": "2016-10-18"
+  },
+  {
+    "id": 1149,
+    "lat": 38.648865,
+    "lng": -121.731796,
+    "status": "healthy",
+    "note": "[Manmade structure] 1 hive",
+    "date": "2016-10-26"
+  },
+  {
+    "id": 1150,
+    "lat": 39.77858,
+    "lng": -75.993584,
+    "status": "healthy",
+    "note": "[Manmade structure] 3 honey bee hives, 2 in 10 frame langstroths, 1 in an \\r\\n8 frame",
+    "date": "2016-10-27"
+  },
+  {
+    "id": 1151,
+    "lat": 39.897701,
+    "lng": -119.9403,
+    "status": "healthy",
+    "note": "[Manmade structure] Langstroth hive.",
+    "date": "2016-10-30"
+  },
+  {
+    "id": 1152,
+    "lat": 39.477295,
+    "lng": -75.599487,
+    "status": "healthy",
+    "note": "[Manmade structure] Three-four manmade hives, healthy and active.",
+    "date": "2016-10-30"
+  },
+  {
+    "id": 1153,
+    "lat": 39.489651,
+    "lng": -75.638802,
+    "status": "healthy",
+    "note": "[Manmade structure] Three-four manmade hives, healthy and active.",
+    "date": "2016-10-30"
+  },
+  {
+    "id": 1154,
+    "lat": 49.597233,
+    "lng": 6.111816,
+    "status": "healthy",
+    "note": "[Manmade structure] 5 DEUTSCH NORMAL",
+    "date": "2016-11-25"
+  },
+  {
+    "id": 1155,
+    "lat": 28.426701,
+    "lng": -82.179123,
+    "status": "healthy",
+    "note": "[Manmade structure] Man made",
+    "date": "2016-11-30"
+  },
+  {
+    "id": 1156,
+    "lat": 33.881977,
+    "lng": -118.403305,
+    "status": "healthy",
+    "note": "[Manmade structure] Five medium Lang boxes on SolutionBee hive \\r\\nscale from feral swarm April 2014.  \\r\\nFoundationless, no excluders or treatments ever. \\r\\n5 other hives on property",
+    "date": "2017-01-04"
+  },
+  {
+    "id": 1157,
+    "lat": 7.070784,
+    "lng": 80.070419,
+    "status": "healthy",
+    "note": "[Manmade structure] Starting few hives",
+    "date": "2017-01-19"
+  },
+  {
+    "id": 1158,
+    "lat": 40.817455,
+    "lng": -81.214485,
+    "status": "healthy",
+    "note": "[Manmade structure] Italons",
+    "date": "2017-02-06"
+  },
+  {
+    "id": 1159,
+    "lat": 41.728527,
+    "lng": -88.138969,
+    "status": "healthy",
+    "note": "[Manmade structure] Langstroth hive",
+    "date": "2017-02-07"
+  },
+  {
+    "id": 1160,
+    "lat": 38.92849,
+    "lng": -104.516693,
+    "status": "healthy",
+    "note": "[Manmade structure] 2017 First year. Beginner hive.",
+    "date": "2017-03-11"
+  },
+  {
+    "id": 1161,
+    "lat": 34.670235,
+    "lng": -83.048073,
+    "status": "healthy",
+    "note": "[Manmade Beehive] Currently 12 colonies at this location.",
+    "date": "2017-03-24"
+  },
+  {
+    "id": 1162,
+    "lat": 37.924225,
+    "lng": -105.649002,
+    "status": "healthy",
+    "note": "[Living Tree] Colony in live pinyon pine, about 8 inches dbh.  Two \\r\\nentrances- about 3 feet and 7 feet.  Origin and time of \\r\\nsurvival unknown.  Discovered by bee lining from \\r\\nresidential area to the north in March 2017.  Inside \\r\\nGreat Sand Dunes National Park.  Park biologist \\r\\ninformed of location.",
+    "date": "2017-04-10"
+  }
+];
+
+const TYPE_CONFIG = {
+  TREE: 'ðŸŒ²', GROUND: 'â›°ï¸', BUILDING: 'ðŸ ', BEEHIVE: 'ðŸ'
+};
+
+const App = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategories, setActiveCategories] = useState(['Tree', 'Ground', 'Building', 'Beehive']);
+  const [geneticFilter, setGeneticFilter] = useState('All');
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [viewableCount, setViewableCount] = useState(ALL_DATA.length);
+  const [zip, setZip] = useState('');
+  const [targetCoords, setTargetCoords] = useState(null);
+  const [statusFilter, setStatusFilter] = useState(['healthy', 'warning', 'at-risk', 'gray']);
+  const [showDCA, setShowDCA] = useState(false);
+  const [showDCAInfo, setShowDCAInfo] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [mapInstance, setMapInstance] = useState(null);
+  const [mapZoom, setMapZoom] = useState(14);
+  const [clickedAnalysis, setClickedAnalysis] = useState(null);
+
+  const handleZipSearch = async (e) => {
+    if (e.key === 'Enter' && zip.length === 5) {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${zip}&country=US&format=json`);
+        const data = await res.json();
+        if (data[0]) {
+          setTargetCoords([parseFloat(data[0].lon), parseFloat(data[0].lat)]);
+          setMapZoom(14);
+        }
+      } catch (err) { console.error("Zip search failed", err); }
+    }
+  };
+
+  // V117: FONT SANITIZATION & MATRIX TYPES
+  const sanitizedData = useMemo(() => {
+    return ALL_DATA.filter(h => h.lat !== 0 && h.lng !== 0 && h.lat != null && h.lng != null && Number.isFinite(parseFloat(h.lat)) && Number.isFinite(parseFloat(h.lng)))
+      .map(hive => {
+        // Strips hidden control characters that cause font glitches [cite: 2026-02-26]
+        const cleanNotes = (hive.note || "").replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+        const notes = cleanNotes.toLowerCase();
+        let derivedStatus = 'gray'; // Default to NEEDS AUDIT
+
+        // Explicit Field > Bracket Tag > Keyword Search
+        const s = hive.status || '';
+        if (s === 'atRisk' || s === 'at-risk' || notes.includes('[dead]') || notes.includes('afb') || notes.includes('inactive')) derivedStatus = 'at-risk';
+        else if (s === 'warning' || notes.includes('[warning]') || notes.includes('varroa') || notes.includes('mite')) derivedStatus = 'warning';
+        else if (s === 'healthy' || notes.includes('[healthy]') || notes.includes('active') || notes.includes('alive')) derivedStatus = 'healthy';
+
+        // FINAL CATEGORY HIERARCHY [cite: 2026-02-26]
+        let derivedType = 'Unknown'; // Default for the 65 Orphans
+        if (notes.includes('[living tree]') || notes.includes('[dead tree]') || notes.includes('[tree]')) {
+          derivedType = 'Tree';
+        } else if (notes.includes('[manmade structure]') || notes.includes('[building]')) {
+          derivedType = 'Building';
+        } else if (notes.includes('[in the ground]')) {
+          derivedType = 'Ground';
+        } else if (notes.includes('[manmade beehive]') || notes.includes('[beehive]')) {
+          derivedType = 'Beehive';
+        }
+
+        return { ...hive, note: cleanNotes, derivedStatus, derivedType };
+      });
+  }, []);
+
+  // V105: Stateful copy of sanitizedData for live editing
+  const [liveData, setLiveData] = useState([]);
+
+  useEffect(() => {
+    setLiveData(sanitizedData);
+  }, [sanitizedData]);
+
+  // V105: GLOBAL BRIDGE FOR CONSOLE AUDIT
+  window.updateHiveStatus = (id, newStatus) => {
+    // Intercept user-friendly strings and match to our internal derivedStatus schema
+    const internalStatus = newStatus.toLowerCase() === 'green' ? 'healthy' :
+      newStatus.toLowerCase() === 'orange' ? 'warning' :
+        newStatus.toLowerCase() === 'red' ? 'at-risk' :
+          newStatus.toLowerCase() === 'gray' ? 'gray' : newStatus;
+
+    setLiveData(prev => prev.map(h =>
+      (h.id === id || h._id === id || h.id === parseInt(id) || h._id === parseInt(id)) ? { ...h, derivedStatus: internalStatus } : h
+    ));
+    console.log(`âœ… Hive #${id} updated to ${newStatus} (Internal: ${internalStatus}).`);
+  };
+
+  // V106: GUIDED CONSOLE AUDIT
+  window.audit = () => {
+    const idStr = prompt("Enter the Hive ID you wish to update (e.g., 501):");
+    if (!idStr) return;
+    const id = parseInt(idStr);
+
+    const colorInput = prompt("Enter new status: (g)reen, (o)range, (r)ed, or (gray):").toLowerCase();
+    let status = 'gray'; // default internal status
+    let displayStatus = 'Gray';
+
+    if (colorInput === 'g' || colorInput === 'green') { status = 'healthy'; displayStatus = 'Green'; }
+    if (colorInput === 'o' || colorInput === 'orange') { status = 'warning'; displayStatus = 'Orange'; }
+    if (colorInput === 'r' || colorInput === 'red') { status = 'at-risk'; displayStatus = 'Red'; }
+    if (colorInput === 'gray') { status = 'gray'; displayStatus = 'Gray'; }
+
+    // Update State
+    setLiveData(prev => prev.map(h =>
+      (h.id === id || h._id === id || h.id === parseInt(id) || h._id === parseInt(id)) ? { ...h, derivedStatus: status } : h
+    ));
+
+    // Auto-Fly to the hive for visual confirmation
+    setSearchTerm(`#${id}`);
+
+    console.log(`âœ… Hive #${id} updated to ${displayStatus}.`);
+  };
+
+  // V108: EXPORT AUDITED DATA
+  window.exportAudit = () => {
+    // Filter for ONLY the hives that were manually changed
+    const changes = liveData.filter((h, i) => h.derivedStatus !== sanitizedData[i].derivedStatus);
+
+    if (changes.length === 0) {
+      console.log("âš ï¸ No manual changes detected yet.");
+      return;
+    }
+
+    const exportPayload = changes.map(h => ({
+      id: h.id || h._id,
+      newStatus: h.derivedStatus,
+      noteTag: `[${h.derivedStatus.toLowerCase()}]`
+    }));
+
+    console.log("%c ðŸš€ AUDIT EXPORT READY ðŸš€ ", "color: black; background: #00ff00; font-size: 18px; font-weight: bold;");
+    console.log("Copy the array below and send it to Gemini:");
+    console.log(JSON.stringify(exportPayload, null, 2));
+
+    alert(`Exported ${changes.length} changes to the console. Copy them for the permanent update.`);
+  };
+
+  const filteredHives = useMemo(() => {
+    return liveData.filter(hive => {
+      const notes = (hive.note || "").toLowerCase();
+
+      // V98: ID-JUMP LOGIC
+      if (searchTerm.startsWith('#')) {
+        const targetId = searchTerm.replace('#', '');
+        return (hive._id || hive.id || '').toString() === targetId;
+      }
+
+      const matchesSearch = notes.includes(searchTerm.toLowerCase());
+
+      const isTree = notes.includes('[tree]') || (activeCategories.includes('Tree') && /tree|pine|oak|snag|wood/i.test(notes));
+      const isGround = notes.includes('[ground]') || (activeCategories.includes('Ground') && /ground|dirt|earth|mound/i.test(notes));
+      const isBuilding = notes.includes('[building]') || (activeCategories.includes('Building') && /building|structure|house|roof|wall/i.test(notes));
+      const isHive = notes.includes('[beehive]') || (activeCategories.includes('Beehive') && /box|hive|nuc|feral/i.test(notes));
+
+      const isCatchAll = activeCategories.length === 4 && !(/tree|pine|oak|snag|wood|ground|dirt|earth|mound|building|structure|house|roof|wall|box|hive|nuc|feral/i.test(notes));
+      const isFeral = /tree|building|feral/i.test(notes) && !/box|langstroth|managed/i.test(notes);
+
+      const matchesGenetics = geneticFilter === 'All' ||
+        (geneticFilter === 'Feral' && isFeral) ||
+        (geneticFilter === 'Managed' && !isFeral);
+
+      const matchesStatus = statusFilter.includes(hive.derivedStatus);
+
+      return matchesSearch && (isTree || isGround || isBuilding || isHive || isCatchAll) && matchesGenetics && matchesStatus;
+    });
+  }, [liveData, searchTerm, activeCategories, geneticFilter, statusFilter]);
+
+  const mappableCount = liveData.length;
+  const invalidCoordsCount = ALL_DATA.length - liveData.length;
+
+  const stats = useMemo(() => {
+    return {
+      Green: liveData.filter(h => h.derivedStatus === 'healthy').length,
+      Orange: liveData.filter(h => h.derivedStatus === 'warning').length,
+      Red: liveData.filter(h => h.derivedStatus === 'at-risk').length,
+      Gray: liveData.filter(h => h.derivedStatus === 'gray').length,
+      Total: liveData.length
+    };
+  }, [liveData]);
+
+  // V117 Matrix Computation -> V122 Unknown
+  const matrix = useMemo(() => {
+    const types = ['Tree', 'Ground', 'Building', 'Beehive', 'Unknown'];
+    const statusesMap = { 'Green': 'healthy', 'Orange': 'warning', 'Red': 'at-risk', 'Gray': 'gray' };
+    const statuses = Object.keys(statusesMap);
+    const data = {};
+
+    types.forEach(t => {
+      data[t] = {};
+      statuses.forEach(s => {
+        data[t][s] = liveData.filter(h => h.derivedType === t && h.derivedStatus === statusesMap[s]).length;
+      });
+      data[t].Total = Object.values(data[t]).reduce((a, b) => a + b, 0);
+    });
+
+    const totals = { Total: 0 };
+    statuses.forEach(s => {
+      totals[s] = liveData.filter(h => h.derivedStatus === statusesMap[s]).length;
+      totals.Total += totals[s];
+    });
+
+    return { data, types, statuses, totals };
+  }, [liveData]);
+
+  // V93: Log first 10 Unknown/Gray records for the user
+  useEffect(() => {
+    const unknownRecords = liveData.filter(h => h.derivedStatus === 'gray').slice(0, 10);
+    console.log("ðŸ› ï¸ V93 NEEDS AUDIT (First 10 Gray Records):", unknownRecords.map(h => ({ id: h._id, note: h.note })));
+  }, [liveData]);
+
+  // V98: ID JUMP AUTO-ZOOM
+  useEffect(() => {
+    if (searchTerm.startsWith('#') && filteredHives.length === 1) {
+      setTargetCoords([filteredHives[0].lng, filteredHives[0].lat]);
+      setMapZoom(19);
+    }
+  }, [searchTerm, filteredHives]);
+
+  // V98: Audit Logger
+  const logAuditData = () => {
+    const unknownRecords = liveData.filter(h => h.derivedStatus === 'gray');
+    console.log("ðŸ› ï¸ V98 AUDITOR LOG:");
+    unknownRecords.forEach(h => {
+      console.log(`ID: ${h._id || h.id} | Notes: ${h.note || ''} | ACTION: Add [healthy] to notes`);
+    });
+  };
+
+  // V104: Full Narrative Audit Output
+  const auditFullNotes = (statusType) => {
+    try {
+      const subset = liveData.filter(h => h.derivedStatus === statusType);
+      if (subset.length === 0) {
+        console.warn(`No hives found for status: ${statusType}`);
+        return;
+      }
+
+      console.clear();
+      console.log(`%c ðŸ•µï¸ FULL NARRATIVE AUDIT: ${statusType.toUpperCase()} HIVES `, "color: black; background: #ffcc00; font-size: 18px; font-weight: bold;");
+
+      const auditTable = subset.map(h => ({
+        ID: h._id || h.id,
+        Type: h.type || 'Unknown',
+        Full_Note: h.note || h.notes || '',
+        Suggested_Action: (h.note || h.notes || '').toLowerCase().includes('living') ? "Move to Green" : "Keep in " + statusType
+      }));
+
+      console.table(auditTable);
+      console.log(`%c ðŸ‘‡ CLICK HERE AND TYPE: audit() `, "color: #ffcc00; background: #000; font-size: 20px; border: 2px solid #ffcc00; padding: 5px; border-radius: 5px;");
+      alert(`Audit of ${subset.length} records printed to console. Read the 'Full_Note' column.`);
+
+      setClickedAnalysis(statusType);
+      setTimeout(() => setClickedAnalysis(null), 1000);
+    } catch (error) {
+      console.error("Analysis failed:", error);
+    }
+  };
+
+  useEffect(() => { setViewableCount(filteredHives.length); }, [filteredHives]);
+
+  const toggleStatus = (s) => {
+    setStatusFilter(prev => prev.includes(s) ? prev.filter(c => c !== s) : [...prev, s]);
+  };
+
+  const handleHomeClick = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (mapInstance) {
+          mapInstance.flyTo({
+            center: [pos.coords.longitude, pos.coords.latitude],
+            zoom: 14,
+            essential: true
+          });
+        }
+      },
+      (err) => alert(`Location Error: ${err.message}`),
+      { enableHighAccuracy: true }
+    );
+  };
+
+  return (
+    <div className="app-container">
+      {/* DCA LOGIC INFO MODAL [cite: 2026-02-26] */}
+      {showDCAInfo && (
+        <div onClick={() => setShowDCAInfo(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 4000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#222', border: '2px solid #ffcc00', padding: '20px', borderRadius: '15px', color: '#ffcc00' }}>
+            <h3>🧬 DCA Metrics Explained</h3>
+            <p style={{ color: '#fff', fontSize: '14px' }}>Predictions are based on three pillars:</p>
+            <ul style={{ color: '#fff', fontSize: '13px', lineHeight: '1.6' }}>
+              <li><b>Survivor Density:</b> Heat centers on Green-status hives [cite: 2026-02-26].</li>
+              <li><b>Flyway Radius:</b> Uses a 1,500m catchment area for drone travel [cite: 2026-02-26].</li>
+              <li><b>Genetic Intersection:</b> Red zones indicate where drone paths from 3+ colonies overlap [cite: 2026-02-26].</li>
+            </ul>
+            <button onClick={() => setShowDCAInfo(false)} style={{ width: '100%', background: '#ffcc00', border: 'none', padding: '10px', fontWeight: 'bold', borderRadius: '5px' }}>Back to Map</button>
+          </div>
+        </div>
+      )}
+
+      {/* GLOBAL FONT INJECTION [cite: 2026-02-26] */}
+      <style>{`
+        body, input, button, .app-container {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+          -webkit-font-smoothing: antialiased;
+        }
+        .fab-btn, .icon-btn {
+          font-family: Arial, sans-serif !important;
+        }
+        .app-container {
+          padding-top: env(safe-area-inset-top);
+          background: #1a1a1a;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+          color: #fff;
+        }
+      `}</style>
+      {/* SCIENCE SIDEBAR - Slide in from left */}
+      <aside className={`science-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{
+        position: 'fixed', left: isSidebarOpen ? '0' : '-300px',
+        width: '300px', height: '100%', background: '#1a1a1a', color: 'white',
+        zIndex: 10000, transition: 'left 0.3s ease', padding: '20px',
+        boxShadow: '2px 0 5px rgba(0,0,0,0.5)'
+      }}>
+        <button onClick={() => setSidebarOpen(false)} style={{ float: 'right', fontSize: '24px', background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>Ã—</button>
+        <h2 style={{ marginTop: '0', borderBottom: '1px solid #333', paddingBottom: '10px' }}>ðŸ›ï¸ Science Portal</h2>
+
+        <div className="research-feed" style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ padding: '15px', background: '#222', borderRadius: '8px', border: '1px solid #333' }}>
+            <h4 style={{ margin: '0 0 5px 0', color: '#fbbf24' }}>NCSU Tarpy Lab (2025)</h4>
+            <p style={{ fontSize: '0.85em', margin: '0 0 10px 0', color: '#aaa' }}>Comparison of Varroa resistance in feral survivor stock.</p>
+            <a href="https://entomology.ces.ncsu.edu/apiculture/" target="_blank" rel="noreferrer" style={{ fontSize: '0.85em', color: '#60a5fa', textDecoration: 'none' }}>Full Research â†—</a>
+          </div>
+          <div style={{ padding: '15px', background: '#222', borderRadius: '8px', border: '1px solid #333' }}>
+            <h4 style={{ margin: '0 0 5px 0', color: '#fbbf24' }}>Queen Quality (2026)</h4>
+            <p style={{ fontSize: '0.85em', margin: '0 0 10px 0', color: '#aaa' }}>Benchmarks for survivor queen sperm viability metrics.</p>
+            <a href="https://entomology.ces.ncsu.edu/apiculture/queen-quality-clinic/" target="_blank" rel="noreferrer" style={{ fontSize: '0.85em', color: '#60a5fa', textDecoration: 'none' }}>Clinic Data â†—</a>
+          </div>
+        </div>
+      </aside>
+
+      {/* HEADER: WIDE INPUTS */}
+      <header className="z-[9999] bg-[#1a1a1a]/90 backdrop-blur-md p-4 border-b border-white/10 shadow-xl">
+        <div className="flex gap-2">
+          <input type="text" placeholder="Search..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-1 min-w-0 bg-[#333] text-[#ffcc00] rounded-full px-4 py-2 border border-[#444] outline-none focus:border-yellow-500 placeholder-[#ffcc00]/50" style={{ fontFamily: 'inherit', fontSize: '16px' }} />
+          <input type="text" placeholder="Zipcode..." value={zip} onChange={(e) => setZip(e.target.value)} onKeyDown={handleZipSearch}
+            className="flex-1 min-w-0 bg-[#333] text-[#ffcc00] rounded-full px-4 py-2 text-[14px] border border-[#444] outline-none placeholder-[#ffcc00]/50 text-center font-bold" style={{ fontFamily: 'inherit' }} />
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={() => setShowDCA(!showDCA)}
+              style={{ padding: '0 15px', borderRadius: '20px', background: showDCA ? '#ffcc00' : '#444', color: showDCA ? '#000' : '#fff', border: 'none', fontWeight: 'bold' }}
+            >
+              🧬 DCA
+            </button>
+            {showDCA && <button onClick={() => setShowDCAInfo(true)} style={{ background: '#444', border: 'none', color: '#ffcc00', borderRadius: '50%', width: '30px', fontWeight: 'bold' }}>?</button>}
+          </div>
+        </div>
+      </header>
+
+      {/* ROW 2: CATEGORIES + COUNTER */}
+      <div className="z-[9990] bg-[#1a1a1a]/95 p-3 flex items-center justify-between border-b border-white/5 flex-wrap gap-2">
+        <div className="flex gap-1 overflow-x-auto no-scrollbar flex-1 min-w-[200px]">
+          {['Tree', 'Ground', 'Building', 'Beehive'].map(cat => (
+            <button key={cat} onClick={() => {
+              const newCats = activeCategories.includes(cat) ? activeCategories.filter(c => c !== cat) : [...activeCategories, cat];
+              setActiveCategories(newCats);
+            }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all ${activeCategories.includes(cat) ? 'bg-white text-black border-white' : 'bg-black/50 text-gray-500 border-white/5'}`}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* V91: Live Counter Moved to Row 2 Right edge */}
+        <div className="flex-[0_0_auto] bg-[#ffcc00] text-black px-3 py-1.5 rounded-full text-[12px] font-black border border-yellow-500/30 cursor-pointer whitespace-nowrap flex gap-1 items-center" onClick={() => setIsAnalyticsOpen(true)}>
+          <span>{viewableCount} / {liveData.length}</span> <span className="icon-btn flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="M18 17V9" /><path d="M13 17V5" /><path d="M8 17v-3" /></svg>
+          </span>
+        </div>
+      </div>
+
+      <main className="flex-1 relative">
+        {ALL_DATA.length > 0 && <MapComponent hives={filteredHives} flyTo={targetCoords} zoomLevel={mapZoom} onMapLoad={setMapInstance} dcaLayer={showDCA} />}
+      </main>
+
+      {/* ANALYTICS MODAL (RESEARCH MATRIX) */}
+      {isAnalyticsOpen && (
+        <div className="fixed inset-0 bg-black/95 z-[10000] flex items-center justify-center p-4" onClick={() => setIsAnalyticsOpen(false)}>
+          <div className="bg-[#222] border-2 border-[#ffcc00] rounded-xl p-6 shadow-2xl w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4 border-b border-[#444] pb-2">
+              <h3 className="text-xl font-bold text-[#ffcc00]">📊 Researcher Visibility Matrix</h3>
+              <button onClick={() => setIsAnalyticsOpen(false)} className="text-[#ffcc00] hover:text-white text-xl">✕</button>
+            </div>
+
+            <table className="w-full border-collapse text-[#ffcc00] text-sm mb-4">
+              <thead>
+                <tr>
+                  <th className="border border-[#444] p-2 text-center text-white">Type</th>
+                  {matrix.statuses.map(s => <th key={s} className="border border-[#444] p-2 text-center">{s[0]}</th>)}
+                  <th className="border border-[#444] p-2 text-center font-bold text-white">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {matrix.types.map(t => (
+                  <tr key={t}>
+                    <td className="border border-[#444] p-2 text-center text-white">{t}</td>
+                    {matrix.statuses.map(s => <td key={s} className="border border-[#444] p-2 text-center">{matrix.data[t][s]}</td>)}
+                    <td className="border border-[#444] p-2 text-center font-bold text-white">{matrix.data[t].Total}</td>
+                  </tr>
+                ))}
+                <tr className="font-bold bg-[#333]">
+                  <td className="border border-[#444] p-2 text-center text-white">TOTAL</td>
+                  {matrix.statuses.map(s => <td key={s} className="border border-[#444] p-2 text-center">{matrix.totals[s]}</td>)}
+                  <td className="border border-[#444] p-2 text-center text-white">{matrix.totals.Total}</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <button onClick={() => setIsAnalyticsOpen(false)} className="w-full mt-2 bg-[#ffcc00] text-black font-bold py-3 rounded-lg hover:bg-yellow-400 transition-colors">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING ACTION CLUSTER */}
+      <div className="fixed left-5 flex flex-col gap-4 z-[2100]" style={{ bottom: 'calc(25px + env(safe-area-inset-bottom))' }}>
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fab-btn bg-[#ffcc00] text-black border-none rounded-full w-14 h-14 text-3xl shadow-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+        ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12" /><line x1="4" x2="20" y1="6" y2="6" /><line x1="4" x2="20" y1="18" y2="18" /></svg></button>
+        <button
+          onClick={handleHomeClick}
+          className="fab-btn bg-[#ffcc00] text-black border-none rounded-full w-14 h-14 text-2xl shadow-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+        ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg></button>
+      </div>
+
+      {/* STATUS FOOTER */}
+      <footer style={{ position: 'fixed', bottom: 0, right: 0, padding: '20px', paddingBottom: 'calc(20px + env(safe-area-inset-bottom))', zIndex: 2050 }}>
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <button onClick={() => toggleStatus('healthy')} className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${statusFilter.includes('healthy') ? 'bg-green-500 border-green-300 shadow-[0_0_15px_rgba(34,197,94,0.6)] scale-110' : 'bg-green-900 border-green-700 opacity-50 hover:opacity-100'}`} />
+          <button onClick={() => toggleStatus('warning')} className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${statusFilter.includes('warning') ? 'bg-yellow-500 border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.6)] scale-110' : 'bg-yellow-900 border-yellow-700 opacity-50 hover:opacity-100'}`} />
+          <button onClick={() => toggleStatus('at-risk')} className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${statusFilter.includes('at-risk') ? 'bg-red-500 border-red-300 shadow-[0_0_15px_rgba(239,68,68,0.6)] scale-110' : 'bg-red-900 border-red-700 opacity-50 hover:opacity-100'}`} />
+          {/* V93: GRAY NEEDS AUDIT DOT */}
+          <button onClick={() => toggleStatus('gray')} className={`w-6 h-6 rounded-full border-2 transition-all cursor-pointer ${statusFilter.includes('gray') ? 'bg-gray-500 border-gray-300 shadow-[0_0_15px_rgba(156,163,175,0.6)] scale-110' : 'bg-gray-800 border-gray-600 opacity-50 hover:opacity-100'}`} />
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default App;

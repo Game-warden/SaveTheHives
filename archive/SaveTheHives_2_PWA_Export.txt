@@ -1,0 +1,138 @@
+Here is the verified source code for the PWA Identity and Offline Integration. This configuration establishes 'Hives_2' as a native, installable standalone application and provides immediate map shell loading even in rural areas without connectivity.
+
+
+
+--- public/manifest.json ---
+
+{
+    "name": "SaveTheHives_2",
+    "short_name": "Hives_2",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f4f1ea",
+    "theme_color": "#7d6d52",
+    "description": "Next generation mapping for honeybee colonies using MapLibre WebGL.",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
+
+--- src/sw.js ---
+
+const CACHE_NAME = 'savethehives-cache-v2';
+
+// Core assets to cache immediately on install
+const urlsToCache = [
+    '/',
+    '/index.html',
+    '/icon.png',
+    'https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css'
+];
+
+// Install Phase: Cache App Shell
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                return cache.addAll(urlsToCache);
+            })
+    );
+    self.skipWaiting();
+});
+
+// Activate Phase: Clean up old caches
+self.addEventListener('activate', event => {
+    const cacheWhitelist = [CACHE_NAME];
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        })
+    );
+    self.clients.claim();
+});
+
+// Fetch Phase: Cache-First Strategy for Offline Rural Connectivity
+self.addEventListener('fetch', event => {
+    // Only cache GET requests
+    if (event.request.method !== 'GET') return;
+
+    event.respondWith(
+        caches.match(event.request)
+            .then(cachedResponse => {
+                if (cachedResponse) {
+                    // Serve from cache immediately for speed/offline access
+                    // Optional: Fetch network version in background to keep cache fresh
+                    event.waitUntil(
+                        fetch(event.request).then(networkResponse => {
+                            if (networkResponse && networkResponse.status === 200) {
+                                caches.open(CACHE_NAME).then(cache => {
+                                    cache.put(event.request, networkResponse.clone());
+                                });
+                            }
+                        }).catch(() => { }) // Ignore background network failures
+                    );
+                    return cachedResponse;
+                }
+
+                // If not in cache, fallback to Network
+                return fetch(event.request)
+                    .then(networkResponse => {
+                        // Validate response before caching
+                        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                            return networkResponse;
+                        }
+
+                        // Clone the response because it's a stream
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+
+                        return networkResponse;
+                    });
+            })
+    );
+});
+
+
+--- src/main.jsx ---
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+
+// Register Service Worker for Offline PWA Support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(
+      (registration) => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      },
+      (err) => {
+        console.log('ServiceWorker registration failed: ', err);
+      }
+    );
+  });
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)

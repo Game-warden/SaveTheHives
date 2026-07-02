@@ -1,0 +1,113 @@
+Here is the full source code for the Vercel PWA Deployment Fixes. All paths have been made relative (./) to prevent Vercel routing errors, and the Service Worker now utilizes a robust Stale-While-Revalidate caching strategy with a clean v2 cache name.
+
+
+
+--- vite.config.js ---
+
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss()
+  ],
+  // Ensure base routing works smoothly on Vercel deployments
+  base: './',
+})
+
+
+--- index.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/icon.png" />
+  <link rel="apple-touch-icon" href="/icon.png">
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SaveTheHives_2">
+  <title>SaveTheHives_2</title>
+
+  <!-- MapLibre GL CSS -->
+  <link href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" rel="stylesheet" />
+</head>
+
+<body class="bg-[#f4f1ea] antialiased overscroll-none">
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
+
+--- public/sw.js ---
+
+/* public/sw.js */
+const CACHE_NAME = 'savethehives-cache-v2';
+const urlsToCache = [
+    './',
+    './index.html',
+    './icon.png',
+    'https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css'
+];
+
+self.addEventListener('install', event => {
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(caches.keys().then(names => Promise.all(names.map(n => n !== CACHE_NAME && caches.delete(n)))));
+    self.clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+
+    // Stale-While-Revalidate
+    event.respondWith(
+        caches.match(event.request).then(cached => {
+            const fetchRefreshed = fetch(event.request).then(res => {
+                if (res && res.status === 200) caches.open(CACHE_NAME).then(c => c.put(event.request, res.clone()));
+                return res;
+            }).catch(() => { });
+            return cached || fetchRefreshed;
+        })
+    );
+});
+
+
+--- src/main.jsx ---
+
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.jsx';
+
+// Register Service Worker for Offline PWA Support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Ensuring relative pathing for Vercel deployment compatibility
+    navigator.serviceWorker.register('./sw.js').then(
+      (registration) => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      },
+      (err) => {
+        console.log('ServiceWorker registration failed: ', err);
+      }
+    );
+  });
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

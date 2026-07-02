@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — SaveTheHives</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fffdf7;
+      color: #3b2d0a;
+      line-height: 1.7;
+      padding: 32px 16px 64px;
+    }
+    .container { max-width: 680px; margin: 0 auto; }
+    .logo-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 32px;
+    }
+    .logo-row a {
+      font-size: 1.1rem; font-weight: 700; color: #c8860a;
+      text-decoration: none;
+    }
+    .logo-row a:hover { text-decoration: underline; }
+    h1 {
+      font-size: 1.6rem; font-weight: 800;
+      color: #c8860a; margin-bottom: 4px;
+    }
+    .updated {
+      font-size: 0.82rem; color: #7a6535;
+      margin-bottom: 36px;
+    }
+    h2 {
+      font-size: 1.05rem; font-weight: 700;
+      color: #c8860a; margin: 32px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(200,134,10,0.2);
+    }
+    p { margin-bottom: 14px; font-size: 0.95rem; }
+    ul { margin: 0 0 14px 20px; font-size: 0.95rem; }
+    li { margin-bottom: 6px; }
+    a { color: #c8860a; }
+    .callout {
+      background: rgba(200,134,10,0.08);
+      border: 1px solid rgba(200,134,10,0.25);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      font-size: 0.9rem;
+    }
+    .contact-box {
+      background: #f5f0e8;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 32px;
+      font-size: 0.9rem;
+    }
+    .contact-box strong { display: block; margin-bottom: 4px; }
+    footer {
+      margin-top: 48px;
+      font-size: 0.8rem;
+      color: #7a6535;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo-row">
+    <a href="/">← Back to SaveTheHives</a>
+  </div>
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: June 30, 2025</p>
+
+  <p>SaveTheHives (<strong>savethehives.org</strong>) is a citizen science project dedicated to mapping feral honeybee colonies worldwide. We take your privacy seriously and collect only what is necessary to run the service.</p>
+
+  <h2>1. Who We Are</h2>
+  <p>SaveTheHives is operated as a volunteer, zero-budget citizen science project. Questions about this policy can be directed to <a href="mailto:privacy@savethehives.org">privacy@savethehives.org</a>.</p>
+
+  <h2>2. What We Collect and Why</h2>
+
+  <p><strong>Email address</strong> — Collected when you sign in using our magic link authentication. Used solely to send you a one-time sign-in link. We do not use your email for marketing, and we do not share it with third parties except as described below.</p>
+
+  <p><strong>Hive records you submit</strong> — When you log a hive, we store the coordinates (latitude/longitude), hive type, description, approximate location (city/state/zip if provided), observer name (optional), and year first observed (optional). <strong>This data is published publicly on the SaveTheHives map</strong> — do not submit coordinates for hives where public disclosure could cause harm.</p>
+
+  <p><strong>Check-in records</strong> — Status updates you log against existing hives are stored and associated with your account.</p>
+
+  <p><strong>Device signals via Cloudflare Turnstile</strong> — When you sign in, our bot-protection layer (Cloudflare Turnstile) processes minimal technical signals including your IP address, browser fingerprint, and user-agent. See Section 6 for full details.</p>
+
+  <p>We do not run ads, use tracking pixels, or build behavioral profiles of any kind.</p>
+
+  <h2>3. How We Store Your Data</h2>
+  <p>All hive and account data is stored in <strong>Supabase</strong> (a PostgreSQL database hosted on AWS infrastructure in the United States). Supabase is our data processor and operates under its own <a href="https://supabase.com/privacy" target="_blank">Privacy Policy</a>.</p>
+  <p>Authentication emails (magic links) are delivered by <strong>Resend</strong>, which processes your email address to send the sign-in link. Resend operates under its own <a href="https://resend.com/legal/privacy-policy" target="_blank">Privacy Policy</a>.</p>
+  <p>The SaveTheHives website is served through <strong>Cloudflare Pages</strong>. Cloudflare may process connection-level data as part of delivering the site. Cloudflare operates under its own <a href="https://www.cloudflare.com/en-gb/privacypolicy/" target="_blank">Privacy Policy</a>.</p>
+
+  <h2>4. Who Can See Your Data</h2>
+  <ul>
+    <li><strong>Hive records</strong> — publicly visible to all visitors of savethehives.org</li>
+    <li><strong>Your email address</strong> — visible only to project administrators; never published</li>
+    <li><strong>Your name</strong> — if provided when submitting a hive, it is shown on that hive's public record</li>
+  </ul>
+  <p>We do not sell, rent, or trade any personal data.</p>
+
+  <h2>5. Your Rights</h2>
+  <p>You may request access to, correction of, or deletion of your personal data at any time by emailing <a href="mailto:privacy@savethehives.org">privacy@savethehives.org</a>. We will respond within 30 days. Deletion of your account will remove your email and authentication record; hive records you submitted will remain on the public map unless you specifically request their removal.</p>
+
+  <h2>6. Cloudflare Turnstile</h2>
+  <div class="callout">
+    SaveTheHives uses <strong>Cloudflare Turnstile</strong> to protect the sign-in form from automated bot abuse. Turnstile is an invisible, pro-privacy alternative to traditional CAPTCHAs — you will not be asked to solve puzzles or click images.
+  </div>
+  <p>When you use the sign-in form, Cloudflare Turnstile processes the following signals to distinguish human users from bots: IP address, TLS fingerprint, User-Agent header, and the Turnstile site key. Cloudflare states it cannot directly identify individuals from these signals.</p>
+  <p>Cloudflare uses this data for two purposes: (1) as a data <em>processor</em> on our behalf to protect our sign-in endpoint, and (2) as a data <em>controller</em> in its own right to improve Turnstile's bot-detection capabilities.</p>
+  <p>For EU and UK residents: when Cloudflare processes Turnstile data as our processor, we (SaveTheHives) are the data controller and the lawful basis is our legitimate interest in securing our service. When Cloudflare processes data as its own controller, it relies on its legitimate interest in improving bot-detection.</p>
+  <p>Turnstile may use strictly necessary cookies. Full details are in Cloudflare's <a href="https://www.cloudflare.com/en-gb/turnstile-privacy-policy/" target="_blank">Turnstile Privacy Addendum</a> and <a href="https://www.cloudflare.com/en-gb/cookie-policy/" target="_blank">Cookie Policy</a>.</p>
+  <p>For questions about Cloudflare's processing of your data, contact Cloudflare's Data Protection Officer at <a href="mailto:dpo@cloudflare.com">dpo@cloudflare.com</a>.</p>
+
+  <h2>7. Data Retention</h2>
+  <p>Account and authentication data is retained until you request deletion. Hive records are retained indefinitely as part of the scientific record, unless you request removal of records you submitted.</p>
+
+  <h2>8. Children</h2>
+  <p>SaveTheHives is not directed at children under 13. We do not knowingly collect personal data from children under 13. If you believe a child has submitted data, please contact us for removal.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>We may update this policy as the service evolves. The "Last updated" date at the top reflects the most recent revision. Continued use of SaveTheHives after a policy change constitutes acceptance of the updated policy.</p>
+
+  <div class="contact-box">
+    <strong>Privacy questions or data requests:</strong>
+    <a href="mailto:privacy@savethehives.org">privacy@savethehives.org</a><br>
+    <span style="color:#7a6535;font-size:0.85rem;">We aim to respond within 30 days.</span>
+  </div>
+
+  <footer>
+    © SaveTheHives · <a href="/">Back to map</a> · <a href="https://www.cloudflare.com/en-gb/turnstile-privacy-policy/" target="_blank">Cloudflare Turnstile Privacy Addendum</a>
+  </footer>
+
+</div>
+</body>
+</html>

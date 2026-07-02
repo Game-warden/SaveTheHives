@@ -1,0 +1,10 @@
+{
+  "name": "SaveTheHives",
+  "short_name": "SaveTheHives",
+  "description": "Feral Honeybee Mapping Network",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0f0d07",
+  "theme_color": "#f5a623",
+  "icons": []
+}

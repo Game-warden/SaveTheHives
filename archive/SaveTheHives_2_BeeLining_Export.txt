@@ -1,0 +1,572 @@
+Here is the full source code for the Navigation Zoom Fix and Algebra Method Triangulation Tool. The new BeeLiningTool.jsx contains mathematical intersections using Great Circle principles, and MapLibre renders the calculated target using a custom CSS pulsing marker animation defined in index.css.
+
+
+
+--- src/index.css ---
+
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Prevents double scrolling on Mac/Phone */
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes pulseTarget {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+--- src/components/BeeLiningTool.jsx ---
+
+import React, { useState } from 'react';
+
+// Standard Great Circle Intersection Math for Triangulation
+function degreesToRadians(degrees) {
+    return degrees * Math.PI / 180;
+}
+function radiansToDegrees(radians) {
+    return radians * 180 / Math.PI;
+}
+
+function computeIntersection(lat1, lon1, brng1, lat2, lon2, brng2) {
+    const phi1 = degreesToRadians(lat1), lambda1 = degreesToRadians(lon1);
+    const phi2 = degreesToRadians(lat2), lambda2 = degreesToRadians(lon2);
+    const theta13 = degreesToRadians(brng1), theta23 = degreesToRadians(brng2);
+
+    const deltaPhi = phi2 - phi1, deltaLambda = lambda2 - lambda1;
+
+    const delta12 = 2 * Math.asin(Math.sqrt(
+        Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+        Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2)
+    ));
+
+    if (delta12 === 0) return null;
+
+    const thetaA = Math.acos((Math.sin(phi2) - Math.sin(phi1) * Math.cos(delta12)) / (Math.sin(delta12) * Math.cos(phi1)));
+    const thetaB = Math.acos((Math.sin(phi1) - Math.sin(phi2) * Math.cos(delta12)) / (Math.sin(delta12) * Math.cos(phi2)));
+
+    const theta12 = Math.sin(lambda2 - lambda1) > 0 ? thetaA : 2 * Math.PI - thetaA;
+    const theta21 = Math.sin(lambda2 - lambda1) > 0 ? 2 * Math.PI - thetaB : thetaB;
+
+    const alpha1 = theta13 - theta12;
+    const alpha2 = theta21 - theta23;
+
+    if (Math.sin(alpha1) === 0 && Math.sin(alpha2) === 0) return null; // Infinite intersections
+    if (Math.sin(alpha1) * Math.sin(alpha2) < 0) return null; // Ambiguous intersection
+
+    const alpha3 = Math.acos(-Math.cos(alpha1) * Math.cos(alpha2) + Math.sin(alpha1) * Math.sin(alpha2) * Math.cos(delta12));
+    const delta13 = Math.atan2(Math.sin(delta12) * Math.sin(alpha1) * Math.sin(alpha2), Math.cos(alpha2) + Math.cos(alpha1) * Math.cos(alpha3));
+
+    const phi3 = Math.asin(Math.sin(phi1) * Math.cos(delta13) + Math.cos(phi1) * Math.sin(delta13) * Math.cos(theta13));
+    const deltaLambda13 = Math.atan2(Math.sin(theta13) * Math.sin(delta13) * Math.cos(phi1), Math.cos(delta13) - Math.sin(phi1) * Math.sin(phi3));
+
+    let lambda3 = lambda1 + deltaLambda13;
+    lambda3 = (lambda3 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+
+    return { lat: radiansToDegrees(phi3), lng: radiansToDegrees(lambda3) };
+}
+
+export default function BeeLiningTool({ onCalculate, onClose }) {
+    const [p1, setP1] = useState({ lat: '', lng: '', bearing: '' });
+    const [p2, setP2] = useState({ lat: '', lng: '', bearing: '' });
+    const [error, setError] = useState('');
+
+    const handleCalc = (e) => {
+        e.preventDefault();
+        setError('');
+
+        const lat1 = parseFloat(p1.lat), lng1 = parseFloat(p1.lng), b1 = parseFloat(p1.bearing);
+        const lat2 = parseFloat(p2.lat), lng2 = parseFloat(p2.lng), b2 = parseFloat(p2.bearing);
+
+        if ([lat1, lng1, b1, lat2, lng2, b2].some(isNaN)) {
+            setError("All fields are required and must be valid numbers.");
+            return;
+        }
+
+        const intersect = computeIntersection(lat1, lng1, b1, lat2, lng2, b2);
+        if (!intersect) {
+            setError("Lines do not intersect or are parallel.");
+            return;
+        }
+
+        onCalculate(intersect);
+    };
+
+    return (
+        <div className="mt-4 bg-[#7d6d52]/5 p-4 rounded-xl border border-[#7d6d52]/20">
+            <h4 className="font-bold text-sm text-[#7d6d52] mb-3">Triangulation (Algebra Method)</h4>
+            <form onSubmit={handleCalc} className="space-y-4">
+
+                <div className="space-y-2">
+                    <p className="text-[10px] font-black tracking-wider text-[#7d6d52] opacity-70 uppercase">Point 1 (Origin)</p>
+                    <div className="flex space-x-2">
+                        <input type="number" step="any" placeholder="Lat" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p1.lat} onChange={e => setP1({ ...p1, lat: e.target.value })} />
+                        <input type="number" step="any" placeholder="Lng" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p1.lng} onChange={e => setP1({ ...p1, lng: e.target.value })} />
+                        <input type="number" step="any" placeholder="Brg" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p1.bearing} onChange={e => setP1({ ...p1, bearing: e.target.value })} />
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <p className="text-[10px] font-black tracking-wider text-[#7d6d52] opacity-70 uppercase">Point 2 (Origin)</p>
+                    <div className="flex space-x-2">
+                        <input type="number" step="any" placeholder="Lat" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p2.lat} onChange={e => setP2({ ...p2, lat: e.target.value })} />
+                        <input type="number" step="any" placeholder="Lng" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p2.lng} onChange={e => setP2({ ...p2, lng: e.target.value })} />
+                        <input type="number" step="any" placeholder="Brg" className="w-full p-2 text-xs rounded border border-[#7d6d52]/20 font-mono text-[#7d6d52]" value={p2.bearing} onChange={e => setP2({ ...p2, bearing: e.target.value })} />
+                    </div>
+                </div>
+
+                {error && <p className="text-red-500 text-xs font-bold bg-white p-2 rounded shadow-sm">{error}</p>}
+
+                <div className="flex flex-col space-y-2 pt-2">
+                    <button type="submit" className="w-full bg-[#7d6d52] text-[#f4f1ea] py-2.5 rounded text-sm font-bold shadow-md active:scale-95 transition-transform">Triangulate Target Location</button>
+                    <button type="button" onClick={onClose} className="w-full bg-transparent text-[#7d6d52] py-2 rounded text-xs font-bold opacity-60 active:scale-95 transition-transform">Cancel</button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+
+--- src/App.jsx ---
+
+import React, { useState } from 'react';
+import MapComponent from './components/MapComponent';
+import BeeLiningTool from './components/BeeLiningTool';
+
+// Isolated SearchBar to prevent typing lag in the main App (and thereby the Map)
+function SearchBar({ onSearch }) {
+  const [val, setVal] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (val.length === 5) {
+      onSearch(val);
+      document.activeElement.blur(); // Hides keyboard
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex items-center bg-white/10 rounded-lg overflow-hidden border border-white/20">
+      <input
+        type="number"
+        inputMode="numeric"
+        placeholder="ZIP"
+        className="w-20 bg-transparent text-white px-3 py-2 text-sm outline-none placeholder-white/40"
+        style={{ fontSize: '16px' }}
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+      />
+      <button type="submit" className="bg-[#7d6d52] px-3 py-2 text-[#f4f1ea] border-l border-white/10 active:bg-white/30">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    </form>
+  );
+}
+
+function FilterGroup({ title, items, onToggle, isType }) {
+  const getColorDot = (key) => {
+    if (isType) {
+      const colors = { building: 'bg-blue-500', tree: 'bg-green-600', ground: 'bg-orange-500', beehive: 'bg-purple-500' };
+      return colors[key];
+    } else {
+      const colors = { healthy: 'bg-green-500', warning: 'bg-yellow-500', atRisk: 'bg-red-500' };
+      return colors[key];
+    }
+  };
+
+  return (
+    <div className="flex flex-col space-y-1.5">
+      <p className="text-[8px] font-black uppercase text-[#7d6d52] text-center border-b border-[#7d6d52]/20 pb-1">{title}</p>
+      {Object.keys(items).map(k => (
+        <button key={k} onClick={() => onToggle(k)}
+          className={`flex items-center px-1.5 py-1.5 rounded text-[8px] font-bold border transition-all outline-none active:scale-95 ${items[k]
+            ? 'bg-[#7d6d52] text-white border-[#7d6d52] shadow-sm'
+            : 'bg-white/80 text-[#7d6d52]/50 border-gray-200'
+            }`}
+        >
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 mr-1.5 ${getColorDot(k)}`}></span>
+          <span className="truncate">{k === 'atRisk' ? 'At-Risk' : k.toUpperCase()}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [targetPos, setTargetPos] = useState(null);
+  const [counts, setCounts] = useState({ total: 0, viewable: 0 });
+
+  const [healthFilters, setHealthFilters] = useState({ healthy: true, warning: true, atRisk: true });
+  const [typeFilters, setTypeFilters] = useState({ building: true, tree: true, ground: true, beehive: true });
+
+  const [showBeeLining, setShowBeeLining] = useState(false);
+  const [targetIntersection, setTargetIntersection] = useState(null);
+
+  const toggleFilter = (set, current, key) => set({ ...current, [key]: !current[key] });
+
+  return (
+    <div className="flex flex-col h-screen w-screen bg-[#f4f1ea] overflow-hidden font-sans fixed inset-0">
+
+      {/* Header with Safe Area Support */}
+      <header
+        className="bg-[#7d6d52] text-[#f4f1ea] px-3 pb-3 shadow-lg z-[5000] flex items-center justify-between w-full relative flex-shrink-0"
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1rem)' }}
+      >
+        <div className="flex items-center space-x-2 min-w-0 flex-1">
+          <img src="/icon.png" alt="logo" className="w-8 h-8 rounded-full border border-[#f4f1ea]/30 flex-shrink-0" />
+          <h1 className="font-bold text-base uppercase truncate leading-none">SaveTheHives</h1>
+        </div>
+
+        {/* COMPACT SEARCH & LOCATE */}
+        <div className="flex items-center space-x-2 mr-1">
+          <SearchBar onSearch={(zip) => setTargetPos({ type: 'zip', value: zip, timestamp: Date.now() })} />
+        </div>
+
+        <button onClick={() => setMenuOpen(!menuOpen)} className="w-6 h-6 flex flex-col justify-around flex-shrink-0 active:scale-90 transition-transform cursor-pointer">
+          <span className="h-0.5 w-full bg-[#f4f1ea] rounded"></span>
+          <span className="h-0.5 w-full bg-[#f4f1ea] rounded"></span>
+          <span className="h-0.5 w-full bg-[#f4f1ea] rounded"></span>
+        </button>
+      </header>
+
+      {/* Stats Bar */}
+      <div className="bg-[#5a4e3b] text-[#f4f1ea] px-4 py-1 flex justify-between text-[10px] uppercase font-bold z-[4500] relative flex-shrink-0">
+        <span>Total: {counts.total}</span>
+        <span className="text-[#d4af37]">Visible: {counts.viewable}</span>
+      </div>
+
+      {/* MAP AREA: Forced to fill remaining space */}
+      <main className="flex-1 w-full h-full relative z-[10] touch-pan-x touch-pan-y">
+        <MapComponent
+          healthFilters={healthFilters}
+          typeFilters={typeFilters}
+          navigation={targetPos}
+          onUpdateCounts={setCounts}
+          targetIntersection={targetIntersection}
+        />
+
+        {/* Floating Action Button for GPS */}
+        <button
+          onClick={() => setTargetPos({ type: 'gps', timestamp: Date.now() })}
+          className="absolute bottom-6 right-4 z-[4000] bg-[#7d6d52] text-[#f4f1ea] p-3 rounded-full shadow-xl active:scale-90 transition-transform border border-white/20"
+          aria-label="Find My Location"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        </button>
+
+        {/* Floating Sidebar (stays relative to main) */}
+        <div className="absolute left-2 top-4 bottom-4 z-[3000] w-20 flex flex-col pointer-events-none">
+          <div className="pointer-events-auto bg-[#f4f1ea]/95 p-1.5 rounded-lg shadow-xl border border-[#dcd7cc] flex flex-col space-y-3">
+            <FilterGroup title="Health" items={healthFilters} onToggle={(k) => toggleFilter(setHealthFilters, healthFilters, k)} isType={false} />
+            <FilterGroup title="Type" items={typeFilters} onToggle={(k) => toggleFilter(setTypeFilters, typeFilters, k)} isType={true} />
+          </div>
+        </div>
+      </main>
+
+      {/* Hamburger Menu Overlay */}
+      {menuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-[9999] flex justify-end" onClick={() => setMenuOpen(false)}>
+          <div
+            className="w-72 bg-[#f4f1ea] h-full p-6 shadow-2xl relative overflow-y-auto"
+            onClick={e => e.stopPropagation()}
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.5rem)' }}
+          >
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="text-[#7d6d52] font-bold text-lg mb-8 outline-none active:scale-95 transition-transform"
+            >✕ Close</button>
+
+            <nav className="flex flex-col space-y-8">
+              <div className="border-b border-[#7d6d52]/20 pb-4">
+                <h3 className="text-[#7d6d52] font-black text-xs uppercase tracking-widest opacity-50">Resources</h3>
+                <button className="block mt-4 text-[#7d6d52] font-bold text-lg opacity-40 text-left w-full outline-none hover:opacity-70 transition-opacity">Documents & Guides</button>
+              </div>
+
+              <div className="border-b border-[#7d6d52]/20 pb-4">
+                <h3 className="text-[#7d6d52] font-black text-xs uppercase tracking-widest opacity-50">BeeLining Tools</h3>
+
+                {!showBeeLining ? (
+                  <button onClick={() => setShowBeeLining(true)} className="block mt-4 text-[#7d6d52] font-bold text-lg text-left w-full outline-none hover:opacity-100 transition-opacity">The Algebra Method</button>
+                ) : (
+                  <BeeLiningTool
+                    onCalculate={(target) => {
+                      setTargetIntersection(target);
+                      // Zoom to target 
+                      setTargetPos({ type: 'target', value: target, timestamp: Date.now() });
+                      setMenuOpen(false);
+                    }}
+                    onClose={() => setShowBeeLining(false)}
+                  />
+                )}
+
+                <button className="block mt-4 text-[#7d6d52] font-bold text-lg text-left w-full outline-none hover:opacity-100 transition-opacity">Use Your Phone <span className="text-[10px] ml-1 opacity-50 font-normal uppercase tracking-widest text-[#7d6d52]">(Coming Soon)</span></button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+
+
+--- src/components/MapComponent.jsx ---
+
+import React, { useEffect, useRef, useState } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import * as HiveDataModule from '../hiveData';
+
+const allHives = HiveDataModule.allHives || [];
+
+const getHiveCategory = (n = '', s = '') => {
+    const text = (n + ' ' + s).toLowerCase();
+
+    // 1. BRACKET SUPREMACY [cite: 31-32]
+    const bracketMatch = text.match(/\[(.*?)\]/);
+    if (bracketMatch) {
+        const b = bracketMatch[1];
+        if (b.includes('tree') || b.includes('wood')) return 'tree';
+        if (b.includes('ground') || b.includes('earth')) return 'ground';
+        if (b.includes('beehive') || b.includes('box') || b.includes('nuc') || b.includes('langstroth')) return 'beehive';
+        if (b.includes('building') || b.includes('manmade') || b.includes('structure')) return 'building';
+    }
+
+    // 2. PRIORITY FLIP: Trees and Ground First
+    if (text.includes('tree') || text.includes('wood') || text.includes('oak') || text.includes('pine')) {
+        return 'tree';
+    }
+    if (text.includes('ground') || text.includes('earth') || text.includes('dirt')) {
+        return 'ground';
+    }
+
+    // 3. HUMAN STRUCTURES (Building)
+    if (text.includes('building') || text.includes('manmade') || text.includes('structure') ||
+        text.includes('house') || text.includes('roof') || text.includes('wall')) {
+        return 'building';
+    }
+
+    // 4. SPECIFIC BEEKEEPING EQUIPMENT (Removed generic 'hive')
+    if (text.includes('beehive') || text.includes('box') ||
+        text.includes('langstroth') || text.includes('nuc') || text.includes('feral')) {
+        return 'beehive';
+    }
+
+    return 'beehive';
+};
+
+const getRingColor = (s) => ({ healthy: '#22c55e', warning: '#eab308', atRisk: '#ef4444' }[s] || '#eab308');
+const getPointerColor = (cat) => ({ building: '#3b82f6', tree: '#16a34a', ground: '#f97316', beehive: '#8b5cf6' }[cat] || '#8b5cf6');
+
+export default function MapComponent({ healthFilters, typeFilters, navigation, onUpdateCounts, targetIntersection }) {
+    const mapContainer = useRef(null);
+    const map = useRef(null);
+    const markersRef = useRef([]);
+    const [mapReady, setMapReady] = useState(false);
+
+    useEffect(() => {
+        if (map.current) return;
+
+        map.current = new maplibregl.Map({
+            container: mapContainer.current,
+            style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+            center: [-98.5795, 39.8283], // [Lng, Lat] standard 
+            zoom: 3,
+            attributionControl: false
+        });
+
+        // Prevent iOS rubber-banding [cite: 19]
+        mapContainer.current.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+
+        map.current.on('load', () => {
+            map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+            setMapReady(true);
+        });
+
+        map.current.on('moveend', updateCounts);
+        map.current.on('zoomend', updateCounts);
+
+        return () => {
+            if (map.current) {
+                map.current.remove();
+                map.current = null;
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!mapReady || !map.current) return;
+
+        markersRef.current.forEach(marker => marker.remove());
+        markersRef.current = [];
+
+        if (map.current.getLayer('foraging-rings')) map.current.removeLayer('foraging-rings');
+        if (map.current.getSource('foraging-data')) map.current.removeSource('foraging-data');
+
+        const geojsonFeatures = [];
+        let renderedCount = 0;
+        let viewableCount = 0;
+        const bounds = map.current.getBounds();
+
+        allHives.forEach(h => {
+            const cat = getHiveCategory(h.note, h.status);
+            if (healthFilters[h.status] && typeFilters[cat]) {
+                renderedCount++;
+                if (bounds.contains([h.lng, h.lat])) viewableCount++;
+
+                const el = document.createElement('div');
+                el.className = 'custom-marker';
+                el.style.width = '16px';
+                el.style.height = '16px';
+                el.style.borderRadius = '50%';
+                el.style.backgroundColor = getPointerColor(cat);
+                el.style.border = '2px solid white';
+                el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+
+                const htmlPopup = `
+                    <div style="font-family:sans-serif;font-size:12px;min-width:150px;color:#374151;">
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding-bottom:4px;margin-bottom:4px;font-weight:bold;font-size:10px;text-transform:uppercase;color:#7d6d52;opacity:0.8;">
+                            <span>${cat}</span>
+                            <span style="color:${getRingColor(h.status)}">${h.status}</span>
+                        </div>
+                        <b>Date:</b> ${h.date || 'Legacy'}<br/>
+                        <div style="margin-top:8px;border-top:1px solid #f3f4f6;padding-top:4px;font-style:italic;font-size:11px;">"${h.note}"</div>
+                    </div>
+                `;
+
+                const marker = new maplibregl.Marker({ element: el })
+                    .setLngLat([h.lng, h.lat])
+                    .setPopup(new maplibregl.Popup({ offset: 15, closeButton: false }).setHTML(htmlPopup))
+                    .addTo(map.current);
+                markersRef.current.push(marker);
+
+                geojsonFeatures.push({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: [h.lng, h.lat] },
+                    properties: { color: getRingColor(h.status) }
+                });
+            }
+        });
+
+        // Add the Pulsating Target Marker if Triangulated
+        if (targetIntersection) {
+            const el = document.createElement('div');
+            el.className = 'pulsating-target';
+            el.style.width = '24px';
+            el.style.height = '24px';
+            el.style.borderRadius = '50%';
+            el.style.backgroundColor = 'rgba(139, 92, 246, 0.4)';
+            el.style.border = '3px solid #8b5cf6';
+            el.style.animation = 'pulseTarget 1.5s infinite';
+
+            const htmlPopup = `<div style="font-family:sans-serif;font-size:12px;color:#374151;min-width:140px;text-align:center;"><b>🎯 Extrapolated Target</b><div style="font-family:monospace;margin-top:4px;color:#8b5cf6;">Lng: ${targetIntersection.lng.toFixed(5)}<br/>Lat: ${targetIntersection.lat.toFixed(5)}</div></div>`;
+
+            const marker = new maplibregl.Marker({ element: el })
+                .setLngLat([targetIntersection.lng, targetIntersection.lat])
+                .setPopup(new maplibregl.Popup({ offset: 15, closeButton: false }).setHTML(htmlPopup))
+                .addTo(map.current);
+            markersRef.current.push(marker);
+        }
+
+        map.current.addSource('foraging-data', {
+            type: 'geojson',
+            data: { type: 'FeatureCollection', features: geojsonFeatures }
+        });
+
+        map.current.addLayer({
+            id: 'foraging-rings',
+            type: 'circle',
+            source: 'foraging-data',
+            paint: {
+                'circle-radius': [
+                    'interpolate', ['exponential', 2], ['zoom'],
+                    2, 2,
+                    10, 40,
+                    15, 1200
+                ],
+                'circle-color': ['get', 'color'],
+                'circle-opacity': 0.2,
+                'circle-stroke-color': ['get', 'color'],
+                'circle-stroke-width': 2
+            }
+        });
+
+        onUpdateCounts({ total: renderedCount, viewable: viewableCount });
+    }, [healthFilters, typeFilters, targetIntersection, mapReady]);
+
+    // Adjusted Zoom Levels for Navigation 
+    useEffect(() => {
+        if (!navigation || !mapReady || !map.current) return;
+
+        if (navigation.type === 'zip') {
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&postalcode=${navigation.value}&country=USA`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length > 0) {
+                        // Zip Zoom decreased to 10 for better context
+                        map.current.flyTo({ center: [parseFloat(data[0].lon), parseFloat(data[0].lat)], zoom: 10 });
+                    }
+                });
+        } else if (navigation.type === 'gps') {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    // GPS Zoom decreased to 11 for better context
+                    map.current.flyTo({ center: [pos.coords.longitude, pos.coords.latitude], zoom: 11 });
+                },
+                (error) => console.error("GPS Error:", error),
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else if (navigation.type === 'target') {
+            map.current.flyTo({ center: [navigation.value.lng, navigation.value.lat], zoom: 14 });
+        }
+    }, [navigation, mapReady]);
+
+    const updateCounts = () => {
+        if (!mapReady || !map.current) return;
+        const bounds = map.current.getBounds();
+        let total = 0;
+        let viewable = 0;
+        allHives.forEach(h => {
+            const cat = getHiveCategory(h.note, h.status);
+            if (healthFilters[h.status] && typeFilters[cat]) {
+                total++;
+                if (bounds.contains([h.lng, h.lat])) viewable++;
+            }
+        });
+        onUpdateCounts({ total, viewable });
+    };
+
+    return (
+        <div className="absolute inset-0 w-full h-full">
+            <div ref={mapContainer} style={{ width: '100%', height: '100%', position: 'absolute' }} />
+        </div>
+    );
+}

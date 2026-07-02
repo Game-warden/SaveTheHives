@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveTheHives | Bee-Lining Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-50 text-stone-800 p-4 font-sans">
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-md border border-stone-200 p-6 space-y-6">
+        <div class="text-center">
+            <h1 class="text-xl font-bold text-amber-700 flex items-center justify-center gap-2">
+                🐝 Bee-Lining Explorer
+            </h1>
+            <p class="text-xs text-stone-500 mt-1">Triangulate wild hives using two compass bearings</p>
+        </div>
+        <div class="space-y-4">
+            <!-- Step 1: Baseline -->
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
+                    1. Distance between Station A & B
+                </label>
+                <div class="flex items-center gap-2">
+                    <input type="number" id="baseline" value="50" class="w-full border rounded-xl p-3 text-sm bg-stone-50 outline-none focus:ring-2 focus:ring-amber-500">
+                    <span class="text-sm font-medium text-stone-500">Yards</span>
+                </div>
+            </div>
+            <!-- Step 2: Bearings -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Bearing from A
+                    </label>
+                    <input type="number" id="bearingA" placeholder="e.g. 45" class="w-full border rounded-xl p-3 text-sm bg-stone-50 outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Bearing from B
+                    </label>
+                    <input type="number" id="bearingB" placeholder="e.g. 315" class="w-full border rounded-xl p-3 text-sm bg-stone-50 outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+            </div>
+            <button onclick="calculateHiveDistance()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 rounded-xl shadow transition">
+                Calculate Intersection
+            </button>
+        </div>
+        <!-- Output Display -->
+        <div id="result-box" class="hidden bg-stone-100 rounded-xl p-4 border border-stone-200 text-center space-y-1">
+            <p class="text-xs font-bold text-stone-500 uppercase">Estimated Distance to Hive</p>
+            <p id="distance-output" class="text-2xl font-black text-stone-900">---</p>
+            <p id="warning-output" class="text-[11px] text-amber-700 font-medium italic mt-2"></p>
+        </div>
+    </div>
+    <script>
+        function calculateHiveDistance() {
+            const baseline = parseFloat(document.getElementById('baseline').value);
+            const bA = parseFloat(document.getElementById('bearingA').value);
+            const bB = parseFloat(document.getElementById('bearingB').value);
+
+            const resultBox = document.getElementById('result-box');
+            const distanceOutput = document.getElementById('distance-output');
+            const warningOutput = document.getElementById('warning-output');
+            if (isNaN(baseline) || isNaN(bA) || isNaN(bB)) {
+                alert("Please fill out all field values.");
+                return;
+            }
+            // Convert to internal triangle interior angles
+            // Assumes Station B is directly East (90 degrees) of Station A
+            const alpha = Math.abs(90 - bA) * (Math.PI / 180);
+            const beta = Math.abs(270 - bB) * (Math.PI / 180);
+            const gamma = Math.PI - alpha - beta;
+            // Geometry Safeguard: Parallel lines or non-intersecting tracks
+            if (gamma <= 0 || gamma >= Math.PI) {
+                distanceOutput.innerText = "No Intersection";
+                warningOutput.innerText = "Tracks do not cross. Double check your compass bearings!";
+                resultBox.classList.remove('hidden');
+                return;
+            }
+            // Law of Sines calculation
+            // Distance from Station A to Hive (Side b)
+            const distanceToHive = (baseline * Math.sin(beta)) / Math.sin(gamma);
+            distanceOutput.innerText = `${Math.round(distanceToHive)} Yards`;
+
+            // Spatial accuracy warnings for users
+            if (baseline < 30) {
+                warningOutput.innerText = "⚠️ Station A and B are close together. Walk further apart before releasing the bees for a more accurate result.";
+            } else {
+                warningOutput.innerText = "🎯 Nice baseline. Search along the crossing point of your bearings.";
+            }
+            resultBox.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
