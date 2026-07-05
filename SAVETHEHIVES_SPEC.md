@@ -24,7 +24,7 @@ The core scientific purpose is tracking **colony resilience**: feral hives that 
 
 | Layer | Technology | Notes |
 |---|---|---|
-| App shell | Single-file HTML PWA | No build step; `savethehives.html` |
+| App shell | Single-file HTML PWA | No build step; `index.html` |
 | Map engine | Leaflet 1.9.4 | Handles 1,000+ markers smoothly |
 | Tile layer | CartoDB Positron → Voyager (zoom-adaptive) | Muted overview below zoom 15, more street-level reference detail (buildings, road color) above it. Two-tier CARTO family only — raw OSM Standard tiles were considered but skipped in production per tile.openstreetmap.org's heavy-traffic usage policy. |
 | Clustering | Leaflet.MarkerCluster 1.5.3 | Auto-clusters dense areas |
@@ -296,7 +296,7 @@ User's Browser / iPhone
          │  loads app
          ▼
 ┌─────────────────────┐
-│   savethehives.html │  Single-file PWA
+│   index.html        │  Single-file PWA
 │   (Leaflet map +    │  All JS, CSS, HTML in one file
 │    Supabase client) │
 └────────┬────────────┘
@@ -321,15 +321,18 @@ User's Browser / iPhone
 
 **What it does:** Owns the `savethehives.org` domain, manages all DNS records, and hosts the app via Cloudflare Pages (free static file hosting with global CDN).
 
-**How the app is deployed:**
-1. Edit `savethehives.html` locally
-2. Copy/rename to `index.html` (`cp savethehives.html index.html`)
-3. Ensure `privacy.html` is also in the folder
-4. Zip the project folder
-5. Cloudflare dashboard → Workers & Pages → `savethehives` project → Create new deployment → upload zip
-6. Live instantly at `https://savethehives.org`
+**How the app is deployed (as of v2.6):**
+1. Edit `index.html` (or `styles.css`/`app.js`/`pathfinder.js` post-Phase-2) locally
+2. `git add -A && git commit -m "..." && git push`
+3. Cloudflare Pages is Git-connected to `Game-warden/SaveTheHives` (production branch `main`,
+   automatic deployments enabled) — the push alone triggers a new build and deploy, live within
+   seconds, no manual zip upload
+4. Confirm at `https://savethehives.org` (hard-refresh to bypass cache)
 
-> Both `index.html` **and** `privacy.html` must be included in the zip. `privacy.html` lives at `savethehives.org/privacy.html` and is linked from the About modal.
+> The old manual zip-upload flow (`cp savethehives.html index.html` → zip → dashboard upload) is
+> retired as of Phase 0 of the v2.6 rollout, but remains a documented fallback if Git integration
+> ever needs to be bypassed. `privacy.html`, `manifest.json`, and icons deploy automatically as
+> part of the repo — no separate zip contents to track.
 
 **Key DNS records:**
 
@@ -440,20 +443,26 @@ Supabase Authentication → SMTP Settings points to Resend's SMTP server. When S
 ### Local Development
 
 - **Run server:** `cd ~/claude/SaveTheHives-pwa-claude && python3 -m http.server 8080`
-- **URL:** `http://localhost:8080/savethehives.html`
+- **URL:** `http://localhost:8080/index.html`
 - **If port 8080 busy:** `lsof -ti :8080 | xargs kill -9` then restart
 - **iPhone testing (local):** Start ngrok (`ngrok http 8080`), open the ngrok URL on iPhone, sign in from there. Add ngrok URL to Supabase Redirect URLs. Note: ngrok URL changes each session on free tier.
 - **iPhone testing (production):** Just use `https://savethehives.org` — no ngrok needed.
 
 ---
 
-### Deploying an Update
+### Deploying an Update (as of v2.6)
 
-1. Edit `~/claude/SaveTheHives-pwa-claude/savethehives.html`
-2. In Terminal: `cp ~/claude/SaveTheHives-pwa-claude/savethehives.html ~/claude/SaveTheHives-pwa-claude/index.html`
-3. Zip the `SaveTheHives-pwa-claude` folder (includes `index.html`, `privacy.html`, `manifest.json`)
-4. Cloudflare → Workers & Pages → `savethehives` → Create new deployment → upload zip
-5. Live in ~30 seconds worldwide
+1. Edit `~/claude/SaveTheHives-pwa-claude/index.html` (or the split-out `styles.css`/`app.js`/
+   `pathfinder.js` once Phase 2 lands)
+2. In Terminal: `git add -A && git commit -m "..." && git push`
+3. Cloudflare Pages (Git-connected to `Game-warden/SaveTheHives`, production branch `main`,
+   automatic deployments enabled) builds and deploys automatically on push
+4. Live in ~10-30 seconds worldwide — check the Deployments tab in the Cloudflare dashboard,
+   or just hard-refresh `https://savethehives.org`
+
+> Fallback only: the old manual zip-upload flow (edit `savethehives.html` → `cp` to `index.html`
+> → zip the folder → dashboard upload) is retired now that Git integration is live, but Cloudflare
+> Pages still accepts a manual "Create deployment" zip upload if the Git connection ever breaks.
 
 ---
 
