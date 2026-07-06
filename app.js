@@ -946,6 +946,7 @@ function updateDebugPanel(fields) {
     filter: 'dbg-filter',   // Pathfinder Phase 5 — alpha-beta filter state
     anchor: 'dbg-anchor',   // Pathfinder Phase 5 — last anchor capture quality
     rays: 'dbg-rays',       // Pathfinder Phase 5 — triangulation geometry (γ, εA, εB)
+    compassAcc: 'dbg-compass-acc', // Pathfinder Phase 5 — OS compass-error estimate
   };
   Object.entries(fields).forEach(([key, val]) => {
     const el = document.getElementById(map[key]);

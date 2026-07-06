@@ -80,6 +80,18 @@
 // CONF_WEAK_M              Above this radius, a toast advises redoing Point B
 //                          with a longer / more angled walk. LOW: nags on
 //                          decent results. HIGH: users trust hopeless circles.
+//
+// ── Compass health ──
+// COMPASS_ACCURACY_WARN_DEG  iOS reports its own compass-error estimate
+//                          (webkitCompassAccuracy, degrees). Above this, each
+//                          "Bee Flew Off" tap warns the user to recalibrate
+//                          with a figure-8 wave. A miscalibrated compass is a
+//                          SYSTEMATIC bias — all three taps share it, so the
+//                          spread check can't see it (field test #3: ray A
+//                          ~10° off while ray B was clean, because walking to
+//                          B recalibrated the sensor). LOW: constant nagging
+//                          on devices that always report mediocre accuracy.
+//                          HIGH: silently accepts miscalibrated bearings.
 // ═══════════════════════════════════════════════════════════════════════════
 const PF_TUNE = {
   // Anchor capture
@@ -101,6 +113,8 @@ const PF_TUNE = {
   BEARING_STD_DEFAULT_DEG: 10,   // manual mode — same as the old fixed assumption
   CONF_RADIUS_MIN_M: 15,
   CONF_WEAK_M: 75,
+  // Compass health
+  COMPASS_ACCURACY_WARN_DEG: 15, // added after field test #3 — uncalibrated Point A compass
 };
 
 // Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
@@ -304,6 +318,10 @@ const PF = {
   rayA: null,                 // Point A's original bearing sightline (dimmed once navigating starts)
   rayB: null,                 // Point B's original bearing sightline
   directionArrow: null,        // fixed-distance arrow that stays visible even up close
+  compassAccuracy: null,       // live OS estimate of compass error in degrees (iOS webkitCompassAccuracy)
+  maxCompassAccUsed: 0,        // worst compass accuracy seen across the current point's 3 flight taps
+  candMarker: null,            // candidate marker — tracked so drag-recalc can replace it
+  confCircle: null,            // confidence circle — same
 };
 
 // Rotate the compass needle by the shortest path, accumulating rotation so the
@@ -389,6 +407,8 @@ function pathfinderReset() {
   PF.rayA = null;
   PF.rayB = null;
   PF.directionArrow = null;
+  PF.candMarker = null;
+  PF.confCircle = null;
   PF.navTrail = [];
   PF.lastWalkPos = null;
   PF.walkFilter = null;
@@ -404,6 +424,7 @@ function pathfinderReset() {
   PF.step = 'sensorsReady';
   PF.flightCount = 0;
   PF.bearingReadings = [];
+  PF.maxCompassAccUsed = 0;
   PF.pointA = null;
   PF.pointB = null;
   PF.candidate = null;
@@ -426,6 +447,12 @@ function startCompass() {
     } else if (typeof e.alpha === 'number') {
       heading = (360 - e.alpha) % 360;
     }
+    // iOS also reports its own estimate of compass error (degrees; negative
+    // or missing = unknown). A miscalibrated compass is a SYSTEMATIC bias —
+    // all three flight taps share it, so the spread check can't catch it.
+    if (typeof e.webkitCompassAccuracy === 'number' && e.webkitCompassAccuracy >= 0) {
+      PF.compassAccuracy = e.webkitCompassAccuracy;
+    }
     if (heading !== null) {
       PF.heading = heading;
       renderCompassNeedle(heading);
@@ -447,7 +474,11 @@ function renderCompassNeedle(heading) {
     rotateNeedleTo(heading);
   }
   if (readout) readout.textContent = Math.round(heading) + '°';
-  updateDebugPanel({ heading: Math.round(heading) + '°', rotation: Math.round(PF.needleRotation) + '°' });
+  updateDebugPanel({
+    heading: Math.round(heading) + '°',
+    rotation: Math.round(PF.needleRotation) + '°',
+    compassAcc: PF.compassAccuracy !== null ? '±' + Math.round(PF.compassAccuracy) + '°' : 'unknown',
+  });
 }
 
 async function enableSensors() {
@@ -485,6 +516,7 @@ async function enableSensors() {
 
   PF.permissionGranted = true;
   PF.bearingReadings = [];
+  PF.maxCompassAccUsed = 0;
   PF.flightCount = 0;
   PF.step = 'pointA';
   updatePathfinderUI();
@@ -534,6 +566,11 @@ function logBeeFlight() {
 
   PF.bearingReadings.push(reading);
   PF.flightCount = PF.bearingReadings.length;
+  // Track the worst OS-reported compass accuracy across this point's taps —
+  // it feeds the confidence radius (systematic bias the spread can't see).
+  if (PF.compassAccuracy !== null) {
+    PF.maxCompassAccUsed = Math.max(PF.maxCompassAccUsed, PF.compassAccuracy);
+  }
 
   document.querySelectorAll('.pf-dot').forEach(dot => {
     dot.classList.toggle('pf-dot-filled', parseInt(dot.dataset.n) <= PF.flightCount);
@@ -546,11 +583,19 @@ function logBeeFlight() {
       .join('');
   }
 
+  // Warn (don't block) when the OS says the compass itself is off — a
+  // figure-8 wave now is cheap; a biased ray costs the whole triangulation.
+  const compassPoor = !PF.manualMode && PF.compassAccuracy !== null &&
+    PF.compassAccuracy > PF_TUNE.COMPASS_ACCURACY_WARN_DEG;
   if (PF.flightCount >= 3) {
     const avg = circularMeanBearing(PF.bearingReadings);
-    showToast(`✅ 3 bearings recorded — averaged to ${Math.round(avg)}°. Ready to lock.`);
+    showToast(compassPoor
+      ? `⚠️ 3 bearings recorded (avg ${Math.round(avg)}°) — but compass reports ±${Math.round(PF.compassAccuracy)}° error. Wave phone in a figure-8 and consider redoing this point.`
+      : `✅ 3 bearings recorded — averaged to ${Math.round(avg)}°. Ready to lock.`);
   } else {
-    showToast(`🐝 Bearing ${Math.round(reading)}° recorded (${PF.flightCount}/3)`);
+    showToast(compassPoor
+      ? `⚠️ ${Math.round(reading)}° recorded (${PF.flightCount}/3) — compass unsure (±${Math.round(PF.compassAccuracy)}°). Wave phone in a figure-8 to calibrate.`
+      : `🐝 Bearing ${Math.round(reading)}° recorded (${PF.flightCount}/3)`);
   }
   updatePathfinderUI();
 }
@@ -617,7 +662,9 @@ function pathfinderAction() {
         return;
       }
       bearing = circularMeanBearing(PF.bearingReadings);
-      bearingStd = lockedBearingStd(PF.bearingReadings); // measured spread → confidence radius
+      // Measured spread, floored by the OS's own compass-error estimate —
+      // systematic bias (field test #3) doesn't show up in the spread.
+      bearingStd = Math.max(lockedBearingStd(PF.bearingReadings), PF.maxCompassAccUsed);
     }
     // Phase 5: anchor captured from a stationary accuracy-gated averaging
     // window instead of a single (potentially 20m-off) getCurrentPosition fix.
@@ -636,6 +683,7 @@ function pathfinderAction() {
     PF.step = 'pointB';
     PF.flightCount = 0;
     PF.bearingReadings = []; // fresh set of readings for Point B
+    PF.maxCompassAccUsed = 0; // fresh compass-health tracking too
     document.querySelectorAll('.pf-dot').forEach(dot => dot.classList.remove('pf-dot-filled'));
     const readingsEl = document.getElementById('pf-readings');
     if (readingsEl) readingsEl.innerHTML = '';
@@ -655,7 +703,8 @@ function pathfinderAction() {
         return;
       }
       bearing = circularMeanBearing(PF.bearingReadings);
-      bearingStd = lockedBearingStd(PF.bearingReadings); // measured spread → confidence radius
+      // Same spread-vs-OS-estimate max as Point A
+      bearingStd = Math.max(lockedBearingStd(PF.bearingReadings), PF.maxCompassAccUsed);
     }
     // Phase 5: same stationary averaging window as Point A.
     captureAnchorPoint(anchor => {
@@ -772,6 +821,9 @@ function startNavTracking() {
     PF.pointB.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M);
 
   PF.navWatchId = navigator.geolocation.watchPosition(pos => {
+    // Guard: a drag-triggered re-triangulation can null the candidate if the
+    // corrected rays no longer intersect cleanly — skip ticks until reset.
+    if (!PF.candidate) return;
     // Phase 5: alpha-beta filter replaced the old moving average here too —
     // same reasoning as startWalkTracking (lag → curved trail on turns).
     const here = gpsFilterUpdate(PF.navFilter,
@@ -947,6 +999,10 @@ function pathIntersection(p1, brng1, p2, brng2) {
 }
 
 function calculateIntersection() {
+  // Recalc-safe (anchors are draggable): drop the previous candidate layers
+  if (PF.candMarker) { map.removeLayer(PF.candMarker); PF.candMarker = null; }
+  if (PF.confCircle) { map.removeLayer(PF.confCircle); PF.confCircle = null; }
+
   const result = pathIntersection(PF.pointA, PF.pointA.bearing, PF.pointB, PF.pointB.bearing);
   if (!result) {
     showToast('⚠️ Bearings did not produce a clean intersection — try wider angle between points');
@@ -973,8 +1029,15 @@ function calculateIntersection() {
   let gamma = Math.abs(PF.pointA.bearing - PF.pointB.bearing) % 360;
   if (gamma > 180) gamma = 360 - gamma; // fold to 0..180; sin() then handles both parallel (0°) and antiparallel (180°) degeneracy
   const sinG = Math.max(Math.sin(toRad(gamma)), 0.02); // guard: near-parallel rays would divide by ~0
-  const dA = distFromA * Math.tan(epsA) / sinG;
-  const dB = distFromB * Math.tan(epsB) / sinG;
+  // Each ray's total error = bearing swing at range ⊕ its anchor's position
+  // error (field test #3: canopy multipath displaced anchor A ~18m — anchor
+  // error shifts the ray sideways in parallel, which the crossing geometry
+  // amplifies exactly like a bearing error does). Caveat: effAcc understates
+  // correlated multipath, which is why anchors are also draggable now.
+  const anchErrA = PF.pointA.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
+  const anchErrB = PF.pointB.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
+  const dA = Math.hypot(distFromA * Math.tan(epsA), anchErrA) / sinG;
+  const dB = Math.hypot(distFromB * Math.tan(epsB), anchErrB) / sinG;
   const confidenceRadius = Math.max(PF_TUNE.CONF_RADIUS_MIN_M, Math.hypot(dA, dB));
   PF.candidate = { lat: result.lat, lng: result.lng, confidenceRadius };
   updateDebugPanel({ rays: `γ ${gamma.toFixed(1)}°, εA ${toDeg(epsA).toFixed(1)}°, εB ${toDeg(epsB).toFixed(1)}°` });
@@ -985,15 +1048,17 @@ function calculateIntersection() {
     className: '', iconSize: [22,22], iconAnchor: [11,11],
   });
   const candMarker = L.marker([result.lat, result.lng], { icon: candIcon })
-    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from 2 bearings. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Baseline: ${Math.round(baseline)}m, rays crossed at ${Math.round(gamma)}°.</div></div>`)
+    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from 2 bearings. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Baseline: ${Math.round(baseline)}m, rays crossed at ${Math.round(gamma)}°. Tip: if marker A or B isn't where you actually stood, drag it — the site recomputes.</div></div>`)
     .addTo(map);
   PF.markers.push(candMarker);
+  PF.candMarker = candMarker; // tracked separately so re-triangulation can replace it
 
   const confCircle = L.circle([result.lat, result.lng], {
     radius: confidenceRadius,
     color: '#f5a623', fillColor: '#f5a623', fillOpacity: 0.1, weight: 1.5, dashArray: '4 4'
   }).addTo(map);
   PF.markers.push(confCircle);
+  PF.confCircle = confCircle;
 
   // Warn when the geometry is weak. The confidence radius now measures this
   // directly, so warn on the OUTCOME (big circle) rather than just the input
@@ -1020,7 +1085,39 @@ function drawPathfinderPoint(point, label) {
     html: `<div style="width:26px;height:26px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:12px;">${label}</div>`,
     className: '', iconSize: [26,26], iconAnchor: [13,13],
   });
-  const marker = L.marker([point.lat, point.lng], { icon }).addTo(map);
+  // Draggable (Phase 5, field test #3): under heavy tree canopy, GPS
+  // multipath can put an anchor 15-20m from where the user actually stood —
+  // and with a small CLAIMED accuracy, because every fix in the averaging
+  // window shared the same bias. No amount of averaging fixes that. But the
+  // user can SEE where they stood relative to houses/roads on the map, so
+  // let them drag the marker there; the triangulation re-runs automatically.
+  const marker = L.marker([point.lat, point.lng], { icon, draggable: true })
+    .bindTooltip(`Point ${label} — drag to fix if this isn't where you stood`, { direction: 'top' });
+  marker.on('dragend', () => {
+    const pos = marker.getLatLng();
+    point.lat = pos.lat;
+    point.lng = pos.lng;
+    // Redraw this point's bearing sightline from the corrected position
+    const ray = label === 'A' ? PF.rayA : PF.rayB;
+    if (ray) {
+      const end = destinationPoint(point.lat, point.lng, point.bearing, 400);
+      ray.setLatLngs([[point.lat, point.lng], [end.lat, end.lng]]);
+    }
+    // Keep the walked path attached to A if A is corrected during the walk
+    if (label === 'A' && PF.walkPath.length) {
+      PF.walkPath[0] = [point.lat, point.lng];
+      if (PF.walkPolyline) PF.walkPolyline.setLatLngs(PF.walkPath);
+    }
+    // If a candidate already exists, re-triangulate from the corrected anchor
+    if (PF.pointA && PF.pointB && (PF.step === 'result' || PF.step === 'navigating')) {
+      calculateIntersection();
+      updatePathfinderUI(); // refresh instruction text (new radius)
+      showToast(`📍 Point ${label} corrected — hive site re-triangulated`);
+    } else {
+      showToast(`📍 Point ${label} corrected`);
+    }
+  });
+  marker.addTo(map);
   PF.markers.push(marker);
 }
 
@@ -1082,7 +1179,7 @@ function updatePathfinderUI() {
     document.getElementById('pf-accuracy').style.display = 'block';
     document.getElementById('pf-howto-box').classList.add('pf-howto-collapsed');
     badge.textContent = 'Step 1 of 3 — Point A';
-    instr.textContent = "Release one bee. The instant it takes off toward home, point your phone's top edge the same direction, then tap \"Bee Flew Off\" below to record that bearing. Repeat for 3 separate bees.";
+    instr.textContent = "First, wave your phone in a sideways figure-8 for a few seconds — phone compasses start out biased until calibrated. Then release one bee. The instant it takes off toward home, point your phone's top edge the same direction and tap \"Bee Flew Off\" to record that bearing. Repeat for 3 separate bees.";
     needleCaption.textContent = "This shows your phone's current facing direction";
     flightCounter.style.display = 'flex';
     actionBtn.textContent = '🔒 Lock Bearing — Point A';

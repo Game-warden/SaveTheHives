@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.6.8'; // Pathfinder Phase 5 step 4 (honest confidence radius) + arrival hysteresis, after field test #2
+const CACHE_VERSION = 'v2.6.9'; // Pathfinder Phase 5 after field test #3: draggable anchors, compass-health tracking, anchor error in radius
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
