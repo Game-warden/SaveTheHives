@@ -1,8 +1,8 @@
 # SaveTheHives — Project Specification & Status Document
 
 **Author:** Ronnie Bouchon  
-**Document Version:** v2.4  
-**Last Updated:** June 2026  
+**Document Version:** v2.6  
+**Last Updated:** July 2026  
 **Live URL:** https://savethehives.org  
 **Purpose:** Living reference for the SaveTheHives PWA — feature set, design system, tech stack, and roadmap.
 
@@ -24,7 +24,7 @@ The core scientific purpose is tracking **colony resilience**: feral hives that 
 
 | Layer | Technology | Notes |
 |---|---|---|
-| App shell | Single-file HTML PWA | No build step; `index.html` |
+| App shell | Few-files HTML PWA (as of v2.6) | No build step, no bundler; `index.html` + `styles.css` + `app.js` + `pathfinder.js` + `sw.js`, plain `<script>`/`<link>` tags |
 | Map engine | Leaflet 1.9.4 | Handles 1,000+ markers smoothly |
 | Tile layer | CartoDB Positron → Voyager (zoom-adaptive) | Muted overview below zoom 15, more street-level reference detail (buildings, road color) above it. Two-tier CARTO family only — raw OSM Standard tiles were considered but skipped in production per tile.openstreetmap.org's heavy-traffic usage policy. |
 | Clustering | Leaflet.MarkerCluster 1.5.3 | Auto-clusters dense areas |
@@ -235,6 +235,7 @@ Used for all user-action modals (sign-in, check-in, add hive). Slides up from bo
 | v2.4 | Jun 2026 | **Security & Privacy** — Supabase RLS hardened (auth required for INSERT/UPDATE); Cloudflare Turnstile invisible CAPTCHA on sign-in; `submitted_by` tied to auth UID; privacy policy (`privacy.html`) published covering email, location, Turnstile; search/filter architecture split (top bar = geocode only; drawer = type + notes keyword + radius) |
 | v2.4 | Jun 30 2026 | **Deployed to production** at savethehives.org — v2.4 is the live version. Includes all security hardening, privacy policy, About modal expanded (How to Contribute, Data & Research, contact), coordinates always visible in popups, light/dark mode fixed throughout all modals and bars, `hello@savethehives.org` email routing active. |
 | v2.5 | Jul 2 2026 | **Housekeeping & community feedback** — zoom-adaptive basemap (Positron → Voyager), coordinate display reverted to 2 decimals for poaching-risk mitigation, PWA manifest icons added, popup clipping fixed on narrow phones, Ideas & Voting feature built (see `ideas_and_voting.sql`). |
+| v2.6 | Jul 5-6 2026 | **Infrastructure & PWA batch.** Phase 0: repo connected to GitHub (`Game-warden/SaveTheHives`), Cloudflare Pages switched from manual zip upload to automatic Git-based deploys on push to `main`; `savethehives.html` retired, `index.html` is the single canonical source. Phase 1: fixed the placeholder-manifest override bug that silently broke PWA installability; de-duplicated ~220KB of embedded base64 images into `logo.jpg` and `images/honeybee-on-comb.jpg`. Phase 2: split the former single-file `index.html` into `styles.css`, `app.js`, and `pathfinder.js` (plain scripts, no bundler, no ES modules — inline `onclick` handlers still need global scope). Phase 3: added `updated_at` tracking + delta sync (hives cache in IndexedDB, only rows changed since last visit are re-fetched, first-ever load still does the full paginated fetch); replaced the two-step check-in insert+update with an atomic `submit_checkin()` Postgres RPC (also fixed check-ins always logging `user_id = null`); added a service worker (`sw.js`) for offline app-shell caching (cache-first for app shell/CDN libs, network-first capped cache for map tiles, network-only for Supabase/Turnstile/geocoding). Tags: `v2.6-a` (Phase 1 checkpoint), `v2.6-b` (Phase 2 checkpoint), `v2.6` (full release). |
 
 ---
 
@@ -278,6 +279,12 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 - Magic link: savethehives.org and www.savethehives.org both working; ensure both in Supabase Redirect URLs
 - Photos deferred to v3 — existing `photo_url` values in DB still display in popups (read-only); upload UI removed
 - Two Cloudflare Turnstile widgets exist on the account, only "SaveTheHives Auth" is wired to the app — the unused one should be deleted manually in the Cloudflare dashboard (Account → Turnstile); not something a code change can do
+- **`hives` table has no `year` column**, despite the app reading/writing `row.year` in `dbRowToHive()` and `submitHive()` — the read side tolerates this fine (falls back to null), but the write side breaks Add Hive with "Could not find the year column of 'hives' in the schema cache." Needs a decision: add the column via SQL, or stop sending `year` in the insert and derive it from `submitted_at` instead.
+- **Zip/postal code search can resolve to the wrong country** (geocoding is worldwide with no country bias) — e.g. searching a US zip code can jump the map overseas
+- **A shared status/error-message UI component is unreadable in light mode** (dark text, no contrast) — reproduced on both the search "Locating…" message and the Submit Hive Record error toast; readable fine in dark mode, so it's a light-mode-specific CSS/contrast bug
+- **Ideas & Voting fetch is missing its Supabase `apikey`** — the `feature_ideas_with_votes` request 404s with "No API key found in request," so the About modal's Ideas & Voting section always shows as unavailable
+- Sign-in occasionally redirects with a malformed double `##access_token=...` URL fragment and doesn't show as signed in on the first attempt — re-tested and worked cleanly on a second attempt, so this may be intermittent rather than reliably broken; worth re-confirming before spending time on it
+- **Cloudflare Browser Cache TTL** is currently set to "Respect Existing Headers" (changed from 4 hours on 2026-07-06 during active v2.6 testing, to stop fighting stale browser caches after each deploy) — revisit and decide on a permanent value once v2.6 settles
 
 ---
 
@@ -296,9 +303,12 @@ User's Browser / iPhone
          │  loads app
          ▼
 ┌─────────────────────┐
-│   index.html        │  Single-file PWA
-│   (Leaflet map +    │  All JS, CSS, HTML in one file
-│    Supabase client) │
+│   index.html +      │  Few-files PWA (v2.6+)
+│   styles.css +      │  index.html loads styles.css, then app.js,
+│   app.js +          │  then pathfinder.js (in that order) — plain
+│   pathfinder.js     │  <link>/<script> tags, no bundler/modules.
+│   (+ sw.js for       │  sw.js is a service worker registered by
+│    offline caching) │  app.js for offline app-shell caching.
 └────────┬────────────┘
          │  API calls
          ▼
