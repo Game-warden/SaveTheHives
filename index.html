@@ -270,7 +270,7 @@
 <div id="search-wrapper">
   <input type="text" id="smart-search-input"
     placeholder="Enter a city, landmark, or address"
-    onkeydown="if(event.key='Enter') doSmartSearch()">
+    onkeydown="if(event.key==='Enter') doSmartSearch()">
   <button class="btn" id="search-go-btn" onclick="doSmartSearch()">Go</button>
   <button id="filter-drawer-btn" onclick="openFilterDrawer()" title="Filter hives">
     <span>Filter</span>

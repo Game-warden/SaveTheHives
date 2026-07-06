@@ -1196,7 +1196,14 @@ function doSmartSearch() {
   const val = document.getElementById('smart-search-input').value.trim();
   if (!val) return;
   showToast('Locating…');
-  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}&limit=1`)
+  // Bias results toward the map's current center — without this, an
+  // ambiguous query like a bare US zip code can match a same-numbered
+  // postal code in a different country entirely. This keeps search
+  // worldwide (no hard country restriction) while strongly preferring
+  // matches near wherever the user is already looking.
+  const bias = map.getCenter();
+  const biasParams = `&lat=${bias.lat}&lon=${bias.lng}&location_bias_scale=0.5`;
+  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}${biasParams}&limit=1`)
     .then(r => r.json())
     .then(data => {
       if (!data.features?.length) {
