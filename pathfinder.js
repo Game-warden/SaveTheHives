@@ -82,6 +82,18 @@
 //                          decent results. HIGH: users trust hopeless circles.
 //
 // ── Compass health ──
+// ── Leapfrog refinement ──
+// REFINE_MIN_READINGS      Bee flights required to lock a refinement station
+//                          (C, D, …). A/B still require 3; by refinement time
+//                          spare bees are scarce, and one close-range bearing
+//                          beats zero. LOW/1: single-flight stations carry the
+//                          default 10° assumption. HIGH: users can't refine at
+//                          all when short on bees.
+// MAX_STATIONS             Hard cap on total stations (A + B + refinements).
+//                          LOW: can't leapfrog deep into a long approach.
+//                          HIGH: map clutter, and very stale early rays keep
+//                          voting on a candidate they're no longer good for.
+//
 // COMPASS_ACCURACY_WARN_DEG  iOS reports its own compass-error estimate
 //                          (webkitCompassAccuracy, degrees). Above this, each
 //                          "Bee Flew Off" tap warns the user to recalibrate
@@ -115,6 +127,9 @@ const PF_TUNE = {
   CONF_WEAK_M: 75,
   // Compass health
   COMPASS_ACCURACY_WARN_DEG: 15, // added after field test #3 — uncalibrated Point A compass
+  // Leapfrog refinement (stations C, D, …)
+  REFINE_MIN_READINGS: 1,        // spare bees are scarce by this stage; 3 still average better
+  MAX_STATIONS: 6,               // A + B + 4 refinements — beyond this, stale early rays add noise, not signal
 };
 
 // Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
@@ -263,9 +278,11 @@ function captureAnchorPoint(onDone) {
     // judge anchor quality: sqrt(1/Σw) — shrinks as good fixes accumulate.
     const effAcc = Math.sqrt(1 / wSum);
     updateDebugPanel({ anchor: `${fixes.length} fixes, ±${effAcc.toFixed(1)}m${degraded ? ' (fallback)' : ''}` });
+    // Drag hint lives here (not just the marker tooltip — tooltips are
+    // invisible on touch unless tapped, which nobody discovers in the field)
     showToast(degraded
-      ? `⚠️ GPS accuracy stayed poor — anchor averaged from best ${fixes.length} fixes (±${Math.round(effAcc)}m). Consider re-locking from a clearing.`
-      : `✅ Anchor locked from ${fixes.length} fixes (±${Math.round(effAcc)}m)`);
+      ? `⚠️ GPS stayed poor — anchor averaged from best ${fixes.length} fixes (±${Math.round(effAcc)}m). Drag the pin to where you're standing if it's off.`
+      : `✅ Anchor locked (${fixes.length} fixes, ±${Math.round(effAcc)}m). If the pin isn't where you're standing, drag it to fix.`);
     onDone({ lat, lng, effAcc }); // effAcc: seeds the walk/nav filter start uncertainty
   };
 
@@ -322,6 +339,7 @@ const PF = {
   maxCompassAccUsed: 0,        // worst compass accuracy seen across the current point's 3 flight taps
   candMarker: null,            // candidate marker — tracked so drag-recalc can replace it
   confCircle: null,            // confidence circle — same
+  stations: [],                // all bearing stations in order: [pointA, pointB, C, D…] — leapfrog refinement appends here
 };
 
 // Rotate the compass needle by the shortest path, accumulating rotation so the
@@ -427,6 +445,7 @@ function pathfinderReset() {
   PF.maxCompassAccUsed = 0;
   PF.pointA = null;
   PF.pointB = null;
+  PF.stations = [];
   PF.candidate = null;
   PF.walkPath = [];
   document.querySelectorAll('.pf-dot').forEach(dot => dot.classList.remove('pf-dot-filled'));
@@ -670,6 +689,7 @@ function pathfinderAction() {
     // window instead of a single (potentially 20m-off) getCurrentPosition fix.
     captureAnchorPoint(anchor => {
       PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing, bearingStd, effAcc: anchor.effAcc };
+      PF.stations = [PF.pointA];
       drawPathfinderPoint(PF.pointA, 'A');
       drawBearingRay(PF.pointA, 'A');
       PF.step = 'walking';
@@ -709,8 +729,42 @@ function pathfinderAction() {
     // Phase 5: same stationary averaging window as Point A.
     captureAnchorPoint(anchor => {
       PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing, bearingStd, effAcc: anchor.effAcc };
+      PF.stations.push(PF.pointB);
       drawPathfinderPoint(PF.pointB, 'B');
       drawBearingRay(PF.pointB, 'B');
+      calculateIntersection();
+      PF.step = 'result';
+      updatePathfinderUI();
+    });
+    return;
+  }
+
+  if (PF.step === 'pointC') {
+    // Leapfrog refinement station (C, D, …). Unlike A/B, ONE bearing is
+    // accepted — by this stage spare bees are usually scarce, and a station
+    // close to the hive is valuable even from a single flight.
+    let bearing, bearingStd = PF_TUNE.BEARING_STD_DEFAULT_DEG;
+    if (PF.manualMode) {
+      bearing = getCurrentBearing();
+      if (bearing === null) { showToast('Enter a bearing manually first'); return; }
+    } else {
+      if (PF.bearingReadings.length < PF_TUNE.REFINE_MIN_READINGS) {
+        showToast('Record at least one bee flight first (tap "Bee Flew Off")');
+        return;
+      }
+      bearing = circularMeanBearing(PF.bearingReadings);
+      // <3 taps → little spread to measure; fall back to the default
+      // assumption, still floored by the OS compass-error estimate.
+      bearingStd = Math.max(
+        PF.bearingReadings.length >= 2 ? lockedBearingStd(PF.bearingReadings) : PF_TUNE.BEARING_STD_DEFAULT_DEG,
+        PF.maxCompassAccUsed);
+    }
+    captureAnchorPoint(anchor => {
+      const label = String.fromCharCode(65 + PF.stations.length); // C, D, E…
+      const station = { lat: anchor.lat, lng: anchor.lng, bearing, bearingStd, effAcc: anchor.effAcc };
+      PF.stations.push(station);
+      drawPathfinderPoint(station, label);
+      drawBearingRay(station, label);
       calculateIntersection();
       PF.step = 'result';
       updatePathfinderUI();
@@ -743,6 +797,29 @@ function pathfinderAction() {
     }
     return;
   }
+}
+
+// ── LEAPFROG REFINEMENT ("Refine from Here" button, result/navigating) ──
+// Classic beelining closes the final stretch by re-releasing bees CLOSER to
+// the hive: triangulation error scales with range ÷ crossing angle, so a
+// fresh station near the zone tightens the circle more than any amount of
+// A/B tuning ever can. This kicked off after field test #4 showed the
+// two-station architecture at its physical accuracy floor (~±20m).
+function startRefinePoint() {
+  if (PF.stations.length >= PF_TUNE.MAX_STATIONS) {
+    showToast(`Max ${PF_TUNE.MAX_STATIONS} stations reached — drag markers to correct, or Start Over`);
+    return;
+  }
+  stopNavTracking();
+  PF.step = 'pointC';
+  PF.flightCount = 0;
+  PF.bearingReadings = [];
+  PF.maxCompassAccUsed = 0;
+  document.querySelectorAll('.pf-dot').forEach(dot => dot.classList.remove('pf-dot-filled'));
+  const readingsEl = document.getElementById('pf-readings');
+  if (readingsEl) readingsEl.innerHTML = '';
+  if (!compassHandler && !PF.manualMode) startCompass(); // only if not already listening
+  updatePathfinderUI();
 }
 
 // ── WALK TRACKING (Point A → Point B) ──
@@ -998,49 +1075,91 @@ function pathIntersection(p1, brng1, p2, brng2) {
   return { lat: toDeg(φ3), lng: ((toDeg(λ3) + 540) % 360) - 180 };
 }
 
+// ── STATION-PAIR ESTIMATE (Phase 5 step 4, generalized for leapfrogging) ──
+// Intersect two stations' rays and estimate that intersection's error radius.
+// Two things propagate into the error (replaces the old fixed-10° assumption,
+// which ignored geometry and lied small on short baselines — field test #2):
+//   1. Each station's bearing uncertainty ε — the MEASURED circular std-dev
+//      of its logged flights (see lockedBearingStd), not an assumption.
+//   2. Ray-crossing geometry — rotating ray 1 by ε shifts the crossing point
+//      along ray 2 by dist·tan(ε)/sin(γ), where γ is the angle between the
+//      rays. Near-parallel rays → sin(γ) tiny → error balloons honestly.
+//   3. Each anchor's position error (field test #3: canopy multipath moved
+//      anchor A ~18m with a confident accuracy claim) — a sideways anchor
+//      shift is amplified by the same geometry as a bearing error. effAcc
+//      understates correlated multipath, which is why anchors are draggable.
+function stationPairEstimate(p1, p2) {
+  const inter = pathIntersection(p1, p1.bearing, p2, p2.bearing);
+  if (!inter) return null;
+  const d1 = haversine(p1.lat, p1.lng, inter.lat, inter.lng);
+  const d2 = haversine(p2.lat, p2.lng, inter.lat, inter.lng);
+  const eps1 = toRad(p1.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
+  const eps2 = toRad(p2.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
+  let gamma = Math.abs(p1.bearing - p2.bearing) % 360;
+  if (gamma > 180) gamma = 360 - gamma; // fold to 0..180; sin() handles parallel AND antiparallel degeneracy
+  const sinG = Math.max(Math.sin(toRad(gamma)), 0.02); // guard div-by-~0
+  const anch1 = p1.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
+  const anch2 = p2.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
+  const e1 = Math.hypot(d1 * Math.tan(eps1), anch1) / sinG;
+  const e2 = Math.hypot(d2 * Math.tan(eps2), anch2) / sinG;
+  return {
+    lat: inter.lat, lng: inter.lng,
+    radius: Math.hypot(e1, e2), // un-floored; floor applied after fusion
+    gamma,
+    baseline: haversine(p1.lat, p1.lng, p2.lat, p2.lng),
+  };
+}
+
 function calculateIntersection() {
   // Recalc-safe (anchors are draggable): drop the previous candidate layers
   if (PF.candMarker) { map.removeLayer(PF.candMarker); PF.candMarker = null; }
   if (PF.confCircle) { map.removeLayer(PF.confCircle); PF.confCircle = null; }
 
-  const result = pathIntersection(PF.pointA, PF.pointA.bearing, PF.pointB, PF.pointB.bearing);
-  if (!result) {
+  const stations = PF.stations;
+  const prevRadius = PF.candidate ? PF.candidate.confidenceRadius : null;
+
+  // All pairwise ray intersections. With 2 stations (classic A/B) there's one
+  // pair; each leapfrog station adds pairs. LEAPFROG RATIONALE (field tests
+  // 1-4): triangulation error scales with range ÷ crossing angle, and real
+  // sites rarely allow 20m+ baselines — but a fresh bearing taken CLOSER to
+  // the hive has intrinsically less range-amplified error, so late stations
+  // tighten the estimate more than any filter tuning can.
+  const estimates = [];
+  for (let i = 0; i < stations.length; i++) {
+    for (let j = i + 1; j < stations.length; j++) {
+      const est = stationPairEstimate(stations[i], stations[j]);
+      if (est) estimates.push(est);
+    }
+  }
+
+  if (!estimates.length) {
+    if (PF.candidate) {
+      // Refining and the new ray didn't intersect anything cleanly — keep the
+      // previous candidate rather than destroying a working result.
+      showToast("⚠️ New bearing didn't intersect the earlier rays cleanly — keeping the previous estimate. Try another bee.");
+      return;
+    }
     showToast('⚠️ Bearings did not produce a clean intersection — try wider angle between points');
     PF.candidate = null;
     return;
   }
-  const baseline = haversine(PF.pointA.lat, PF.pointA.lng, PF.pointB.lat, PF.pointB.lng);
-  const distFromA = haversine(PF.pointA.lat, PF.pointA.lng, result.lat, result.lng);
-  const distFromB = haversine(PF.pointB.lat, PF.pointB.lng, result.lat, result.lng);
 
-  // ── Confidence radius (Phase 5 step 4) ──
-  // Replaces the old fixed-10° assumption, which ignored geometry and lied
-  // small on short baselines (field test #2: 12m baseline looked as confident
-  // as a 50m one). Two things propagate into the intersection error:
-  //   1. Each point's bearing uncertainty ε — the MEASURED circular std-dev
-  //      of its logged flights (see lockedBearingStd), not an assumption.
-  //   2. Ray-crossing geometry — rotating ray A by ε shifts the crossing
-  //      point along ray B by distFromA·tan(ε)/sin(γ), where γ is the angle
-  //      between the rays. Short or badly-angled baselines make the rays
-  //      nearly parallel → sin(γ) tiny → error balloons. That's the honest
-  //      cost of a 12m baseline, now made visible instead of hidden.
-  const epsA = toRad(PF.pointA.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
-  const epsB = toRad(PF.pointB.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
-  let gamma = Math.abs(PF.pointA.bearing - PF.pointB.bearing) % 360;
-  if (gamma > 180) gamma = 360 - gamma; // fold to 0..180; sin() then handles both parallel (0°) and antiparallel (180°) degeneracy
-  const sinG = Math.max(Math.sin(toRad(gamma)), 0.02); // guard: near-parallel rays would divide by ~0
-  // Each ray's total error = bearing swing at range ⊕ its anchor's position
-  // error (field test #3: canopy multipath displaced anchor A ~18m — anchor
-  // error shifts the ray sideways in parallel, which the crossing geometry
-  // amplifies exactly like a bearing error does). Caveat: effAcc understates
-  // correlated multipath, which is why anchors are also draggable now.
-  const anchErrA = PF.pointA.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
-  const anchErrB = PF.pointB.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M;
-  const dA = Math.hypot(distFromA * Math.tan(epsA), anchErrA) / sinG;
-  const dB = Math.hypot(distFromB * Math.tan(epsB), anchErrB) / sinG;
-  const confidenceRadius = Math.max(PF_TUNE.CONF_RADIUS_MIN_M, Math.hypot(dA, dB));
+  // Fuse: center = inverse-variance weighted mean of the pair intersections
+  // (weight 1/r² — tighter pairs pull harder). Radius = the BEST single
+  // pair's radius, deliberately conservative: the pairs share rays, so their
+  // errors are correlated and the usual 1/√Σw shrinkage would overclaim.
+  let wSum = 0, latSum = 0, lngSum = 0, best = estimates[0];
+  estimates.forEach(est => {
+    const w = 1 / (est.radius * est.radius);
+    wSum += w; latSum += est.lat * w; lngSum += est.lng * w;
+    if (est.radius < best.radius) best = est;
+  });
+  const result = { lat: latSum / wSum, lng: lngSum / wSum };
+  const confidenceRadius = Math.max(PF_TUNE.CONF_RADIUS_MIN_M, best.radius);
+  const gamma = best.gamma;
+  const baseline = best.baseline;
   PF.candidate = { lat: result.lat, lng: result.lng, confidenceRadius };
-  updateDebugPanel({ rays: `γ ${gamma.toFixed(1)}°, εA ${toDeg(epsA).toFixed(1)}°, εB ${toDeg(epsB).toFixed(1)}°` });
+  updateDebugPanel({ rays: `${stations.length} stations, ${estimates.length} pair(s); best γ ${gamma.toFixed(1)}°, ±${Math.round(confidenceRadius)}m` });
 
   // Draw candidate marker + confidence circle
   const candIcon = L.divIcon({
@@ -1048,7 +1167,7 @@ function calculateIntersection() {
     className: '', iconSize: [22,22], iconAnchor: [11,11],
   });
   const candMarker = L.marker([result.lat, result.lng], { icon: candIcon })
-    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from 2 bearings. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Baseline: ${Math.round(baseline)}m, rays crossed at ${Math.round(gamma)}°. Tip: if marker A or B isn't where you actually stood, drag it — the site recomputes.</div></div>`)
+    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from ${stations.length} bearing station${stations.length > 2 ? 's' : 's (A & B)'}. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Best pair: baseline ${Math.round(baseline)}m, rays crossed at ${Math.round(gamma)}°. Tip: if a lettered marker isn't where you actually stood, drag it — the site recomputes.</div></div>`)
     .addTo(map);
   PF.markers.push(candMarker);
   PF.candMarker = candMarker; // tracked separately so re-triangulation can replace it
@@ -1060,27 +1179,33 @@ function calculateIntersection() {
   PF.markers.push(confCircle);
   PF.confCircle = confCircle;
 
-  // Warn when the geometry is weak. The confidence radius now measures this
-  // directly, so warn on the OUTCOME (big circle) rather than just the input
-  // (short baseline) — a short-but-perpendicular walk can still be decent,
-  // and a long-but-parallel one can still be hopeless.
-  if (confidenceRadius > PF_TUNE.CONF_WEAK_M) {
+  // Feedback. On a refine (3+ stations), report the before/after radius —
+  // that's the number that tells the user whether the leapfrog helped.
+  // Otherwise warn when the geometry is weak: on the OUTCOME (big circle)
+  // rather than just the input (short baseline) — a short-but-perpendicular
+  // walk can be decent, and a long-but-parallel one hopeless.
+  if (stations.length > 2 && prevRadius !== null) {
+    showToast(confidenceRadius < prevRadius - 1
+      ? `🎯 Refined with station ${String.fromCharCode(64 + stations.length)}: ±${Math.round(prevRadius)}m → ±${Math.round(confidenceRadius)}m`
+      : `Refined — circle stayed ~±${Math.round(confidenceRadius)}m. A station more to the SIDE of the bee line helps more than one along it.`);
+  } else if (confidenceRadius > PF_TUNE.CONF_WEAK_M) {
     showToast(`⚠️ Weak triangulation (±${Math.round(confidenceRadius)}m) — your two rays crossed at only ${Math.round(gamma)}°. Re-lock Point B after a longer walk, angled ACROSS the bee line, to tighten it.`);
   } else if (baseline < 30) {
     showToast(`⚠️ Short baseline (${Math.round(baseline)}m) — result usable (±${Math.round(confidenceRadius)}m) but longer walks give tighter circles.`);
   }
 
-  // Fit map to show A, B, and candidate
-  const bounds = L.latLngBounds([
-    [PF.pointA.lat, PF.pointA.lng],
-    [PF.pointB.lat, PF.pointB.lng],
-    [result.lat, result.lng]
-  ]);
+  // Fit map to show every station and the candidate
+  const bounds = L.latLngBounds(stations.map(s => [s.lat, s.lng]).concat([[result.lat, result.lng]]));
   map.fitBounds(bounds, { padding: [60, 60] });
 }
 
+// Station colors: A blue, B purple, C+ (leapfrog refinements) orange
+function stationColor(label) {
+  return label === 'A' ? '#2196f3' : label === 'B' ? '#9c27b0' : '#ff9800';
+}
+
 function drawPathfinderPoint(point, label) {
-  const color = label === 'A' ? '#2196f3' : '#9c27b0';
+  const color = stationColor(label);
   const icon = L.divIcon({
     html: `<div style="width:26px;height:26px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:12px;">${label}</div>`,
     className: '', iconSize: [26,26], iconAnchor: [13,13],
@@ -1098,10 +1223,9 @@ function drawPathfinderPoint(point, label) {
     point.lat = pos.lat;
     point.lng = pos.lng;
     // Redraw this point's bearing sightline from the corrected position
-    const ray = label === 'A' ? PF.rayA : PF.rayB;
-    if (ray) {
+    if (point._ray) {
       const end = destinationPoint(point.lat, point.lng, point.bearing, 400);
-      ray.setLatLngs([[point.lat, point.lng], [end.lat, end.lng]]);
+      point._ray.setLatLngs([[point.lat, point.lng], [end.lat, end.lng]]);
     }
     // Keep the walked path attached to A if A is corrected during the walk
     if (label === 'A' && PF.walkPath.length) {
@@ -1109,7 +1233,7 @@ function drawPathfinderPoint(point, label) {
       if (PF.walkPolyline) PF.walkPolyline.setLatLngs(PF.walkPath);
     }
     // If a candidate already exists, re-triangulate from the corrected anchor
-    if (PF.pointA && PF.pointB && (PF.step === 'result' || PF.step === 'navigating')) {
+    if (PF.stations.length >= 2 && (PF.step === 'result' || PF.step === 'navigating' || PF.step === 'pointC')) {
       calculateIntersection();
       updatePathfinderUI(); // refresh instruction text (new radius)
       showToast(`📍 Point ${label} corrected — hive site re-triangulated`);
@@ -1122,14 +1246,15 @@ function drawPathfinderPoint(point, label) {
 }
 
 function drawBearingRay(point, label) {
-  const color = label === 'A' ? '#2196f3' : '#9c27b0';
+  const color = stationColor(label);
   const end = destinationPoint(point.lat, point.lng, point.bearing, 400); // 400m visual ray
   const ray = L.polyline([[point.lat, point.lng], [end.lat, end.lng]], {
     color, weight: 2, opacity: 0.7, dashArray: '8 6'
   }).addTo(map);
   PF.markers.push(ray);
+  point._ray = ray; // per-station ref — used by drag-correct and dimming
   if (label === 'A') PF.rayA = ray;
-  else PF.rayB = ray;
+  else if (label === 'B') PF.rayB = ray;
   return ray;
 }
 
@@ -1137,8 +1262,9 @@ function drawBearingRay(point, label) {
 // (proving the triangulation) — dim them way down so they don't compete
 // visually with the live gold direct-line and green walked trail.
 function dimBearingRays() {
-  if (PF.rayA) PF.rayA.setStyle({ opacity: 0.18, weight: 1 });
-  if (PF.rayB) PF.rayB.setStyle({ opacity: 0.18, weight: 1 });
+  PF.stations.forEach(s => {
+    if (s._ray) s._ray.setStyle({ opacity: 0.18, weight: 1 });
+  });
 }
 
 // ── UI STATE RENDERER ──
@@ -1156,10 +1282,12 @@ function updatePathfinderUI() {
   const flatHint = document.querySelector('.pf-flat-hint');
 
   // Reset visibility defaults
+  const refineBtn = document.getElementById('pf-refine-btn');
   flightCounter.style.display = 'none';
   walkReadout.style.display = 'none';
   navReadout.style.display = 'none';
   secondaryBtn.style.display = 'none';
+  if (refineBtn) refineBtn.style.display = 'none';
   manualToggle.style.display = 'block';
   compassDial.parentElement.style.display = 'flex';
   flatHint.style.display = 'block';
@@ -1203,20 +1331,32 @@ function updatePathfinderUI() {
     actionBtn.textContent = '🔒 Lock Bearing — Point B';
   }
   else if (PF.step === 'result') {
-    badge.textContent = 'Step 3 of 3 — Result';
+    badge.textContent = PF.stations.length > 2 ? `Refined — ${PF.stations.length} stations` : 'Step 3 of 3 — Result';
     compassDial.parentElement.style.display = 'none';
     manualToggle.style.display = 'none';
     flatHint.style.display = 'none';
     if (PF.candidate) {
-      instr.textContent = `Triangulation complete! 🔵 blue line = Point A's bearing, 🟣 magenta line = Point B's bearing — they cross at the candidate site. The dashed gold circle (~${Math.round(PF.candidate.confidenceRadius)}m) is the error margin, not a mating radius. Navigate there now, or save it directly.`;
+      instr.textContent = `Triangulation complete! The lettered stations' bearing lines cross at the candidate site. The dashed gold circle (~${Math.round(PF.candidate.confidenceRadius)}m) is the error margin, not a mating radius. Navigate there now — and once close, "Refine from Here" with a spare bee shrinks the circle fast.`;
       actionBtn.textContent = '🧭 Navigate to Hive Site';
+      if (refineBtn) refineBtn.style.display = 'block';
     } else {
-      instr.textContent = "The two bearings didn't produce a usable intersection. Try again with a wider angle between Point A and Point B.";
+      instr.textContent = "The bearings didn't produce a usable intersection. Try again with a wider angle between points.";
       actionBtn.textContent = '🔄 Start Over';
     }
     secondaryBtn.style.display = 'block';
   }
+  else if (PF.step === 'pointC') {
+    document.getElementById('pf-accuracy').style.display = 'block';
+    badge.textContent = `Refine — Station ${String.fromCharCode(65 + PF.stations.length)}`;
+    instr.textContent = 'Release a spare bee from here — a bearing taken closer to the hive tightens the circle more than anything else. Point your phone along its flight and tap "Bee Flew Off" (1 bee is enough, 3 average better), then lock.';
+    needleCaption.textContent = "This shows your phone's current facing direction";
+    flightCounter.style.display = 'flex';
+    actionBtn.textContent = `🔒 Lock Bearing — Station ${String.fromCharCode(65 + PF.stations.length)}`;
+    secondaryBtn.style.display = 'block';
+    updateAccuracyBanner();
+  }
   else if (PF.step === 'navigating') {
+    if (refineBtn) refineBtn.style.display = 'block';
     badge.textContent = 'Navigating';
     instr.textContent = "Follow the gold arrow below. On the map: 🔵 blue dot = you. 🔺 gold triangle = points the way and stays visible even when you're close. 🟡 gold dashed line = direct distance to the hive (shrinks as you approach). 🟢 green trail = path you've walked. The faint blue/magenta lines are your original Point A/B sightlines, kept dim for reference.";
     needleCaption.textContent = '🎯 This points toward the hive site';

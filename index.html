@@ -392,6 +392,10 @@
     <button class="btn pf-action-btn" id="pf-action-btn" onclick="pathfinderAction()">
       📍 Enable GPS &amp; Compass
     </button>
+    <!-- Leapfrog refinement (Phase 5): release a spare bee from closer in and re-triangulate -->
+    <button class="btn btn-outline pf-secondary-btn" id="pf-refine-btn" style="display:none;" onclick="startRefinePoint()">
+      🐝 Refine from Here — Release Another Bee
+    </button>
     <button class="btn btn-outline pf-secondary-btn" id="pf-secondary-btn" style="display:none;" onclick="pathfinderReset()">
       🔄 Start Over
     </button>
