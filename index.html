@@ -545,59 +545,14 @@
 <div class="modal-overlay" id="about-modal" onclick="closeModal(event,'about-modal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">🌍 About SaveTheHives</div>
-    <img src="images/honeybee-on-comb.jpg" alt="Honeybee on comb" style="width:100%;border-radius:10px;margin-bottom:16px;object-fit:cover;height:140px;">
-    <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:12px;">
-      SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America.
-      With <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing,
-      we track wild colony resilience, mating corridors, and genetic goldmines for Varroa-resistance research.
-    </p>
-    <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:16px;">
-      Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors.
-      Feral bees that survive 3+ winters without treatment are flagged as <strong style="color:var(--honey)">Genetic Goldmines</strong> —
-      valuable breeding stock for disease-resistant bee populations.
-    </p>
-    <div class="legend-box">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-dead)"></div> Dead Tree — Colony in snag or fallen timber</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Man Made — Building, wall, structure, or managed hive</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
-    </div>
-    <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;text-align:center;">
-      Coming soon: DCA Mapping · Resilience Heatmaps · Guardian Network
-
-    <div style="margin:18px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">How to Contribute</div>
-      <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
-        <p style="margin-bottom:8px;">🐝 <strong>Log a hive</strong> — Tap <em>Add</em>, center the map crosshair on the hive, fill in what you know, and submit. Sign-in required to prevent spam.</p>
-        <p style="margin-bottom:8px;">✅ <strong>Verify existing hives</strong> — Tap any pin, then tap <em>Check In</em> to report whether it's still active, gone, or uncertain. Every verification helps track colony survival over time.</p>
-        <p>📍 <strong>Legacy records</strong> — The 1,100+ records from 2008–2017 are unverified historical data. If you can ground-truth one, please check in.</p>
-      </div>
+    <div class="modal-title"><img src="logo.jpg" alt="" style="width:22px;height:22px;border-radius:var(--radius-sm);vertical-align:-4px;margin-right:6px;">About SaveTheHives</div>
+    <div id="about-auth-row" style="margin:0 0 10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <span id="about-auth-label" style="color:var(--text-muted);">Not signed in</span>
+      <button id="about-auth-btn" class="btn btn-outline" style="padding:6px 14px;font-size:0.82rem;" onclick="handleAuth();closeAboutModal();">Sign In</button>
     </div>
 
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Data & Research</div>
-      <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
-        <p style="margin-bottom:8px;">Data is crowdsourced and unvalidated. Legacy records span 2008–2017; accuracy varies. New submissions are timestamped and linked to the observer's account.</p>
-        <p>Researchers interested in data access or collaboration: <a href="mailto:hello@savethehives.org" style="color:var(--honey);">hello@savethehives.org</a></p>
-      </div>
-    </div>
-
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">💡 Ideas &amp; Voting</div>
-      <div id="ideas-list" style="display:flex;flex-direction:column;gap:8px;">
-        <div style="font-size:0.82rem;color:var(--text-muted);">Loading ideas…</div>
-      </div>
-      <div id="ideas-signin-hint" style="display:none;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">Sign in to vote.</div>
-    </div>
-
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
-      SaveTheHives v2.6 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
-    </div>
-    </p>
     <!-- Dark/Light mode toggle -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--border);margin-top:16px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:16px;">
       <div>
         <div style="font-weight:600;font-size:0.9rem;color:var(--text);">🌙 Dark Mode</div>
         <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Switch between light and dark theme</div>
@@ -617,12 +572,54 @@
       </label>
     </div>
 
-    <div id="about-auth-row" style="margin:16px 0;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      <span id="about-auth-label" style="color:var(--text-muted);">Not signed in</span>
-      <button id="about-auth-btn" class="btn btn-outline" style="padding:6px 14px;font-size:0.82rem;" onclick="handleAuth();closeAboutModal();">Sign In</button>
+    <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:16px;">
+      SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America —
+      <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing.
+      Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors; feral bees
+      that survive 3+ winters without treatment are flagged as <strong style="color:var(--honey)">Genetic Goldmines</strong> —
+      valuable breeding stock for disease-resistant bee populations.
+    </p>
+    <div class="legend-box">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-dead)"></div> Dead Tree — Colony in snag or fallen timber</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Man Made — Building, wall, structure, or managed hive</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
+    </div>
+    <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;text-align:center;">
+      Coming soon: DCA Mapping · Resilience Heatmaps · Guardian Network
+    </p>
+
+    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">💡 Ideas &amp; Voting</div>
+      <div id="ideas-list" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:0.82rem;color:var(--text-muted);">Loading ideas…</div>
+      </div>
+      <div id="ideas-signin-hint" style="display:none;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">Sign in to vote.</div>
     </div>
 
-    <button class="btn" style="width:100%;padding:12px;margin-top:4px;font-size:1rem;" onclick="closeAboutModal()">
+    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">How to Contribute</div>
+      <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
+        <p style="margin-bottom:8px;">🐝 <strong>Log a hive</strong> — Tap <em>Add</em>, center the map crosshair on the hive, fill in what you know, and submit. Sign-in required to prevent spam.</p>
+        <p style="margin-bottom:8px;">✅ <strong>Verify existing hives</strong> — Tap any pin, then tap <em>Check In</em> to report whether it's still active, gone, or uncertain. Every verification helps track colony survival over time.</p>
+        <p>📍 <strong>Legacy records</strong> — The 1,100+ records from 2008–2017 are unverified historical data. If you can ground-truth one, please check in.</p>
+      </div>
+    </div>
+
+    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Data & Research</div>
+      <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
+        <p style="margin-bottom:8px;">Data is crowdsourced and unvalidated. Legacy records span 2008–2017; accuracy varies. New submissions are timestamped and linked to the observer's account.</p>
+        <p>Researchers interested in data access or collaboration: <a href="mailto:hello@savethehives.org" style="color:var(--honey);">hello@savethehives.org</a></p>
+      </div>
+    </div>
+
+    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
+      SaveTheHives v2.6 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
+    </div>
+
+    <button class="btn" style="width:100%;padding:12px;margin-top:16px;font-size:1rem;" onclick="closeAboutModal()">
       ← Back to Map
     </button>
   </div>
