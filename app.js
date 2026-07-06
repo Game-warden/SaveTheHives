@@ -1145,29 +1145,18 @@ async function submitCheckin() {
 
   const ts = new Date().toISOString();
 
-  // Insert check-in record
-  const { error: ciErr } = await db.from('checkins').insert({
-    hive_id: hiveId,
-    user_id: null,
-    status,
-    photo_url: null,
-    notes: notes || null
+  // Atomic check-in: logs the check-in AND updates the hive's status in one
+  // round trip via the submit_checkin() Postgres function (v2_6_sync.sql),
+  // instead of the old two-step insert-then-update that could partially
+  // fail and leave the checkin log and hive status out of sync.
+  const { error } = await db.rpc('submit_checkin', {
+    p_hive_id: hiveId,
+    p_status: status,
+    p_notes: notes || null
   });
-  if (ciErr) {
-    console.error('checkins insert failed:', ciErr);
-    showToast(`⚠ Check-in log failed: ${ciErr.message}`);
-    btn.disabled = false; btn.textContent = 'Submit';
-    return;
-  }
-
-  // Update hive status
-  const { error: hvErr, count } = await db.from('hives')
-    .update({ status, last_verified_at: ts })
-    .eq('id', hiveId)
-    .select('id');  // forces Supabase to return affected rows
-  if (hvErr) {
-    console.error('hives update failed:', hvErr);
-    showToast(`⚠ Status save failed: ${hvErr.message}`);
+  if (error) {
+    console.error('submit_checkin failed:', error);
+    showToast(`⚠ Check-in failed: ${error.message}`);
     btn.disabled = false; btn.textContent = 'Submit';
     return;
   }
