@@ -900,6 +900,10 @@ function toggleDarkMode(on) {
   if (thumb) thumb.style.transform = on ? 'translateX(22px)' : 'translateX(0)';
   if (thumb) thumb.style.background = on ? '#f5a623' : '#fff';
   if (track) track.style.background = on ? 'rgba(245,166,35,0.55)' : '#c8b89a';
+  // Bug fix: label used to always read "Dark Mode" regardless of which mode
+  // was actually active. Now it names whichever mode is currently on.
+  const label = document.getElementById('dark-mode-label');
+  if (label) label.textContent = on ? '🌙 Dark Mode' : '☀️ Light Mode';
 }
 
 function initDarkMode() {
