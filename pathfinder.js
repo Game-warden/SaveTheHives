@@ -57,6 +57,29 @@
 //                          in circles chasing a 0m that GPS can't resolve.
 //                          HIGH: guidance quits early, leaving a big area to
 //                          search on foot.
+// ARRIVAL_CONFIRM_FIXES    Consecutive fixes inside ARRIVAL_RADIUS_M required
+//                          before the handover fires. LOW: one jittery fix
+//                          triggers "search here" way out (field test #2
+//                          symptom). HIGH: you stand at the spot for several
+//                          seconds before it acknowledges arrival.
+// ARRIVAL_EXIT_MARGIN_M    Extra meters beyond ARRIVAL_RADIUS_M you must move
+//                          before navigation resumes. LOW: hint flip-flops at
+//                          the boundary. HIGH: walking away keeps showing
+//                          "search here" too long.
+//
+// ── Confidence radius (Phase 5 step 4) ──
+// BEARING_STD_FLOOR_DEG    Minimum per-point bearing error assumed even when
+//                          the 3 logged flights agree perfectly — phone
+//                          compasses are rarely better than ~5° absolute.
+//                          LOW: circle shrinks to flattering, unearned sizes.
+//                          HIGH: circle never gets small even on great data.
+// BEARING_STD_DEFAULT_DEG  Assumed error in manual-bearing mode, where there
+//                          is no spread to measure (the old fixed assumption).
+// CONF_RADIUS_MIN_M        Floor on the displayed circle — below GPS anchor
+//                          error a smaller circle would be fiction.
+// CONF_WEAK_M              Above this radius, a toast advises redoing Point B
+//                          with a longer / more angled walk. LOW: nags on
+//                          decent results. HIGH: users trust hopeless circles.
 // ═══════════════════════════════════════════════════════════════════════════
 const PF_TUNE = {
   // Anchor capture
@@ -71,6 +94,13 @@ const PF_TUNE = {
   FILTER_RESET_GAP_S: 10,
   // Navigation arrival
   ARRIVAL_RADIUS_M: 12,          // hand over from needle-following to area search
+  ARRIVAL_CONFIRM_FIXES: 3,      // added after field test #2 — single-fix trigger fired early
+  ARRIVAL_EXIT_MARGIN_M: 5,
+  // Confidence radius (step 4)
+  BEARING_STD_FLOOR_DEG: 5,
+  BEARING_STD_DEFAULT_DEG: 10,   // manual mode — same as the old fixed assumption
+  CONF_RADIUS_MIN_M: 15,
+  CONF_WEAK_M: 75,
 };
 
 // Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
@@ -364,6 +394,8 @@ function pathfinderReset() {
   PF.walkFilter = null;
   PF.lastNavPos = null;
   PF.navFilter = null;
+  PF.arrivalStreak = 0;
+  PF.inArrivalZone = false;
   PF.needleRotation = 0;
   document.getElementById('pathfinder-panel').classList.remove('pf-compact');
   stopAnchorCapture(); // abort any in-flight Point A/B averaging window
@@ -535,6 +567,30 @@ function circularMeanBearing(readings) {
   return (mean + 360) % 360;
 }
 
+// Circular standard deviation of a set of bearings, in degrees. Companion to
+// circularMeanBearing — same sin/cos trick, so 350° and 10° measure 20° apart,
+// not 340°. R (mean resultant length) near 1 = readings agree tightly.
+function circularStdDevDeg(readings) {
+  let sumSin = 0, sumCos = 0;
+  readings.forEach(b => {
+    sumSin += Math.sin(toRad(b));
+    sumCos += Math.cos(toRad(b));
+  });
+  const R = Math.sqrt(sumSin * sumSin + sumCos * sumCos) / readings.length;
+  if (R >= 1) return 0;
+  return toDeg(Math.sqrt(-2 * Math.log(R)));
+}
+
+// Bearing error to carry into the confidence radius for a just-locked point:
+// the std-dev of the MEAN of n readings (spread/√n), floored at the compass
+// hardware floor — three taps agreeing doesn't make the compass itself honest.
+function lockedBearingStd(readings) {
+  return Math.max(
+    circularStdDevDeg(readings) / Math.sqrt(readings.length),
+    PF_TUNE.BEARING_STD_FLOOR_DEG
+  );
+}
+
 function getCurrentBearing() {
   if (PF.manualMode) {
     const v = parseFloat(document.getElementById('pf-manual-bearing').value);
@@ -551,7 +607,7 @@ function pathfinderAction() {
   }
 
   if (PF.step === 'pointA') {
-    let bearing;
+    let bearing, bearingStd = PF_TUNE.BEARING_STD_DEFAULT_DEG;
     if (PF.manualMode) {
       bearing = getCurrentBearing();
       if (bearing === null) { showToast('Enter a bearing manually first'); return; }
@@ -561,11 +617,12 @@ function pathfinderAction() {
         return;
       }
       bearing = circularMeanBearing(PF.bearingReadings);
+      bearingStd = lockedBearingStd(PF.bearingReadings); // measured spread → confidence radius
     }
     // Phase 5: anchor captured from a stationary accuracy-gated averaging
     // window instead of a single (potentially 20m-off) getCurrentPosition fix.
     captureAnchorPoint(anchor => {
-      PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing, effAcc: anchor.effAcc };
+      PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing, bearingStd, effAcc: anchor.effAcc };
       drawPathfinderPoint(PF.pointA, 'A');
       drawBearingRay(PF.pointA, 'A');
       PF.step = 'walking';
@@ -588,7 +645,7 @@ function pathfinderAction() {
   }
 
   if (PF.step === 'pointB') {
-    let bearing;
+    let bearing, bearingStd = PF_TUNE.BEARING_STD_DEFAULT_DEG;
     if (PF.manualMode) {
       bearing = getCurrentBearing();
       if (bearing === null) { showToast('Enter a bearing manually first'); return; }
@@ -598,10 +655,11 @@ function pathfinderAction() {
         return;
       }
       bearing = circularMeanBearing(PF.bearingReadings);
+      bearingStd = lockedBearingStd(PF.bearingReadings); // measured spread → confidence radius
     }
     // Phase 5: same stationary averaging window as Point A.
     captureAnchorPoint(anchor => {
-      PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing, effAcc: anchor.effAcc };
+      PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing, bearingStd, effAcc: anchor.effAcc };
       drawPathfinderPoint(PF.pointB, 'B');
       drawBearingRay(PF.pointB, 'B');
       calculateIntersection();
@@ -705,6 +763,8 @@ function startNavTracking() {
 
   PF.navTrail = [];
   PF.lastNavPos = null;
+  PF.arrivalStreak = 0;
+  PF.inArrivalZone = false;
   PF.navFilter = createGpsFilter();
   // Navigation starts while the user is still standing at Point B — seed
   // the filter from that anchor for the same reason as startWalkTracking.
@@ -750,7 +810,19 @@ function startNavTracking() {
     // the filtered position jitters past the candidate. Following it walks
     // you in circles (field test #1). Switch from navigating to searching:
     // drop the direction arrow and tell the user GPS has done all it can.
-    const arrived = dist <= PF_TUNE.ARRIVAL_RADIUS_M;
+    //
+    // Hysteresis (added after field test #2, where a single jittery fix
+    // tripped the handover well before arrival): entry requires
+    // ARRIVAL_CONFIRM_FIXES consecutive fixes inside the radius, and exit
+    // requires moving ARRIVAL_EXIT_MARGIN_M beyond it.
+    if (dist <= PF_TUNE.ARRIVAL_RADIUS_M) {
+      PF.arrivalStreak++;
+      if (PF.arrivalStreak >= PF_TUNE.ARRIVAL_CONFIRM_FIXES) PF.inArrivalZone = true;
+    } else if (dist > PF_TUNE.ARRIVAL_RADIUS_M + PF_TUNE.ARRIVAL_EXIT_MARGIN_M) {
+      PF.arrivalStreak = 0;
+      PF.inArrivalZone = false;
+    }
+    const arrived = PF.inArrivalZone;
     if (arrived) {
       if (PF.directionArrow) { map.removeLayer(PF.directionArrow); PF.directionArrow = null; }
       if (turnHint) turnHint.textContent = `🎯 ~${Math.round(dist)}m — you're inside GPS error range. Stop following the needle; search this area (tree cavities, listen for flight).`;
@@ -885,14 +957,27 @@ function calculateIntersection() {
   const distFromA = haversine(PF.pointA.lat, PF.pointA.lng, result.lat, result.lng);
   const distFromB = haversine(PF.pointB.lat, PF.pointB.lng, result.lat, result.lng);
 
-  // Confidence radius: a typical phone compass has ~5-10° of error even when
-  // calibrated, and that error gets magnified by the DISTANCE to the candidate
-  // (not just the baseline) — a small bearing error over a long sight line
-  // swings the result much further than the same error over a short one.
-  // Assume a conservative 10° error margin.
-  const errorMargin = Math.max(distFromA, distFromB) * Math.tan(10 * Math.PI / 180);
-  const confidenceRadius = Math.max(15, errorMargin);
+  // ── Confidence radius (Phase 5 step 4) ──
+  // Replaces the old fixed-10° assumption, which ignored geometry and lied
+  // small on short baselines (field test #2: 12m baseline looked as confident
+  // as a 50m one). Two things propagate into the intersection error:
+  //   1. Each point's bearing uncertainty ε — the MEASURED circular std-dev
+  //      of its logged flights (see lockedBearingStd), not an assumption.
+  //   2. Ray-crossing geometry — rotating ray A by ε shifts the crossing
+  //      point along ray B by distFromA·tan(ε)/sin(γ), where γ is the angle
+  //      between the rays. Short or badly-angled baselines make the rays
+  //      nearly parallel → sin(γ) tiny → error balloons. That's the honest
+  //      cost of a 12m baseline, now made visible instead of hidden.
+  const epsA = toRad(PF.pointA.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
+  const epsB = toRad(PF.pointB.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
+  let gamma = Math.abs(PF.pointA.bearing - PF.pointB.bearing) % 360;
+  if (gamma > 180) gamma = 360 - gamma; // fold to 0..180; sin() then handles both parallel (0°) and antiparallel (180°) degeneracy
+  const sinG = Math.max(Math.sin(toRad(gamma)), 0.02); // guard: near-parallel rays would divide by ~0
+  const dA = distFromA * Math.tan(epsA) / sinG;
+  const dB = distFromB * Math.tan(epsB) / sinG;
+  const confidenceRadius = Math.max(PF_TUNE.CONF_RADIUS_MIN_M, Math.hypot(dA, dB));
   PF.candidate = { lat: result.lat, lng: result.lng, confidenceRadius };
+  updateDebugPanel({ rays: `γ ${gamma.toFixed(1)}°, εA ${toDeg(epsA).toFixed(1)}°, εB ${toDeg(epsB).toFixed(1)}°` });
 
   // Draw candidate marker + confidence circle
   const candIcon = L.divIcon({
@@ -900,7 +985,7 @@ function calculateIntersection() {
     className: '', iconSize: [22,22], iconAnchor: [11,11],
   });
   const candMarker = L.marker([result.lat, result.lng], { icon: candIcon })
-    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from 2 bearings. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Baseline between points: ${Math.round(baseline)}m.</div></div>`)
+    .bindPopup(`<div class="hive-popup"><div class="popup-name">🎯 Candidate Hive Site</div><div class="popup-desc">Triangulated from 2 bearings. The dashed circle (~${Math.round(confidenceRadius)}m radius) shows the estimated <strong>error margin</strong> on this location — it is NOT the 3-mile mating radius used elsewhere in the app, just how confident the triangulation is. Baseline: ${Math.round(baseline)}m, rays crossed at ${Math.round(gamma)}°.</div></div>`)
     .addTo(map);
   PF.markers.push(candMarker);
 
@@ -910,9 +995,14 @@ function calculateIntersection() {
   }).addTo(map);
   PF.markers.push(confCircle);
 
-  // Warn if baseline was short — short baselines amplify small bearing errors a lot
-  if (baseline < 30) {
-    showToast(`⚠️ Short baseline (${Math.round(baseline)}m) — small compass errors swing results a lot. Longer walks (40m+) give tighter results.`);
+  // Warn when the geometry is weak. The confidence radius now measures this
+  // directly, so warn on the OUTCOME (big circle) rather than just the input
+  // (short baseline) — a short-but-perpendicular walk can still be decent,
+  // and a long-but-parallel one can still be hopeless.
+  if (confidenceRadius > PF_TUNE.CONF_WEAK_M) {
+    showToast(`⚠️ Weak triangulation (±${Math.round(confidenceRadius)}m) — your two rays crossed at only ${Math.round(gamma)}°. Re-lock Point B after a longer walk, angled ACROSS the bee line, to tighten it.`);
+  } else if (baseline < 30) {
+    showToast(`⚠️ Short baseline (${Math.round(baseline)}m) — result usable (±${Math.round(confidenceRadius)}m) but longer walks give tighter circles.`);
   }
 
   // Fit map to show A, B, and candidate
