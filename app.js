@@ -1,4 +1,15 @@
 // ═══════════════════════════════════════
+// SERVICE WORKER (offline app-shell caching — Phase 3, v2.6)
+// ═══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.warn('Service worker registration failed (app still works fully online):', err);
+    });
+  });
+}
+
+// ═══════════════════════════════════════
 // SUPABASE CONFIG
 // ═══════════════════════════════════════
 const SUPABASE_URL = 'https://nsujmizdawyoictpawxt.supabase.co';
