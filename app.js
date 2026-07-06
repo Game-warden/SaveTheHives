@@ -228,7 +228,11 @@ function latestUpdatedAt(rows, fallback) {
 // ═══════════════════════════════════════
 // Only the columns dbRowToHive() actually reads — not '*' — to keep both
 // the full load and every delta sync as light as possible.
-const HIVE_COLUMNS = 'id, legacy_id, name, latitude, longitude, hivetype, description, city, state, zip, notes, submitted_at, created_at, photo_url, status, last_verified_at, user_added, year, updated_at';
+// Note: 'year' is deliberately excluded — despite dbRowToHive() reading
+// row.year, that column does not actually exist on hives (confirmed via a
+// live 400 error: "column hives.year does not exist"). dbRowToHive()'s
+// `row.year || null` fallback already handles its absence gracefully.
+const HIVE_COLUMNS = 'id, legacy_id, name, latitude, longitude, hivetype, description, city, state, zip, notes, submitted_at, created_at, photo_url, status, last_verified_at, user_added, updated_at';
 
 async function loadHivesFromSupabase() {
   const cached = await idbGetAllHives();
