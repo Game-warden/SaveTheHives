@@ -264,6 +264,8 @@
   <div class="debug-row"><span>Target bearing</span><span id="dbg-targetbearing">—</span></div>
   <div class="debug-row"><span>Relative angle</span><span id="dbg-relative">—</span></div>
   <div class="debug-row"><span>Needle rotation (cumulative)</span><span id="dbg-rotation">—</span></div>
+  <div class="debug-row"><span>Filter (α gain, σ uncertainty)</span><span id="dbg-filter">—</span></div>
+  <div class="debug-row"><span>Last anchor (fixes, ±eff. acc)</span><span id="dbg-anchor">—</span></div>
 </div>
 
 <!-- SINGLE SMART SEARCH BAR (v2.3) -->
@@ -410,8 +412,10 @@
     </svg>
     Add
   </button>
-  <!-- Pathfinder: hidden until v3 polish — setTab('pathfinder') still works -->
-  <button class="tab-btn" onclick="setTab('pathfinder')" style="display:none">
+  <!-- Pathfinder: hidden until v3 polish — setTab('pathfinder') still works.
+       Field-testing access: visiting /?pf=1 unhides this tab + the 🐞 debug
+       button (see the field-test gate at the bottom of pathfinder.js). -->
+  <button class="tab-btn" id="tab-pathfinder" onclick="setTab('pathfinder')" style="display:none">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="9"/><polygon points="12,7 14,12 12,17 10,12" fill="currentColor" stroke="none"/>
     </svg>

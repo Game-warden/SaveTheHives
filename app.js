@@ -943,6 +943,8 @@ function updateDebugPanel(fields) {
     targetBearing: 'dbg-targetbearing',
     relative: 'dbg-relative',
     rotation: 'dbg-rotation',
+    filter: 'dbg-filter',   // Pathfinder Phase 5 — alpha-beta filter state
+    anchor: 'dbg-anchor',   // Pathfinder Phase 5 — last anchor capture quality
   };
   Object.entries(fields).forEach(([key, val]) => {
     const el = document.getElementById(map[key]);

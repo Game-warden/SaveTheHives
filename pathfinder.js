@@ -3,14 +3,218 @@
 // showToast, and other shared app helpers/state. Do not convert to a module —
 // this and index.html's inline onclick="..." handlers require global scope.
 
-// GPS smoothing — keeps a rolling buffer of the last maxBuf positions and
-// returns their average, eliminating single-fix jitter without adding lag.
-function smoothPosition(buf, lat, lng, maxBuf) {
-  buf.push([lat, lng]);
-  if (buf.length > maxBuf) buf.shift();
-  const avgLat = buf.reduce((s, p) => s + p[0], 0) / buf.length;
-  const avgLng = buf.reduce((s, p) => s + p[1], 0) / buf.length;
-  return [avgLat, avgLng];
+// ═══════════════════════════════════════════════════════════════════════════
+// TUNING GUIDE — every field-adjustable constant lives in PF_TUNE below.
+// Each entry: what it controls → symptom if too LOW → symptom if too HIGH.
+//
+// ── Anchor capture (Point A / Point B GPS lock) ──
+// ANCHOR_TARGET_FIXES      How many accuracy-gated fixes to average before
+//                          locking an anchor. LOW: anchors lock fast but jitter
+//                          survives into the triangulation baseline. HIGH: user
+//                          stands around waiting >15s at every point.
+// ANCHOR_ACCEPT_ACCURACY_M Fixes worse than this (meters) are ignored during
+//                          the averaging window. LOW: under tree canopy almost
+//                          no fix qualifies and capture always times out. HIGH:
+//                          garbage fixes poison the average.
+// ANCHOR_MAX_WAIT_MS       Hard cap on the capture window. On timeout we fall
+//                          back to the best fixes seen so far (any accuracy)
+//                          rather than failing. LOW: fallback fires before good
+//                          fixes arrive. HIGH: user thinks the app is hung.
+// ANCHOR_FALLBACK_BEST_N   How many best-accuracy raw fixes the timeout
+//                          fallback averages. Only matters when the gate was
+//                          never satisfied (bad sky view).
+//
+// ── Alpha-beta position filter (walk + nav tracking) ──
+// FILTER_PROCESS_NOISE_MPS How fast we believe the walker's true position can
+//                          change, in m/s. This is the single most important
+//                          knob: it sets how quickly the filter trusts new
+//                          fixes over its own prediction. LOW: the v1.7/v1.8
+//                          symptom returns — path lags and cuts corners on
+//                          turns. HIGH: filter chases every GPS burp; path
+//                          gets jittery again. Brisk walk ≈ 1.5–2 m/s.
+// FILTER_MIN_ACCURACY_M    Floor for reported coords.accuracy. Phones
+//                          sometimes claim 1–3m optimistically; trusting that
+//                          fully makes the filter twitchy. Raise if the dot
+//                          vibrates while standing still.
+// FILTER_MAX_SPEED_MPS     Velocity estimate clamp. Prevents one wild fix from
+//                          launching the predicted position across the field.
+//                          Keep ≥ 2× real walking speed.
+// FILTER_RESET_GAP_S       If no fix arrives for this many seconds, the filter
+//                          re-initializes from the next fix instead of
+//                          predicting through the gap. LOW: filter resets (and
+//                          momentarily jumps) on routine fix hiccups. HIGH:
+//                          after a real signal loss the dot sails off on stale
+//                          velocity before recovering.
+// ═══════════════════════════════════════════════════════════════════════════
+const PF_TUNE = {
+  // Anchor capture
+  ANCHOR_TARGET_FIXES: 6,        // ~6s of fixes at typical 1Hz GPS
+  ANCHOR_ACCEPT_ACCURACY_M: 12,  // matches the "good/fair" boundary shown in the accuracy banner
+  ANCHOR_MAX_WAIT_MS: 20000,
+  ANCHOR_FALLBACK_BEST_N: 3,
+  // Alpha-beta filter
+  FILTER_PROCESS_NOISE_MPS: 1.8, // brisk walking pace
+  FILTER_MIN_ACCURACY_M: 5,
+  FILTER_MAX_SPEED_MPS: 4,       // ~2× walking speed; jogging with the phone still tracks
+  FILTER_RESET_GAP_S: 10,
+};
+
+// Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
+// computed where needed. Used only for unit conversion inside the filter.
+const M_PER_DEG_LAT = 111320;
+
+// ── ALPHA-BETA POSITION FILTER ──
+// Replaces the old smoothPosition() 5-fix moving average (removed in Phase 5).
+// The moving average treated every fix equally and always answered with the
+// average of the last ~5 positions — i.e. where you were ~2.5 fixes AGO. That
+// lag is what made the drawn path curve through corners in v1.7/v1.8.
+//
+// This filter instead keeps a position + velocity estimate per axis:
+//   1. PREDICT  — advance position by estimated velocity × dt
+//   2. CORRECT  — blend the new fix in, weighted by how much we trust it
+// The blend weight (alpha) is not fixed: it's recomputed every fix from the
+// filter's own uncertainty vs. the fix's reported coords.accuracy — an
+// accurate fix pulls hard, a poor fix barely nudges. beta (the velocity
+// correction gain) is derived from alpha via the standard critically-damped
+// relation beta = alpha² / (2 − alpha), so the two gains never fight.
+function createGpsFilter() {
+  return {
+    lat: null, lng: null, // filtered position (degrees)
+    vLat: 0, vLng: 0,     // estimated velocity (degrees/second, per axis)
+    variance: -1,          // position uncertainty (m²); -1 = uninitialized
+    t: 0,                  // timestamp of last accepted fix (ms)
+    lastAlpha: 0,          // exposed for the debug panel
+  };
+}
+
+function gpsFilterUpdate(f, lat, lng, accuracyM, timestampMs) {
+  // Floor the reported accuracy — phones over-promise (see TUNING guide)
+  const acc = Math.max(accuracyM || PF_TUNE.FILTER_MIN_ACCURACY_M, PF_TUNE.FILTER_MIN_ACCURACY_M);
+
+  const dt = (timestampMs - f.t) / 1000;
+  // First fix ever, or the signal dropped long enough that our velocity
+  // estimate is stale → start over from this fix rather than predicting
+  // through the gap on old momentum.
+  if (f.variance < 0 || dt > PF_TUNE.FILTER_RESET_GAP_S || dt <= 0) {
+    f.lat = lat; f.lng = lng;
+    f.vLat = 0; f.vLng = 0;
+    f.variance = acc * acc;
+    f.t = timestampMs;
+    f.lastAlpha = 1;
+    return [lat, lng];
+  }
+  f.t = timestampMs;
+
+  // 1. PREDICT — dead-reckon forward on current velocity estimate, and grow
+  //    our uncertainty by how far a walker could plausibly have strayed from
+  //    that straight-line prediction in dt seconds (process noise).
+  const predLat = f.lat + f.vLat * dt;
+  const predLng = f.lng + f.vLng * dt;
+  const drift = PF_TUNE.FILTER_PROCESS_NOISE_MPS * dt; // meters
+  const predVariance = f.variance + drift * drift;
+
+  // 2. CORRECT — adaptive gain: ratio of our uncertainty to total uncertainty.
+  //    Both terms are in m², so alpha is dimensionless and safe to apply to
+  //    residuals measured in degrees.
+  const alpha = predVariance / (predVariance + acc * acc);
+  const beta = (alpha * alpha) / (2 - alpha); // critically damped companion gain
+  f.lastAlpha = alpha;
+
+  const resLat = lat - predLat;
+  const resLng = lng - predLng;
+  f.lat = predLat + alpha * resLat;
+  f.lng = predLng + alpha * resLng;
+  f.vLat += (beta * resLat) / dt;
+  f.vLng += (beta * resLng) / dt;
+  f.variance = (1 - alpha) * predVariance;
+
+  // Clamp the velocity estimate so one wild fix can't launch the prediction
+  // across the field (compare in m/s — lng degrees shrink by cos(lat)).
+  const mPerDegLng = M_PER_DEG_LAT * Math.cos(toRad(f.lat));
+  const speed = Math.sqrt((f.vLat * M_PER_DEG_LAT) ** 2 + (f.vLng * mPerDegLng) ** 2);
+  if (speed > PF_TUNE.FILTER_MAX_SPEED_MPS) {
+    const scale = PF_TUNE.FILTER_MAX_SPEED_MPS / speed;
+    f.vLat *= scale;
+    f.vLng *= scale;
+  }
+
+  return [f.lat, f.lng];
+}
+
+// ── ANCHOR POINT CAPTURE ──
+// Replaces the single getCurrentPosition() call that used to lock Point A/B.
+// One fix is a coin toss — under canopy it can be 20m+ off, and both anchor
+// errors feed straight into the triangulation baseline. Instead: watch the
+// GPS for a short stationary window, keep only fixes that pass the accuracy
+// gate, and average them weighted by 1/accuracy² (a 5m fix counts 4× a 10m
+// fix). If the gate is never satisfied before the timeout, fall back to the
+// best few fixes seen at any accuracy — a degraded anchor beats a dead end,
+// and the toast tells the user which kind they got.
+let anchorCapture = null; // { watchId, timer, actionBtn, originalLabel } while a capture window is open
+
+function stopAnchorCapture() {
+  if (!anchorCapture) return;
+  navigator.geolocation.clearWatch(anchorCapture.watchId);
+  clearTimeout(anchorCapture.timer);
+  // Restore the action button label here (not just in finish) so cancelling
+  // mid-capture via reset/exit doesn't leave it stuck on "Averaging GPS…"
+  if (anchorCapture.actionBtn) anchorCapture.actionBtn.textContent = anchorCapture.originalLabel;
+  anchorCapture = null;
+}
+
+function captureAnchorPoint(onDone) {
+  if (anchorCapture) return; // a window is already open — ignore double-taps
+  if (!navigator.geolocation) { showToast('GPS unavailable on this device'); return; }
+
+  const gated = [];  // fixes that passed the accuracy gate
+  const all = [];    // every fix, for the timeout fallback
+  const actionBtn = document.getElementById('pf-action-btn');
+  const originalLabel = actionBtn ? actionBtn.textContent : '';
+  showToast('📡 Hold still — averaging GPS fixes…');
+
+  const finish = (fixes, degraded) => {
+    stopAnchorCapture(); // also restores the action button label
+    if (!fixes.length) {
+      showToast('⚠️ No GPS fixes received — check location permission and try again');
+      return;
+    }
+    // Inverse-variance weighted average: trust each fix ∝ 1/accuracy²
+    let wSum = 0, latSum = 0, lngSum = 0;
+    fixes.forEach(fx => {
+      const w = 1 / (fx.acc * fx.acc);
+      wSum += w; latSum += fx.lat * w; lngSum += fx.lng * w;
+    });
+    const lat = latSum / wSum, lng = lngSum / wSum;
+    // Effective accuracy of the weighted mean, shown so the field tester can
+    // judge anchor quality: sqrt(1/Σw) — shrinks as good fixes accumulate.
+    const effAcc = Math.sqrt(1 / wSum);
+    updateDebugPanel({ anchor: `${fixes.length} fixes, ±${effAcc.toFixed(1)}m${degraded ? ' (fallback)' : ''}` });
+    showToast(degraded
+      ? `⚠️ GPS accuracy stayed poor — anchor averaged from best ${fixes.length} fixes (±${Math.round(effAcc)}m). Consider re-locking from a clearing.`
+      : `✅ Anchor locked from ${fixes.length} fixes (±${Math.round(effAcc)}m)`);
+    onDone({ lat, lng });
+  };
+
+  const watchId = navigator.geolocation.watchPosition(pos => {
+    PF.gpsAccuracy = pos.coords.accuracy;
+    updateAccuracyBanner();
+    const fix = { lat: pos.coords.latitude, lng: pos.coords.longitude, acc: Math.max(pos.coords.accuracy || 99, PF_TUNE.FILTER_MIN_ACCURACY_M) };
+    all.push(fix);
+    if (fix.acc <= PF_TUNE.ANCHOR_ACCEPT_ACCURACY_M) gated.push(fix);
+    if (actionBtn) actionBtn.textContent = `📡 Averaging GPS… ${gated.length}/${PF_TUNE.ANCHOR_TARGET_FIXES}`;
+    if (gated.length >= PF_TUNE.ANCHOR_TARGET_FIXES) finish(gated, false);
+  },
+  () => {}, // per-fix errors are fine — the timeout fallback handles a dead stream
+  { enableHighAccuracy: true, maximumAge: 0, timeout: PF_TUNE.ANCHOR_MAX_WAIT_MS });
+
+  const timer = setTimeout(() => {
+    // Gate never filled — take whatever gated fixes exist, else the best
+    // ANCHOR_FALLBACK_BEST_N raw fixes by accuracy.
+    if (gated.length) finish(gated, true);
+    else finish(all.sort((a, b) => a.acc - b.acc).slice(0, PF_TUNE.ANCHOR_FALLBACK_BEST_N), true);
+  }, PF_TUNE.ANCHOR_MAX_WAIT_MS);
+
+  anchorCapture = { watchId, timer, actionBtn, originalLabel };
 }
 
 // ═══════════════════════════════════════
@@ -109,6 +313,7 @@ function exitPathfinder() {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-btn')[0].classList.add('active');
   stopCompass();
+  stopAnchorCapture(); // abort any in-flight Point A/B averaging window
   stopWalkTracking();
   stopNavTracking();
 }
@@ -126,11 +331,12 @@ function pathfinderReset() {
   PF.directionArrow = null;
   PF.navTrail = [];
   PF.lastWalkPos = null;
-  PF.walkSmoothBuf = [];
+  PF.walkFilter = null;
   PF.lastNavPos = null;
-  PF.navSmoothBuf = [];
+  PF.navFilter = null;
   PF.needleRotation = 0;
   document.getElementById('pathfinder-panel').classList.remove('pf-compact');
+  stopAnchorCapture(); // abort any in-flight Point A/B averaging window
   stopWalkTracking();
   stopNavTracking();
   PF.step = 'sensorsReady';
@@ -326,14 +532,16 @@ function pathfinderAction() {
       }
       bearing = circularMeanBearing(PF.bearingReadings);
     }
-    navigator.geolocation.getCurrentPosition(pos => {
-      PF.pointA = { lat: pos.coords.latitude, lng: pos.coords.longitude, bearing };
+    // Phase 5: anchor captured from a stationary accuracy-gated averaging
+    // window instead of a single (potentially 20m-off) getCurrentPosition fix.
+    captureAnchorPoint(anchor => {
+      PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing };
       drawPathfinderPoint(PF.pointA, 'A');
       drawBearingRay(PF.pointA, 'A');
       PF.step = 'walking';
       startWalkTracking();
       updatePathfinderUI();
-    }, () => showToast('Could not get GPS fix — try again'));
+    });
     return;
   }
 
@@ -361,14 +569,15 @@ function pathfinderAction() {
       }
       bearing = circularMeanBearing(PF.bearingReadings);
     }
-    navigator.geolocation.getCurrentPosition(pos => {
-      PF.pointB = { lat: pos.coords.latitude, lng: pos.coords.longitude, bearing };
+    // Phase 5: same stationary averaging window as Point A.
+    captureAnchorPoint(anchor => {
+      PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing };
       drawPathfinderPoint(PF.pointB, 'B');
       drawBearingRay(PF.pointB, 'B');
       calculateIntersection();
       PF.step = 'result';
       updatePathfinderUI();
-    }, () => showToast('Could not get GPS fix — try again'));
+    });
     return;
   }
 
@@ -403,15 +612,19 @@ function pathfinderAction() {
 function startWalkTracking() {
   PF.walkPath = [[PF.pointA.lat, PF.pointA.lng]];
   PF.lastWalkPos = null;
-  PF.walkSmoothBuf = [];
+  PF.walkFilter = createGpsFilter();
   if (!navigator.geolocation) return;
   PF.watchId = navigator.geolocation.watchPosition(pos => {
     PF.gpsAccuracy = pos.coords.accuracy;
     updateAccuracyBanner();
-    const raw = [pos.coords.latitude, pos.coords.longitude];
 
-    // Smooth via 3-position moving average (reduces single-fix jitter)
-    const here = smoothPosition(PF.walkSmoothBuf, raw[0], raw[1], 5);
+    // Phase 5: alpha-beta filter (predict + accuracy-weighted correct)
+    // replaced the old 5-fix moving average, which lagged ~2.5 fixes behind
+    // and curved the path through turns (the v1.7/v1.8 bug).
+    const here = gpsFilterUpdate(PF.walkFilter,
+      pos.coords.latitude, pos.coords.longitude,
+      pos.coords.accuracy, pos.timestamp);
+    updateDebugPanel({ filter: `α ${PF.walkFilter.lastAlpha.toFixed(2)}, σ ${Math.sqrt(PF.walkFilter.variance).toFixed(1)}m` });
 
     // Only record a path point if we've actually moved ≥8m (filters GPS noise)
     if (PF.lastWalkPos && haversine(PF.lastWalkPos[0], PF.lastWalkPos[1], here[0], here[1]) < 8) {
@@ -455,13 +668,14 @@ function startNavTracking() {
 
   PF.navTrail = [];
   PF.lastNavPos = null;
-  PF.navSmoothBuf = [];
+  PF.navFilter = createGpsFilter();
 
   PF.navWatchId = navigator.geolocation.watchPosition(pos => {
-    const raw = [pos.coords.latitude, pos.coords.longitude];
-
-    // Smooth via 3-position moving average — reduces jitter on blue dot & compass
-    const here = smoothPosition(PF.navSmoothBuf, raw[0], raw[1], 5);
+    // Phase 5: alpha-beta filter replaced the old moving average here too —
+    // same reasoning as startWalkTracking (lag → curved trail on turns).
+    const here = gpsFilterUpdate(PF.navFilter,
+      pos.coords.latitude, pos.coords.longitude,
+      pos.coords.accuracy, pos.timestamp);
 
     updateYouAreHereMarker(here[0], here[1]);
     const dist = haversine(here[0], here[1], PF.candidate.lat, PF.candidate.lng);
@@ -521,6 +735,7 @@ function startNavTracking() {
       relative: Math.round(relative) + '°',
       rotation: Math.round(PF.needleRotation) + '°',
       accuracy: Math.round(pos.coords.accuracy) + 'm',
+      filter: `α ${PF.navFilter.lastAlpha.toFixed(2)}, σ ${Math.sqrt(PF.navFilter.variance).toFixed(1)}m`,
       pointA: PF.pointA ? PF.pointA.lat.toFixed(5) + ', ' + PF.pointA.lng.toFixed(5) + ' @ ' + Math.round(PF.pointA.bearing) + '°' : '—',
       pointB: PF.pointB ? PF.pointB.lat.toFixed(5) + ', ' + PF.pointB.lng.toFixed(5) + ' @ ' + Math.round(PF.pointB.bearing) + '°' : '—',
       candidate: PF.candidate ? PF.candidate.lat.toFixed(5) + ', ' + PF.candidate.lng.toFixed(5) + ' ±' + Math.round(PF.candidate.confidenceRadius) + 'm' : '—',
@@ -772,4 +987,17 @@ function updatePathfinderUI() {
     document.getElementById('pathfinder-panel').classList.add('pf-compact');
   }
 }
+
+// ── FIELD-TEST ACCESS GATE (Phase 5) ──
+// The Pathfinder tab and 🐞 debug button stay hidden in production until the
+// v3 polish ships. Visiting https://savethehives.org/?pf=1 unhides both for
+// that visit only — lets Phase 5 field testing happen on the live site
+// without exposing the unfinished tool to regular visitors.
+(function pathfinderFieldTestGate() {
+  if (new URLSearchParams(location.search).get('pf') !== '1') return;
+  const tab = document.getElementById('tab-pathfinder');
+  if (tab) tab.style.display = '';
+  const dbg = document.getElementById('debug-toggle-btn');
+  if (dbg) dbg.style.display = '';
+})();
 
