@@ -212,7 +212,11 @@ Used for all user-action modals (sign-in, check-in, add hive). Slides up from bo
 | Mite-bomb risk perimeter | Alert when feral collapse logged near managed yards |
 | Guardian accounts | Commercial beekeepers register protected zones |
 
-### Phase 5 — Pathfinder Polish 🔶 In Progress (dedicated Fable session, Jul 6 2026 — steps 1, 2, 4 shipped)
+### Phase 5 — Pathfinder Polish 📦 ARCHIVED Jul 6 2026 (steps 1, 2, 4 + leapfrog shipped; paused at the physical accuracy limit)
+
+> **Ronnie's decision at session close:** the tool reached its honest physical accuracy floor (~±20m) and further automation was adding complexity faster than usability. Work is parked, NOT abandoned — the feature is safe in production (hidden behind `?pf=1`). **The complete handoff for resuming this work is `PATHFINDER_HANDOFF.md` in the repo root** — architecture map, field test log (including the unverified "Africa bug" fix in v2.6.11), physics analysis, known bugs, and the resume-priority backlog. Next intended Pathfinder-adjacent work is *educational*: a "theory of beelining" section with diagrams — see the handoff doc §7.
+
+The section below is the state as of archiving:
 
 **Do not touch Pathfinder code (`pathfinder.js`, `#pathfinder-panel`, `PF.*`, walk/nav tracking, compass code, the debug panel) outside a dedicated Pathfinder session.** This code is intentionally isolated from the rest of the app.
 
@@ -220,7 +224,7 @@ Used for all user-action modals (sign-in, check-in, add hive). Slides up from bo
 
 **All tuning constants live in `PF_TUNE` at the top of `pathfinder.js`**, under a TUNING guide comment block that documents, for every constant: what it controls, the symptom if set too low, and the symptom if set too high. Tune there, nowhere else. Key functions: `captureAnchorPoint()` (A/B GPS lock), `createGpsFilter()`/`gpsFilterSeed()`/`gpsFilterUpdate()` (position filter), `lockedBearingStd()`/`circularStdDevDeg()` (bearing quality), `calculateIntersection()` (triangulation + confidence radius).
 
-**Cache rule still applies:** `pathfinder.js` is in `sw.js`'s precache — any commit touching it must bump `CACHE_VERSION` in the same commit. Current value: `v2.6.9`. Also see the new "service worker two-load update" gotcha in Known Gotchas before field testing a fresh deploy.
+**Cache rule still applies:** `pathfinder.js` is in `sw.js`'s precache — any commit touching it must bump `CACHE_VERSION` in the same commit. Current value: `v2.6.11`. Also see the "service worker two-load update" gotcha in Known Gotchas before field testing a fresh deploy.
 
 **Shipped this session** (original steps 1, 2, 4 plus field-test-driven additions):
 
@@ -293,7 +297,7 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 - **Supabase Attack Protection provider dropdown defaults to hCaptcha** — must manually switch to "Turnstile by Cloudflare" or Turnstile tokens will always be rejected with `invalid-input-response`
 - **Turnstile widget domains** — `localhost` must be in the allowed hostnames list on the SaveTheHives Auth widget in Cloudflare for local testing to work
 - **Toast z-index** — sign-in modal is z-index 9100; toast must be ≥ 9100 to be visible while modal is open (currently 9999)
-- **Service worker (`sw.js`) precaches shell files by `CACHE_VERSION`** — any commit that changes `app.js`, `styles.css`, `pathfinder.js`, `index.html`, `manifest.json`, or any precached image MUST bump `CACHE_VERSION` in the same commit, or returning visitors keep getting the old cached file indefinitely (a Cloudflare cache purge does not fix this — it's client-side Cache Storage, a separate layer). Symptom if missed: "the fix works on savethehives.pages.dev but not on savethehives.org." Current value: `v2.6.9`. Full manual recovery steps if this happens anyway: DevTools → Application → Service Workers → Unregister, then Storage → Clear site data, close the tab, reopen fresh, hard reload.
+- **Service worker (`sw.js`) precaches shell files by `CACHE_VERSION`** — any commit that changes `app.js`, `styles.css`, `pathfinder.js`, `index.html`, `manifest.json`, or any precached image MUST bump `CACHE_VERSION` in the same commit, or returning visitors keep getting the old cached file indefinitely (a Cloudflare cache purge does not fix this — it's client-side Cache Storage, a separate layer). Symptom if missed: "the fix works on savethehives.pages.dev but not on savethehives.org." Current value: `v2.6.11`. Full manual recovery steps if this happens anyway: DevTools → Application → Service Workers → Unregister, then Storage → Clear site data, close the tab, reopen fresh, hard reload.
 - **Service worker two-load update behavior** — even with `CACHE_VERSION` bumped correctly (and `skipWaiting`/`clients.claim` enabled), the FIRST visit after a deploy still runs the previous version: the old SW serves the cached shell instantly while the new SW installs and precaches in the background; the SECOND load gets the new code. Symptom: "I pushed, but my phone doesn't show the new feature" (burned a Pathfinder field test on Jul 6 2026). Before field testing a fresh deploy: open the site, close the tab, reopen (or reload twice). Verification tokens beat assumptions — check for a UI string known to be new in the build under test.
 
 ## 9. Privacy Decisions & Rationale

@@ -93,6 +93,12 @@
 //                          LOW: can't leapfrog deep into a long approach.
 //                          HIGH: map clutter, and very stale early rays keep
 //                          voting on a candidate they're no longer good for.
+// MAX_CANDIDATE_RANGE_M    Pair intersections further than this from either
+//                          station are discarded as geometry noise (the
+//                          "Africa bug", field test #5). LOW: legitimately
+//                          distant hives (long open-country beelines) get
+//                          rejected. HIGH: degenerate far-side intersections
+//                          sneak back into the fusion.
 //
 // COMPASS_ACCURACY_WARN_DEG  iOS reports its own compass-error estimate
 //                          (webkitCompassAccuracy, degrees). Above this, each
@@ -130,6 +136,7 @@ const PF_TUNE = {
   // Leapfrog refinement (stations C, D, …)
   REFINE_MIN_READINGS: 1,        // spare bees are scarce by this stage; 3 still average better
   MAX_STATIONS: 6,               // A + B + 4 refinements — beyond this, stale early rays add noise, not signal
+  MAX_CANDIDATE_RANGE_M: 2000,   // sanity guard added after field test #5 sent the candidate to Africa — see stationPairEstimate
 };
 
 // Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
@@ -1093,6 +1100,14 @@ function stationPairEstimate(p1, p2) {
   if (!inter) return null;
   const d1 = haversine(p1.lat, p1.lng, inter.lat, inter.lng);
   const d2 = haversine(p2.lat, p2.lng, inter.lat, inter.lng);
+  // SANITY GUARD (field test #5, Jul 6 2026): near-parallel rays can
+  // "intersect" thousands of km away on the great-circle far side —
+  // pathIntersection's ambiguity checks don't catch every such case, and one
+  // of these poisoned the fused candidate badly ("had me going to Africa").
+  // Bee foraging tops out around 10km; beelining targets are typically <1km.
+  // Any pair whose intersection is further than this from either station is
+  // geometry noise, not a hive — discard it.
+  if (d1 > PF_TUNE.MAX_CANDIDATE_RANGE_M || d2 > PF_TUNE.MAX_CANDIDATE_RANGE_M) return null;
   const eps1 = toRad(p1.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
   const eps2 = toRad(p2.bearingStd || PF_TUNE.BEARING_STD_DEFAULT_DEG);
   let gamma = Math.abs(p1.bearing - p2.bearing) % 360;
