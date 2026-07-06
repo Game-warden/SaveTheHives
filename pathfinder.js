@@ -45,6 +45,18 @@
 //                          momentarily jumps) on routine fix hiccups. HIGH:
 //                          after a real signal loss the dot sails off on stale
 //                          velocity before recovering.
+//
+// ── Navigation arrival ──
+// ARRIVAL_RADIUS_M         Distance at which turn-by-turn guidance hands over
+//                          to "you've arrived — search this area". Inside this
+//                          range the remaining distance is smaller than the
+//                          combined GPS error (yours + the candidate's own
+//                          confidence radius), so the bearing to the target
+//                          spins randomly as your position jitters past it.
+//                          LOW: field test #1 symptom — the needle leads you
+//                          in circles chasing a 0m that GPS can't resolve.
+//                          HIGH: guidance quits early, leaving a big area to
+//                          search on foot.
 // ═══════════════════════════════════════════════════════════════════════════
 const PF_TUNE = {
   // Anchor capture
@@ -53,10 +65,12 @@ const PF_TUNE = {
   ANCHOR_MAX_WAIT_MS: 20000,
   ANCHOR_FALLBACK_BEST_N: 3,
   // Alpha-beta filter
-  FILTER_PROCESS_NOISE_MPS: 1.8, // brisk walking pace
+  FILTER_PROCESS_NOISE_MPS: 3.0, // raised from 1.8 after field test #1 (Jul 2026): velocity gain converged too slowly — lagging A→B distance, curved start of walk line
   FILTER_MIN_ACCURACY_M: 5,
   FILTER_MAX_SPEED_MPS: 4,       // ~2× walking speed; jogging with the phone still tracks
   FILTER_RESET_GAP_S: 10,
+  // Navigation arrival
+  ARRIVAL_RADIUS_M: 12,          // hand over from needle-following to area search
 };
 
 // Meters per degree of latitude (WGS-84 mean). Longitude shrinks by cos(lat) —
@@ -87,15 +101,31 @@ function createGpsFilter() {
   };
 }
 
+// Seed a fresh filter from a known-good position — the averaged anchor just
+// captured. Without this the filter warms up from the first raw fix instead,
+// which put a visible dogleg at the start of the walked A→B line in field
+// test #1 (the trail starts AT the anchor, but the filter didn't know that).
+function gpsFilterSeed(f, lat, lng, accuracyM) {
+  f.lat = lat; f.lng = lng;
+  f.vLat = 0; f.vLng = 0;
+  f.variance = accuracyM * accuracyM;
+  f.t = Date.now(); // geolocation fix timestamps are epoch ms too, so they compare
+  f.lastAlpha = 1;
+}
+
 function gpsFilterUpdate(f, lat, lng, accuracyM, timestampMs) {
   // Floor the reported accuracy — phones over-promise (see TUNING guide)
   const acc = Math.max(accuracyM || PF_TUNE.FILTER_MIN_ACCURACY_M, PF_TUNE.FILTER_MIN_ACCURACY_M);
 
-  const dt = (timestampMs - f.t) / 1000;
+  let dt = (timestampMs - f.t) / 1000;
+  // Cached fixes (watchPosition maximumAge: 2000) can carry a timestamp
+  // slightly BEFORE a just-seeded filter's start time. Treat those as a short
+  // step instead of resetting, so gpsFilterSeed()'s anchor isn't thrown away.
+  if (f.variance >= 0 && dt <= 0) dt = 0.5;
   // First fix ever, or the signal dropped long enough that our velocity
   // estimate is stale → start over from this fix rather than predicting
   // through the gap on old momentum.
-  if (f.variance < 0 || dt > PF_TUNE.FILTER_RESET_GAP_S || dt <= 0) {
+  if (f.variance < 0 || dt > PF_TUNE.FILTER_RESET_GAP_S) {
     f.lat = lat; f.lng = lng;
     f.vLat = 0; f.vLng = 0;
     f.variance = acc * acc;
@@ -192,7 +222,7 @@ function captureAnchorPoint(onDone) {
     showToast(degraded
       ? `⚠️ GPS accuracy stayed poor — anchor averaged from best ${fixes.length} fixes (±${Math.round(effAcc)}m). Consider re-locking from a clearing.`
       : `✅ Anchor locked from ${fixes.length} fixes (±${Math.round(effAcc)}m)`);
-    onDone({ lat, lng });
+    onDone({ lat, lng, effAcc }); // effAcc: seeds the walk/nav filter start uncertainty
   };
 
   const watchId = navigator.geolocation.watchPosition(pos => {
@@ -535,7 +565,7 @@ function pathfinderAction() {
     // Phase 5: anchor captured from a stationary accuracy-gated averaging
     // window instead of a single (potentially 20m-off) getCurrentPosition fix.
     captureAnchorPoint(anchor => {
-      PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing };
+      PF.pointA = { lat: anchor.lat, lng: anchor.lng, bearing, effAcc: anchor.effAcc };
       drawPathfinderPoint(PF.pointA, 'A');
       drawBearingRay(PF.pointA, 'A');
       PF.step = 'walking';
@@ -571,7 +601,7 @@ function pathfinderAction() {
     }
     // Phase 5: same stationary averaging window as Point A.
     captureAnchorPoint(anchor => {
-      PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing };
+      PF.pointB = { lat: anchor.lat, lng: anchor.lng, bearing, effAcc: anchor.effAcc };
       drawPathfinderPoint(PF.pointB, 'B');
       drawBearingRay(PF.pointB, 'B');
       calculateIntersection();
@@ -613,6 +643,9 @@ function startWalkTracking() {
   PF.walkPath = [[PF.pointA.lat, PF.pointA.lng]];
   PF.lastWalkPos = null;
   PF.walkFilter = createGpsFilter();
+  // Start the filter AT the averaged Point A anchor, not at the first raw fix
+  gpsFilterSeed(PF.walkFilter, PF.pointA.lat, PF.pointA.lng,
+    PF.pointA.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M);
   if (!navigator.geolocation) return;
   PF.watchId = navigator.geolocation.watchPosition(pos => {
     PF.gpsAccuracy = pos.coords.accuracy;
@@ -625,6 +658,13 @@ function startWalkTracking() {
       pos.coords.latitude, pos.coords.longitude,
       pos.coords.accuracy, pos.timestamp);
     updateDebugPanel({ filter: `α ${PF.walkFilter.lastAlpha.toFixed(2)}, σ ${Math.sqrt(PF.walkFilter.variance).toFixed(1)}m` });
+
+    // Live distance-from-A readout — updated EVERY fix. (Field test #1: this
+    // used to update only when a new 8m path point was recorded, which made
+    // the number visibly lag behind the actual walk.)
+    const dist = haversine(PF.pointA.lat, PF.pointA.lng, here[0], here[1]);
+    const distEl = document.getElementById('pf-walk-distance');
+    if (distEl) distEl.textContent = Math.round(dist) + ' m';
 
     // Only record a path point if we've actually moved ≥8m (filters GPS noise)
     if (PF.lastWalkPos && haversine(PF.lastWalkPos[0], PF.lastWalkPos[1], here[0], here[1]) < 8) {
@@ -643,9 +683,6 @@ function startWalkTracking() {
     } else {
       PF.walkPolyline.addLatLng(here);
     }
-    const dist = haversine(PF.pointA.lat, PF.pointA.lng, here[0], here[1]);
-    const distEl = document.getElementById('pf-walk-distance');
-    if (distEl) distEl.textContent = Math.round(dist) + ' m';
   }, () => {}, { enableHighAccuracy: true, maximumAge: 2000, timeout: 8000 });
 }
 function stopWalkTracking() {
@@ -669,6 +706,10 @@ function startNavTracking() {
   PF.navTrail = [];
   PF.lastNavPos = null;
   PF.navFilter = createGpsFilter();
+  // Navigation starts while the user is still standing at Point B — seed
+  // the filter from that anchor for the same reason as startWalkTracking.
+  if (PF.pointB) gpsFilterSeed(PF.navFilter, PF.pointB.lat, PF.pointB.lng,
+    PF.pointB.effAcc || PF_TUNE.FILTER_MIN_ACCURACY_M);
 
   PF.navWatchId = navigator.geolocation.watchPosition(pos => {
     // Phase 5: alpha-beta filter replaced the old moving average here too —
@@ -701,9 +742,21 @@ function startNavTracking() {
 
     // Bearing from here to candidate
     const targetBearing = bearingBetween(here[0], here[1], PF.candidate.lat, PF.candidate.lng);
-    updateDirectionArrow(here, PF.candidate.lat, PF.candidate.lng, targetBearing);
     const turnHint = document.getElementById('pf-turn-hint');
     let relative;
+
+    // ARRIVAL HANDOVER — inside ARRIVAL_RADIUS_M the remaining distance is
+    // smaller than combined GPS error, so bearing-to-target spins randomly as
+    // the filtered position jitters past the candidate. Following it walks
+    // you in circles (field test #1). Switch from navigating to searching:
+    // drop the direction arrow and tell the user GPS has done all it can.
+    const arrived = dist <= PF_TUNE.ARRIVAL_RADIUS_M;
+    if (arrived) {
+      if (PF.directionArrow) { map.removeLayer(PF.directionArrow); PF.directionArrow = null; }
+      if (turnHint) turnHint.textContent = `🎯 ~${Math.round(dist)}m — you're inside GPS error range. Stop following the needle; search this area (tree cavities, listen for flight).`;
+    } else {
+      updateDirectionArrow(here, PF.candidate.lat, PF.candidate.lng, targetBearing);
+    }
 
     if (PF.heading !== null && !PF.manualMode) {
       // relative = how far to turn from current facing direction to face the target
@@ -711,7 +764,7 @@ function startNavTracking() {
       // Needle points at the target, displayed relative to current facing direction
       rotateNeedleTo(((relative % 360) + 360) % 360);
 
-      if (turnHint) {
+      if (turnHint && !arrived) {
         const absRel = Math.abs(relative);
         if (absRel <= 8) {
           turnHint.textContent = '✅ On target — walk forward';
@@ -725,7 +778,7 @@ function startNavTracking() {
       // Manual mode — no live heading, just show absolute bearing to target
       relative = targetBearing;
       rotateNeedleTo(targetBearing);
-      if (turnHint) turnHint.textContent = `Target bearing: ${Math.round(targetBearing)}° (use a compass)`;
+      if (turnHint && !arrived) turnHint.textContent = `Target bearing: ${Math.round(targetBearing)}° (use a compass)`;
     }
 
     updateDebugPanel({
