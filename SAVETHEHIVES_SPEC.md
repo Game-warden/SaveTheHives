@@ -212,12 +212,32 @@ Used for all user-action modals (sign-in, check-in, add hive). Slides up from bo
 | Mite-bomb risk perimeter | Alert when feral collapse logged near managed yards |
 | Guardian accounts | Commercial beekeepers register protected zones |
 
-### Phase 5 — Pathfinder Polish ⬜ Planned
-| Feature | Description |
-|---|---|
-| GPS smoothing refinement | Buffer=5, threshold=8m in place; field-test on longer walks |
-| Debug panel re-enable | Restore 🐞 button for field testing sessions |
-| Path straightness | Ongoing — complex GPS noise problem, defer until adoption proven |
+### Phase 5 — Pathfinder Polish ⬜ Planned — reserved for a dedicated session
+
+**Do not touch `pathfinder.js`, `#pathfinder-panel`, `PF.*`, `smoothPosition`, `pathIntersection`, `calculateIntersection`, walk/nav tracking, compass code, or the debug panel outside of this dedicated session.** This code is intentionally isolated from the rest of the app (see Phase 2 in the Changelog).
+
+**Critical gotcha carried over from the v2.6 bug-fix round:** `pathfinder.js` is listed in `sw.js`'s `SHELL_ASSETS` precache array. Any commit that changes `pathfinder.js` must bump `CACHE_VERSION` in `sw.js` in the *same* commit, or the fix will silently fail to reach `savethehives.org` (it'll work fine on `savethehives.pages.dev`, and a Cloudflare cache purge won't help — this is a client-side Service Worker cache, a completely different layer). See the `CACHE_VERSION` entry under Known Gotchas above for the full recovery steps if this is missed. Current value going into this phase: `v2.6.5`.
+
+**Planned technical work, in attack order** (do each step, field-test, then move to the next — don't batch them):
+
+1. **Anchor points A/B** — add `enableHighAccuracy: true` plus a stationary averaging window with accuracy gating, so the two reference points used for triangulation are captured from a stable, high-confidence GPS fix rather than a single noisy reading.
+2. **Replace `smoothPosition`'s moving average with a per-axis alpha-beta/Kalman filter**, using `coords.accuracy` as the measurement noise input. The current moving-average approach (buffer=5, 8m threshold) is what caused the v1.7/v1.8 "path curves when it shouldn't" problem — it lags behind real position changes. A proper filter should track sharper turns without the lag.
+3. **Field test** after steps 1-2 before touching anything else — confirm the anchor + filter combination actually behaves better on a real walk before adding more complexity on top.
+4. **Propagate circular standard deviation of bee-flight bearings into `confidenceRadius`**, replacing the current fixed 10° assumption, so the displayed confidence zone reflects actual bearing spread rather than a constant.
+5. **Douglas-Peucker simplification for the displayed path**, replacing the current fixed 8m move-threshold approach, for cleaner on-map path rendering.
+6. **"Search the zone" navigation UX** inside the confidence circle — lowest priority, only worth doing once the above is solid.
+
+**Constraint for all Pathfinder code written in this phase:** it must remain Sonnet-serviceable afterward (Fable's access ends shortly after this phase, per the original reason this work was split out) — use named tuning constants (not magic numbers), heavy inline comments explaining *why* a constant has its value, and maintain a short TUNING guide (comment block or separate doc) listing each constant, what it controls, and what symptom to look for when adjusting it.
+
+| Feature | Description | Priority |
+|---|---|---|
+| Anchor point capture (step 1) | `enableHighAccuracy` + stationary averaging + accuracy gating | 1st |
+| Alpha-beta/Kalman filter (step 2) | Replaces moving-average `smoothPosition`, fixes v1.7/v1.8 lag-induced path curving | 1st |
+| Field test | Validate 1+2 on a real walk before continuing | 2nd |
+| Confidence radius from bearing std-dev (step 4) | Replaces fixed 10° assumption | 3rd |
+| Douglas-Peucker path simplification (step 5) | Replaces fixed 8m move threshold | 4th |
+| "Search the zone" nav UX (step 6) | Lowest priority | 5th |
+| Debug panel re-enable | Restore 🐞 button for field testing sessions | as needed |
 
 ---
 
@@ -236,6 +256,7 @@ Used for all user-action modals (sign-in, check-in, add hive). Slides up from bo
 | v2.4 | Jun 30 2026 | **Deployed to production** at savethehives.org — v2.4 is the live version. Includes all security hardening, privacy policy, About modal expanded (How to Contribute, Data & Research, contact), coordinates always visible in popups, light/dark mode fixed throughout all modals and bars, `hello@savethehives.org` email routing active. |
 | v2.5 | Jul 2 2026 | **Housekeeping & community feedback** — zoom-adaptive basemap (Positron → Voyager), coordinate display reverted to 2 decimals for poaching-risk mitigation, PWA manifest icons added, popup clipping fixed on narrow phones, Ideas & Voting feature built (see `ideas_and_voting.sql`). |
 | v2.6 | Jul 5-6 2026 | **Infrastructure & PWA batch.** Phase 0: repo connected to GitHub (`Game-warden/SaveTheHives`), Cloudflare Pages switched from manual zip upload to automatic Git-based deploys on push to `main`; `savethehives.html` retired, `index.html` is the single canonical source. Phase 1: fixed the placeholder-manifest override bug that silently broke PWA installability; de-duplicated ~220KB of embedded base64 images into `logo.jpg` and `images/honeybee-on-comb.jpg`. Phase 2: split the former single-file `index.html` into `styles.css`, `app.js`, and `pathfinder.js` (plain scripts, no bundler, no ES modules — inline `onclick` handlers still need global scope). Phase 3: added `updated_at` tracking + delta sync (hives cache in IndexedDB, only rows changed since last visit are re-fetched, first-ever load still does the full paginated fetch); replaced the two-step check-in insert+update with an atomic `submit_checkin()` Postgres RPC (also fixed check-ins always logging `user_id = null`); added a service worker (`sw.js`) for offline app-shell caching (cache-first for app shell/CDN libs, network-first capped cache for map tiles, network-only for Supabase/Turnstile/geocoding). Tags: `v2.6-a` (Phase 1 checkpoint), `v2.6-b` (Phase 2 checkpoint), `v2.6` (full release). |
+| v2.6 bug-fix + UX round | Jul 6 2026 | **Five backlog bugs fixed, About panel reorganized, housekeeping closed out.** (1) Missing `hives.year` column — added via `add_year_column.sql`, backfilled from `submitted_at`. (2) Zip/postal search resolving to the wrong country — `doSmartSearch()` now declines bare-numeric queries with a toast pointing to city/landmark search instead of silently geocoding worldwide. (3) Unreadable light-mode status messages — `#toast` background was hardcoded to a near-black value instead of `var(--surface)`; fixed to follow the theme. (4) Ideas & Voting 404 — root cause was `ideas_and_voting.sql` never having been run in Supabase (not a missing-apikey code bug as originally suspected); running it once fixed it. (5) Intermittent sign-in double `#access_token` redirect — `submitSignIn()`'s `emailRedirectTo: window.location.href` could capture a stale token hash still sitting in the address bar; fixed by stripping the hash via `history.replaceState()` once `SIGNED_IN` fires. **About panel reorganized:** sign-in status/button and dark mode toggle promoted to the top (previously buried near the bottom); hero photo banner removed; globe emoji in the title replaced with the app's own `logo.jpg`; platform description trimmed to one paragraph; a one-line caption added under the sign-in row explaining what it unlocks; dark mode toggle label now correctly reflects the active theme ("🌙 Dark Mode" vs "☀️ Light Mode") instead of always reading "Dark Mode." **Housekeeping:** stray `fresh-start` branch deleted (redundant, already an ancestor of `main`); `pwa-deployment` branch kept intentionally (unrelated abandoned React/Vite rebuild, possibly useful later for its DCA-heatmap reference code — see Phase 3 Resilience & Research Layer below); confirmed only one Cloudflare Turnstile widget exists (no duplicate to delete); Browser Cache TTL setting ("Respect Existing Headers") made a permanent decision rather than a temporary workaround. **Also discovered and documented:** the root cause of a multi-hour "fix works on .pages.dev but not on .org" mystery was `sw.js`'s `CACHE_VERSION` not being bumped when shell files changed — see Known Gotchas above. `CACHE_VERSION` was bumped five times this round (`v2.6.0` → `v2.6.5`) as commits touched shell files; this is a separate, more granular internal counter from the app's own displayed version badge and is not meant to track 1:1 with it. |
 
 ---
 
@@ -257,8 +278,8 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 
 - **Supabase Attack Protection provider dropdown defaults to hCaptcha** — must manually switch to "Turnstile by Cloudflare" or Turnstile tokens will always be rejected with `invalid-input-response`
 - **Turnstile widget domains** — `localhost` must be in the allowed hostnames list on the SaveTheHives Auth widget in Cloudflare for local testing to work
-- **Two Turnstile widgets exist** in the Cloudflare account — only "SaveTheHives Auth" is wired to the app; the other is unused
 - **Toast z-index** — sign-in modal is z-index 9100; toast must be ≥ 9100 to be visible while modal is open (currently 9999)
+- **Service worker (`sw.js`) precaches shell files by `CACHE_VERSION`** — any commit that changes `app.js`, `styles.css`, `pathfinder.js`, `index.html`, `manifest.json`, or any precached image MUST bump `CACHE_VERSION` in the same commit, or returning visitors keep getting the old cached file indefinitely (a Cloudflare cache purge does not fix this — it's client-side Cache Storage, a separate layer). Symptom if missed: "the fix works on savethehives.pages.dev but not on savethehives.org." Current value: `v2.6.5`. Full manual recovery steps if this happens anyway: DevTools → Application → Service Workers → Unregister, then Storage → Clear site data, close the tab, reopen fresh, hard reload.
 
 ## 9. Privacy Decisions & Rationale
 
@@ -278,13 +299,10 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 - Mating radius with 1,000+ visible pins may be slow on low-end devices — see [Mapping at Scale](#mapping-at-scale-around-5000-hives) below
 - Magic link: savethehives.org and www.savethehives.org both working; ensure both in Supabase Redirect URLs
 - Photos deferred to v3 — existing `photo_url` values in DB still display in popups (read-only); upload UI removed
-- Two Cloudflare Turnstile widgets exist on the account, only "SaveTheHives Auth" is wired to the app — the unused one should be deleted manually in the Cloudflare dashboard (Account → Turnstile); not something a code change can do
-- **`hives` table has no `year` column**, despite the app reading/writing `row.year` in `dbRowToHive()` and `submitHive()` — the read side tolerates this fine (falls back to null), but the write side breaks Add Hive with "Could not find the year column of 'hives' in the schema cache." Needs a decision: add the column via SQL, or stop sending `year` in the insert and derive it from `submitted_at` instead.
-- **Zip/postal code search can resolve to the wrong country** (geocoding is worldwide with no country bias) — e.g. searching a US zip code can jump the map overseas
-- **A shared status/error-message UI component is unreadable in light mode** (dark text, no contrast) — reproduced on both the search "Locating…" message and the Submit Hive Record error toast; readable fine in dark mode, so it's a light-mode-specific CSS/contrast bug
-- **Ideas & Voting fetch is missing its Supabase `apikey`** — the `feature_ideas_with_votes` request 404s with "No API key found in request," so the About modal's Ideas & Voting section always shows as unavailable
-- Sign-in occasionally redirects with a malformed double `##access_token=...` URL fragment and doesn't show as signed in on the first attempt — re-tested and worked cleanly on a second attempt, so this may be intermittent rather than reliably broken; worth re-confirming before spending time on it
-- **Cloudflare Browser Cache TTL** is currently set to "Respect Existing Headers" (changed from 4 hours on 2026-07-06 during active v2.6 testing, to stop fighting stale browser caches after each deploy) — revisit and decide on a permanent value once v2.6 settles
+- `images/honeybee-on-comb.jpg` is no longer referenced anywhere in `index.html` (removed from the About panel Jul 6 2026) — still listed in `sw.js`'s precache list, harmless but could be cleaned up
+- **Cloudflare Browser Cache TTL** — permanent decision made 2026-07-06: kept at "Respect Existing Headers." Not a placeholder, don't flag this as pending — see Changelog.
+
+All five bugs previously tracked here (missing `hives.year` column, zip search resolving to the wrong country, unreadable light-mode status messages, Ideas & Voting 404, intermittent sign-in double-hash redirect) were fixed and verified cross-device on 2026-07-06 — see Changelog below for root causes and fixes. The Cloudflare Turnstile "duplicate widget" item was also checked and turned out to be stale — only one widget (`SaveTheHives Auth`) exists on the account; nothing to delete.
 
 ---
 
