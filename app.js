@@ -28,6 +28,16 @@ db.auth.onAuthStateChange((_event, session) => {
     closeSignInModal();
     setTimeout(() => openAddPanelUnified({}), 300);
   }
+  // Bug fix: once a session is parsed out of the URL's #access_token=...
+  // hash, strip that hash from the address bar. Otherwise it lingers, and
+  // if a later sign-in request captures window.location.href (see
+  // emailRedirectTo in submitSignIn()) while the old hash is still present,
+  // the next magic-link redirect ends up with a corrupted double hash that
+  // fails to parse — the intermittent "click the link, still not signed in"
+  // bug.
+  if (_event === 'SIGNED_IN' && window.location.hash.includes('access_token')) {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+  }
 });
 
 const TYPE_COLORS = {
