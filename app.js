@@ -1195,31 +1195,31 @@ async function submitCheckin() {
 function doSmartSearch() {
   const val = document.getElementById('smart-search-input').value.trim();
   if (!val) return;
+  // Bare numeric queries (zip/postal codes) are unreliable worldwide —
+  // the same digits can match a real place in an entirely different
+  // country, and there's no good way to disambiguate a bare number with
+  // no country context. Rather than silently landing somewhere wrong,
+  // decline up front and point to a more reliable query type. This
+  // matches the same "zip codes are unreliable globally" call already
+  // made for the filter-drawer search (see doSearch() below).
+  if (/^\d[\d\s-]*$/.test(val)) {
+    showToast('Zip codes aren\'t reliable worldwide — try a city or landmark name instead');
+    return;
+  }
   showToast('Locating…');
-  // Bias results toward the map's current center — without this, an
-  // ambiguous query like a bare US zip code can match a same-numbered
-  // postal code in a different country entirely. This keeps search
-  // worldwide (no hard country restriction) while strongly preferring
-  // matches near wherever the user is already looking. Photon's own
-  // relevance ranking can still put a same-numbered match in another
-  // country first despite the bias params, so we fetch several
-  // candidates and explicitly pick whichever is geographically closest
-  // to the map center ourselves, rather than trusting result order.
+  // Bias results toward the map's current center so that, e.g., a search
+  // for a common place name prefers the instance nearest the user over
+  // a same-named place elsewhere in the world.
   const bias = map.getCenter();
-  const biasParams = `&lat=${bias.lat}&lon=${bias.lng}&location_bias_scale=0.9&zoom=${Math.round(map.getZoom())}`;
-  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}${biasParams}&limit=5`)
+  const biasParams = `&lat=${bias.lat}&lon=${bias.lng}&location_bias_scale=0.5`;
+  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}${biasParams}&limit=1`)
     .then(r => r.json())
     .then(data => {
       if (!data.features?.length) {
         showToast('Location not found — try a city name or landmark');
         return;
       }
-      const nearest = data.features.reduce((best, f) => {
-        const [flng, flat] = f.geometry.coordinates;
-        const d = haversine(bias.lat, bias.lng, flat, flng);
-        return (!best || d < best.d) ? { f, d } : best;
-      }, null).f;
-      const [lng, lat] = nearest.geometry.coordinates;
+      const [lng, lat] = data.features[0].geometry.coordinates;
       map.setView([lat, lng], 11);
     })
     .catch(() => showToast('Search unavailable — check your connection'));
