@@ -135,13 +135,144 @@ async function init() {
 }
 
 // ═══════════════════════════════════════
+// INDEXEDDB CACHE (delta sync — Phase 3 v2.6)
+// ═══════════════════════════════════════
+// Minimal wrapper, no libraries. Two object stores: "hives" (raw Supabase
+// rows, keyed by id) and "meta" (small key/value bookkeeping — just
+// lastSync for now). Every read/write is wrapped in try/catch — if
+// IndexedDB is unavailable or fails for any reason, we silently fall back
+// to the old always-full-fetch behavior rather than breaking the app.
+const IDB_NAME = 'savethehives-cache';
+const IDB_VERSION = 1;
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = () => {
+      const dbi = req.result;
+      if (!dbi.objectStoreNames.contains('hives')) dbi.createObjectStore('hives', { keyPath: 'id' });
+      if (!dbi.objectStoreNames.contains('meta')) dbi.createObjectStore('meta', { keyPath: 'key' });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGetAllHives() {
+  try {
+    const dbi = await idbOpen();
+    return await new Promise((resolve, reject) => {
+      const tx = dbi.transaction('hives', 'readonly');
+      const req = tx.objectStore('hives').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn('IndexedDB read failed, falling back to full load:', e);
+    return [];
+  }
+}
+
+async function idbPutHives(rows) {
+  if (!rows || !rows.length) return;
+  try {
+    const dbi = await idbOpen();
+    await new Promise((resolve, reject) => {
+      const tx = dbi.transaction('hives', 'readwrite');
+      const store = tx.objectStore('hives');
+      rows.forEach(r => store.put(r));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) {
+    console.warn('IndexedDB write failed (cache not updated, app still works from network):', e);
+  }
+}
+
+async function idbGetMeta(key) {
+  try {
+    const dbi = await idbOpen();
+    return await new Promise((resolve, reject) => {
+      const tx = dbi.transaction('meta', 'readonly');
+      const req = tx.objectStore('meta').get(key);
+      req.onsuccess = () => resolve(req.result ? req.result.value : null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+async function idbSetMeta(key, value) {
+  try {
+    const dbi = await idbOpen();
+    await new Promise((resolve, reject) => {
+      const tx = dbi.transaction('meta', 'readwrite');
+      tx.objectStore('meta').put({ key, value });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) {
+    console.warn('IndexedDB meta write failed:', e);
+  }
+}
+
+// Latest updated_at among a batch of raw rows, for advancing the sync
+// cursor. Falls back to the current cursor if a row is missing it.
+function latestUpdatedAt(rows, fallback) {
+  return rows.reduce((max, r) => (r.updated_at && r.updated_at > max) ? r.updated_at : max, fallback);
+}
+
+// ═══════════════════════════════════════
 // LOAD DATA FROM SUPABASE
 // ═══════════════════════════════════════
+// Only the columns dbRowToHive() actually reads — not '*' — to keep both
+// the full load and every delta sync as light as possible.
+const HIVE_COLUMNS = 'id, legacy_id, name, latitude, longitude, hivetype, description, city, state, zip, notes, submitted_at, created_at, photo_url, status, last_verified_at, user_added, year, updated_at';
+
 async function loadHivesFromSupabase() {
+  const cached = await idbGetAllHives();
+  const lastSync = await idbGetMeta('lastSync');
+
+  if (cached.length && lastSync) {
+    // Render from cache immediately — instant paint on repeat visits.
+    cached.forEach(row => { const h = dbRowToHive(row); allHives.push(h); addMarker(h); });
+    visibleHives = [...allHives];
+    updateCounts();
+    showToast(`🐝 ${cached.length.toLocaleString()} hives loaded`);
+
+    // Then fetch only what changed since last sync and merge it in.
+    const { data, error } = await db.from('hives').select(HIVE_COLUMNS)
+      .gt('updated_at', lastSync).order('updated_at');
+    if (error) {
+      console.warn('Delta sync fetch failed (showing cached data only):', error);
+      return;
+    }
+    if (data && data.length) {
+      await idbPutHives(data);
+      await idbSetMeta('lastSync', latestUpdatedAt(data, lastSync));
+      data.forEach(row => {
+        const h = dbRowToHive(row);
+        const idx = allHives.findIndex(x => x.id === h.id);
+        if (idx === -1) {
+          allHives.push(h);
+          addMarker(h);
+        } else {
+          if (allHives[idx]._marker) clusterGroup.removeLayer(allHives[idx]._marker);
+          allHives[idx] = h;
+          addMarker(h);
+        }
+      });
+      filterType(activeFilter); // re-applies current filter/keyword + refreshes counts
+    }
+    return;
+  }
+
+  // First-ever load (no cache yet): existing full paginated fetch.
   let all = [];
   let from = 0;
   while (true) {
-    const { data, error } = await db.from('hives').select('*').range(from, from+999).order('id');
+    const { data, error } = await db.from('hives').select(HIVE_COLUMNS).range(from, from+999).order('id');
     if (error || !data || !data.length) break;
     all = all.concat(data);
     if (data.length < 1000) break;
@@ -149,6 +280,11 @@ async function loadHivesFromSupabase() {
   }
   all.forEach(row => { const h = dbRowToHive(row); allHives.push(h); addMarker(h); });
   showToast(`🐝 ${all.length.toLocaleString()} hives loaded`);
+
+  if (all.length) {
+    await idbPutHives(all);
+    await idbSetMeta('lastSync', latestUpdatedAt(all, '1970-01-01T00:00:00Z'));
+  }
 }
 
 function dbRowToHive(row) {
