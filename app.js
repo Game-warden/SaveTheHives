@@ -1200,17 +1200,26 @@ function doSmartSearch() {
   // ambiguous query like a bare US zip code can match a same-numbered
   // postal code in a different country entirely. This keeps search
   // worldwide (no hard country restriction) while strongly preferring
-  // matches near wherever the user is already looking.
+  // matches near wherever the user is already looking. Photon's own
+  // relevance ranking can still put a same-numbered match in another
+  // country first despite the bias params, so we fetch several
+  // candidates and explicitly pick whichever is geographically closest
+  // to the map center ourselves, rather than trusting result order.
   const bias = map.getCenter();
-  const biasParams = `&lat=${bias.lat}&lon=${bias.lng}&location_bias_scale=0.5`;
-  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}${biasParams}&limit=1`)
+  const biasParams = `&lat=${bias.lat}&lon=${bias.lng}&location_bias_scale=0.9&zoom=${Math.round(map.getZoom())}`;
+  fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(val)}${biasParams}&limit=5`)
     .then(r => r.json())
     .then(data => {
       if (!data.features?.length) {
         showToast('Location not found — try a city name or landmark');
         return;
       }
-      const [lng, lat] = data.features[0].geometry.coordinates;
+      const nearest = data.features.reduce((best, f) => {
+        const [flng, flat] = f.geometry.coordinates;
+        const d = haversine(bias.lat, bias.lng, flat, flng);
+        return (!best || d < best.d) ? { f, d } : best;
+      }, null).f;
+      const [lng, lat] = nearest.geometry.coordinates;
       map.setView([lat, lng], 11);
     })
     .catch(() => showToast('Search unavailable — check your connection'));
