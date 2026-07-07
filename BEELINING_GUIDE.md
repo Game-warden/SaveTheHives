@@ -230,6 +230,28 @@ So think of technology as a *logbook and a rough guide*, not an autopilot. The c
 
 ---
 
+## MODULE 9 — The Waggle Dance (How Bees Beeline to Each Other)
+
+> **Audience:** the curious, students, anyone · **Level:** beginner · **Read:** 3 min · **Prereq:** none (pairs beautifully with Module 3)
+
+Here's the wonderful part: bees have been beelining to *each other* for millions of years. When a scout finds a rich patch of flowers, she flies home and — in the pitch dark of the hive, on the vertical face of the comb — she *dances* the directions to her sisters. It's called the **waggle dance**, and decoding it won Karl von Frisch a share of the 1973 Nobel Prize.[6][7]
+
+The dance is a figure-eight with a straight "waggle run" up the middle, where she shimmies her abdomen rapidly side to side. Three things are encoded in it, and they are exactly the three things *you* work out when you beeline:[6][7][13]
+
+- **Direction — the angle of the run.** The angle of the waggle run away from straight-up equals the angle of the flowers away from the sun. Straight up means "fly toward the sun." Sixty degrees to the right of vertical means "sixty degrees to the right of the sun." She translates the sky into gravity, in the dark, and her sisters translate it back into a heading when they fly out.
+
+- **Distance — the length of the run.** The longer she waggles, the farther the food. Roughly one second of waggling per kilometre. A quick little run means "just outside"; a long one means "pack a lunch."
+
+- **Quality — the vigor of the dance.** The faster she waggles and the more times she repeats the figure-eight, the better the find. An ecstatic, tireless dance means "drop everything, this patch is incredible." A lackluster one recruits fewer takers. The colony effectively *votes with its feet*, sending more foragers to the richest sources.[13]
+
+There's even a simpler version — the **round dance**, a plain little circle with no waggle, which means "the food is close, just go out and search nearby." Near gets a round dance; far gets a waggle dance. (Sound familiar? It's the same near/far logic you use when a bee's round-trip time is under three minutes versus twenty.)
+
+So when you stand in a field reading a bee's flight line, you're doing by eye and compass what she does by dance and gravity. You and the bee are speaking the same language — direction, distance, and how good the destination is. That's not a metaphor the app invented; it's the actual structure of how bees share a location. *(SaveTheHives borrows these same three axes — direction, distance, quality — to guide you through this very guide. Watch for it.)*
+
+*[DIAGRAM: a bee on vertical comb mid-waggle-run, the run angled ~30° from vertical, a sun icon up and to the side, with the equal angles marked; labels "angle = direction," "length = distance," "vigor = quality." Interactive version: drag the sun and the dance rotates to match.]*
+
+---
+
 ## READING TRACKS — Three Ready-Made Paths
 
 **Track 1 — "I'm just curious" (the browser / social-media visitor)**
@@ -271,5 +293,6 @@ Short lines drawn from the guide, for posts, captions, and flyers:
 10. Betterbee — *Bee Lining Box, Comb and Plug* (product + method description). https://www.betterbee.com/bee-lining-bee-hunting/blb-bee-lining-box.asp
 11. PerfectBee — *Bee Lining Box.* https://www.perfectbee.com/store/accessories-and-tools/nucs-and-swarm-retrieval/bee-lining-box
 12. The Apiarist — *How to: Queen marking* (bee-safe marking pens and technique). https://theapiarist.org/how-to-queen-marking/
+13. *The Waggle Dance — How Bees Encode Distance and Direction*, Apiary Project; and *Waggle dance*, Wikipedia (vigor/quality and round-dance detail). https://apiaryproject.com/blog/waggle-dance-how-bees-communicate · https://en.wikipedia.org/wiki/Waggle_dance
 
 *Guide compiled July 2026 for SaveTheHives.org. Facts are sourced above; where sources give ranges (e.g., round-trip timing), the guide presents them as field rules of thumb, not precision figures. The primary how-to lineage is Edgell (1949, public domain) and Seeley (2016).*
