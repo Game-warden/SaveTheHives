@@ -27,9 +27,9 @@ burying it in the About modal, because the content is outreach-first and
 deserves top-level discoverability.
 
 - Bottom nav becomes: **Map · Add · Learn · About** (four items).
-- Reuse one of the currently-hidden nav slots (Records or Pathfinder) for
-  Learn rather than adding a fifth item — four is the comfortable max on a
-  phone tab bar. Records/Pathfinder stay reachable via `setTab()` / `?pf=1`.
+- DECIDED: reuse the hidden **Records** nav slot for Learn (Records is not in
+  active use; this keeps Pathfinder's `?pf=1` field-test wiring untouched).
+  Records stays reachable via `setTab('list')` if needed later.
 - Icon: a compass or open-book outline glyph in the honey accent.
 - Also drop a small cross-link card in the About modal ("New: Learn to
   beeline →") so people who explore About still find it.
@@ -69,8 +69,31 @@ Three levels, matching the mockups:
 **Content source of truth:** `BEELINING_GUIDE.md`. Each `## MODULE n` is one
 reader screen. Its metadata line (audience/level/read/prereq) drives the chips
 and the ordering. Don't re-author facts in code — pull from the guide so the
-two never drift. When the guide changes, the app should reflect it (ideally
-the module content is data, not hardcoded markup).
+two never drift.
+
+**Content model — DECIDED: data-driven, not hardcoded per-module HTML.**
+Module content lives in a JS data structure; a single `renderModule()` builds
+every reader screen from it. Rationale (reviewed with Ronnie): one place to
+edit reader layout, chips/progress/soft-locks work uniformly, adding a module
+is adding one object, and the "Follow the Dance" paths become plain arrays of
+module IDs. Shape:
+
+```js
+const MODULES = [
+  { id: 1, track: ['curious','tryit'], title: "What beelining is",
+    level: "beginner", readMin: 2, diagram: "beeline-hero",
+    blocks: [ "para text…", { type:'list', items:[…] } ], next: 2 },
+  // …one object per MODULE n in BEELINING_GUIDE.md
+];
+const TRACKS = { curious:[1,2,9,3], tryit:[1,3,4,5,6,7], maker:[3,9,4,6,8] };
+```
+
+Keep `blocks` simple (paragraphs + the occasional list/callout) so the guide's
+prose maps in almost 1:1. `diagram` is an id into the SVG set (§5). Progress
+state (which modules are read) can live in a plain JS/in-memory object or
+`localStorage` — the app already uses `localStorage` for dark mode, so that's
+consistent. This is the app's first content-as-data surface; keep it small and
+readable, no framework.
 
 ---
 
