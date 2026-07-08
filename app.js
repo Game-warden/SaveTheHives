@@ -1631,69 +1631,134 @@ function lvIconSVG(name) {
 }
 
 // ── SVG diagrams ──
+// Restrained honey-toned line art (thin strokes, lots of negative space) —
+// reads as an extension of the app's existing icon language rather than a
+// separate flat-cartoon illustration layer. Reused motifs (mini bee, flower
+// glyph, tree outline) are drawn fresh in each function to keep each one a
+// standalone string, but share the same visual vocabulary throughout.
+function lvMiniBee(x, y, rotate) {
+  return `<g transform="translate(${x} ${y}) rotate(${rotate})">
+    <ellipse cx="0" cy="0" rx="5.4" ry="3.2" fill="none" stroke="var(--honey-dark)" stroke-width="1.4"/>
+    <line x1="-2.2" y1="-3.2" x2="-2.2" y2="3.2" stroke="var(--honey-dark)" stroke-width="1"/>
+    <line x1="1.6" y1="-3.2" x2="1.6" y2="3.2" stroke="var(--honey-dark)" stroke-width="1"/>
+    <ellipse cx="-1" cy="-4.6" rx="4.6" ry="2.4" fill="none" stroke="var(--honey)" stroke-width="1"/>
+  </g>`;
+}
+function lvMiniTree(x, y) {
+  return `<g transform="translate(${x} ${y})">
+    <path d="M-22 30 Q-26 4 -6 -6 Q2 -20 16 -12 Q30 -6 24 14 Q30 24 20 32 Q0 40 -22 30 Z" fill="none" stroke="var(--tree-dark)" stroke-width="1.8"/>
+    <line x1="0" y1="30" x2="0" y2="46" stroke="var(--tree-dark)" stroke-width="2"/>
+  </g>`;
+}
+
 function lvDiagramSVG(id) {
   if (id === 'hero') {
-    return `<svg viewBox="0 0 400 220" role="img" aria-label="A bee flying a dashed line from flowers to a distant tree.">
-      <rect x="0" y="0" width="400" height="220" fill="var(--sky)"/>
-      <path d="M0 150 Q120 130 220 145 T400 140 L400 220 L0 220 Z" fill="var(--ground)"/>
-      <g transform="translate(320 66)">
-        <rect x="-5" y="10" width="10" height="42" rx="3" fill="var(--tree-dark)"/>
-        <circle cx="0" cy="2" r="26" fill="var(--tree)"/>
-        <circle cx="-16" cy="12" r="17" fill="var(--tree)"/>
-        <circle cx="16" cy="12" r="17" fill="var(--tree)"/>
+    return `<svg viewBox="0 0 400 150" role="img" aria-label="A bee flying a dashed line from a small flower to a distant tree.">
+      <line x1="16" y1="120" x2="384" y2="114" stroke="var(--border)" stroke-width="1.5"/>
+      ${lvMiniTree(322, 68)}
+      <g stroke="var(--honey)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <g transform="translate(54 110)"><line x1="0" y1="-7" x2="0" y2="7"/><line x1="-7" y1="0" x2="7" y2="0"/><line x1="-5" y1="-5" x2="5" y2="5"/><line x1="-5" y1="5" x2="5" y2="-5"/><circle r="2" fill="var(--honey)" stroke="none"/></g>
+        <g transform="translate(72 118) scale(0.65)"><line x1="0" y1="-7" x2="0" y2="7"/><line x1="-7" y1="0" x2="7" y2="0"/><circle r="2" fill="var(--honey)" stroke="none"/></g>
+        <g transform="translate(38 114) scale(0.55)"><line x1="0" y1="-7" x2="0" y2="7"/><line x1="-7" y1="0" x2="7" y2="0"/><circle r="2" fill="var(--honey)" stroke="none"/></g>
       </g>
-      <g transform="translate(55 168)">
-        <circle r="10" fill="#e05a8a"/><circle cx="16" cy="4" r="9" fill="#e05a8a"/><circle cx="-14" cy="6" r="9" fill="#e05a8a"/>
-        <circle r="4" fill="#ffd166"/><circle cx="16" cy="4" r="3.5" fill="#ffd166"/><circle cx="-14" cy="6" r="3.5" fill="#ffd166"/>
-      </g>
-      <defs><marker id="lv-arrow-hero" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="var(--honey)"/></marker></defs>
-      <line x1="70" y1="150" x2="300" y2="80" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-hero)"/>
-      <g transform="translate(150 122) rotate(-24)">
-        <ellipse cx="0" cy="0" rx="6" ry="3.6" fill="#3a2c10"/>
-        <rect x="-3.5" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
-        <rect x="1" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
-        <ellipse cx="-1" cy="-5" rx="5" ry="2.6" fill="#fff" opacity="0.85"/>
-      </g>
+      <line x1="76" y1="104" x2="296" y2="76" stroke="var(--honey)" stroke-width="1.8" stroke-dasharray="5 5"/>
+      ${lvMiniBee(182, 90, -13)}
     </svg>`;
   }
   if (id === 'triangulation') {
-    return `<svg viewBox="0 0 400 300" role="img" aria-label="Two observer positions A and B, each with a dashed bearing line; the lines cross at a bee tree.">
-      <defs><marker id="lv-arrow-tri" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="var(--honey)"/></marker></defs>
-      <rect x="0" y="0" width="400" height="300" fill="var(--sky)"/>
-      <path d="M0 210 Q120 188 220 205 T400 200 L400 300 L0 300 Z" fill="var(--ground)"/>
-      <g transform="translate(300 96)">
-        <rect x="-5" y="10" width="10" height="42" rx="3" fill="var(--tree-dark)"/>
-        <circle cx="0" cy="2" r="26" fill="var(--tree)"/>
-        <circle cx="-16" cy="12" r="17" fill="var(--tree)"/>
-        <circle cx="16" cy="12" r="17" fill="var(--tree)"/>
-        <circle cx="0" cy="20" r="7" fill="var(--tree-dark)" opacity="0.55"/>
+    return `<svg viewBox="0 0 400 240" role="img" aria-label="Two observer positions A and B, each with a dashed bearing line; the lines cross at a bee tree.">
+      <line x1="14" y1="200" x2="386" y2="196" stroke="var(--border)" stroke-width="1.5"/>
+      ${lvMiniTree(300, 82)}
+      <line x1="70" y1="196" x2="300" y2="94" stroke="var(--honey)" stroke-width="1.8" stroke-dasharray="5 5"/>
+      <line x1="240" y1="210" x2="300" y2="94" stroke="var(--honey)" stroke-width="1.8" stroke-dasharray="5 5"/>
+      <g transform="translate(300 94)" stroke="var(--honey-dark)" stroke-width="2" stroke-linecap="round">
+        <line x1="-6" y1="-6" x2="6" y2="6"/><line x1="-6" y1="6" x2="6" y2="-6"/>
       </g>
-      <line x1="72" y1="238" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-tri)"/>
-      <line x1="250" y1="252" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-tri)"/>
-      <g transform="translate(300 112)" stroke="var(--honey-dark)" stroke-width="2.6" stroke-linecap="round">
-        <line x1="-7" y1="-7" x2="7" y2="7"/><line x1="-7" y1="7" x2="7" y2="-7"/>
+      <g transform="translate(70 196)"><circle r="13" fill="var(--surface)" stroke="var(--honey)" stroke-width="2"/><text x="0" y="4.5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="13" fill="var(--honey-dark)">A</text></g>
+      <g transform="translate(240 210)"><circle r="13" fill="var(--surface)" stroke="var(--honey)" stroke-width="2"/><text x="0" y="4.5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="13" fill="var(--honey-dark)">B</text></g>
+      ${lvMiniBee(172, 140, -27)}
+    </svg>`;
+  }
+  if (id === 'terrain-chooser') {
+    return `<svg viewBox="0 0 320 320" role="img" aria-label="Four terrain types, each with its recommended beelining method.">
+      <g fill="var(--surface2)" stroke="var(--border)" stroke-width="1.2">
+        <rect x="10" y="10" width="140" height="140" rx="12"/>
+        <rect x="170" y="10" width="140" height="140" rx="12"/>
+        <rect x="10" y="170" width="140" height="140" rx="12"/>
+        <rect x="170" y="170" width="140" height="140" rx="12"/>
       </g>
-      <g transform="translate(72 238)"><circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/><text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">A</text></g>
-      <g transform="translate(250 252)"><circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/><text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">B</text></g>
-      <g transform="translate(176 172) rotate(-29)">
-        <ellipse cx="0" cy="0" rx="6" ry="3.6" fill="#3a2c10"/>
-        <rect x="-3.5" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
-        <rect x="1" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
-        <ellipse cx="-1" cy="-5" rx="5" ry="2.6" fill="#fff" opacity="0.85"/>
+      <g transform="translate(80 80)" stroke="var(--honey)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <line x1="-32" y1="18" x2="32" y2="18"/>
+        <line x1="-20" y1="18" x2="-20" y2="8"/><line x1="-6" y1="18" x2="-6" y2="4"/><line x1="10" y1="18" x2="10" y2="9"/><line x1="24" y1="18" x2="24" y2="5"/>
+      </g>
+      <g transform="translate(240 80)" stroke="var(--honey)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <path d="M-32 -6 Q-16 10 0 -6 T32 -6"/>
+        <path d="M-32 10 Q-16 26 0 10 T32 10"/>
+      </g>
+      <g transform="translate(80 240)" stroke="var(--honey)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <path d="M-32 18 L0 -14 L32 18"/>
+        <circle cx="0" cy="-14" r="3" fill="var(--honey)" stroke="none"/>
+      </g>
+      <g transform="translate(240 240)" stroke="var(--tree-dark)" stroke-width="1.5" fill="none">
+        <path d="M-22 14 L-10 -8 L2 14 Z"/>
+        <path d="M-4 16 L10 -6 L24 16 Z"/>
+        <path d="M-14 18 L-2 0 L10 18 Z" opacity="0.7"/>
+      </g>
+      <g font-family="Outfit, sans-serif" font-weight="700" fill="var(--honey-dark)">
+        <circle cx="128" cy="128" r="14" fill="var(--surface)" stroke="var(--honey)" stroke-width="1.6"/><text x="128" y="133" text-anchor="middle" font-size="15">A</text>
+        <circle cx="288" cy="128" r="14" fill="var(--surface)" stroke="var(--honey)" stroke-width="1.6"/><text x="288" y="133" text-anchor="middle" font-size="15">B</text>
+        <circle cx="128" cy="288" r="14" fill="var(--surface)" stroke="var(--honey)" stroke-width="1.6"/><text x="128" y="293" text-anchor="middle" font-size="15">C</text>
+        <circle cx="288" cy="288" r="17" fill="var(--surface)" stroke="var(--honey)" stroke-width="1.6"/><text x="288" y="292" text-anchor="middle" font-size="10">B→A</text>
       </g>
     </svg>`;
   }
-  // Remaining shot-list diagrams (terrain-chooser, bee-box, waggle-decoder,
-  // round-trip strip) get a simple placeholder for now — drawn progressively
-  // per LEARN_TAB_BUILD_BRIEF.md §6 build order, step 4.
-  return `<svg viewBox="0 0 400 180" role="img" aria-label="Illustration coming soon">
-    <rect x="0" y="0" width="400" height="180" fill="var(--surface2)"/>
-    <g transform="translate(200 90)">
-      <path d="M-26 -15 L0 -30 L26 -15 L26 15 L0 30 L-26 15 Z" fill="none" stroke="var(--honey)" stroke-width="2.5" opacity="0.55"/>
-      <ellipse cx="0" cy="0" rx="9" ry="5.4" fill="var(--honey)" opacity="0.85"/>
-      <rect x="-5.2" y="-5.4" width="4" height="10.8" fill="var(--honey-light)"/>
-      <rect x="1.2" y="-5.4" width="4" height="10.8" fill="var(--honey-light)"/>
-    </g>
+  if (id === 'bee-box') {
+    return `<svg viewBox="0 0 400 220" role="img" aria-label="A two-compartment bee box: catch chamber, feed chamber with comb, sliding lid; plus the field kit.">
+      <g transform="translate(200 90)">
+        <rect x="-110" y="-46" width="220" height="92" rx="10" fill="none" stroke="var(--honey-dark)" stroke-width="2"/>
+        <line x1="0" y1="-46" x2="0" y2="46" stroke="var(--honey-dark)" stroke-width="1.6"/>
+        <line x1="-110" y1="-46" x2="110" y2="-46" stroke="var(--honey)" stroke-width="3" stroke-dasharray="14 6" opacity="0.7"/>
+        <g stroke="var(--tree-dark)" stroke-width="1" opacity="0.55">
+          <line x1="18" y1="-30" x2="18" y2="30"/><line x1="38" y1="-30" x2="38" y2="30"/><line x1="58" y1="-30" x2="58" y2="30"/><line x1="78" y1="-30" x2="78" y2="30"/>
+          <line x1="10" y1="-14" x2="100" y2="-14"/><line x1="10" y1="8" x2="100" y2="8"/>
+        </g>
+        <text x="-55" y="6" text-anchor="middle" font-family="Outfit, sans-serif" font-size="12" fill="var(--text-muted)">catch</text>
+        <text x="55" y="6" text-anchor="middle" font-family="Outfit, sans-serif" font-size="12" fill="var(--text-muted)">feed</text>
+      </g>
+      <g transform="translate(0 176)" stroke="var(--honey)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <g transform="translate(84 0)"><circle r="16" stroke="var(--border)"/><line x1="0" y1="-10" x2="0" y2="10" stroke="var(--honey-dark)"/><line x1="-4" y1="4" x2="0" y2="-10" stroke="var(--honey-dark)"/></g>
+        <g transform="translate(160 0)"><line x1="-10" y1="10" x2="10" y2="-10"/><circle cx="10" cy="-10" r="2.4" fill="var(--honey)" stroke="none"/></g>
+        <g transform="translate(236 0)"><rect x="-8" y="-10" width="16" height="20" rx="3" stroke="var(--border)"/><line x1="-8" y1="-4" x2="8" y2="-4" stroke="var(--honey)"/></g>
+        <g transform="translate(312 0)"><circle r="12" stroke="var(--border)"/><line x1="0" y1="-2" x2="4" y2="-8" stroke="var(--honey-dark)"/><line x1="0" y1="-16" x2="0" y2="-12" stroke="var(--honey-dark)"/></g>
+      </g>
+    </svg>`;
+  }
+  if (id === 'waggle-decoder') {
+    return `<svg viewBox="0 0 320 220" role="img" aria-label="A bee's waggle run on the comb, angled from vertical, matching the sun's angle from straight up.">
+      <line x1="120" y1="20" x2="120" y2="200" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="3 4"/>
+      <g transform="translate(232 44)" stroke="var(--honey)" stroke-width="1.6" fill="none" stroke-linecap="round">
+        <circle r="10" fill="var(--honey)" stroke="none" opacity="0.85"/>
+        <line x1="0" y1="-18" x2="0" y2="-14"/><line x1="0" y1="14" x2="0" y2="18"/><line x1="-18" y1="0" x2="-14" y2="0"/><line x1="14" y1="0" x2="18" y2="0"/>
+        <line x1="-12.7" y1="-12.7" x2="-9.9" y2="-9.9"/><line x1="9.9" y1="9.9" x2="12.7" y2="12.7"/><line x1="-12.7" y1="12.7" x2="-9.9" y2="9.9"/><line x1="9.9" y1="-9.9" x2="12.7" y2="-12.7"/>
+      </g>
+      <line x1="120" y1="110" x2="222" y2="52" stroke="var(--border)" stroke-width="1.3" stroke-dasharray="3 3"/>
+      <line x1="120" y1="110" x2="164" y2="66" stroke="var(--honey)" stroke-width="2.4"/>
+      <g stroke="var(--honey-dark)" stroke-width="1.4">
+        <line x1="132" y1="98" x2="126" y2="92"/>
+        <line x1="140" y1="90" x2="146" y2="96"/>
+        <line x1="150" y1="80" x2="144" y2="86"/>
+      </g>
+      <path d="M120 90 A20 20 0 0 1 137 78" fill="none" stroke="var(--text-muted)" stroke-width="1.3"/>
+      ${lvMiniBee(120, 116, -42)}
+    </svg>`;
+  }
+  // Fallback for any future/unreferenced diagram id (e.g. the optional
+  // round-trip strip, or the Tier-B Waggle Compass) — small and honest
+  // about being a placeholder, not a big empty box.
+  return `<svg viewBox="0 0 120 90" role="img" aria-label="Illustration coming soon">
+    <path d="M40 20 L60 8 L80 20 L80 44 L60 56 L40 44 Z" fill="none" stroke="var(--border)" stroke-width="2"/>
+    ${lvMiniBee(60, 32, 0)}
+    <text x="60" y="76" text-anchor="middle" font-family="Outfit, sans-serif" font-size="9" fill="var(--text-muted)">illustration soon</text>
   </svg>`;
 }
 
