@@ -1533,8 +1533,18 @@
   .reader-body .note { font-size: .84rem; color: var(--text-muted); font-style: italic; margin: -6px 0 20px; }
 
   .reader-body figure { margin: 6px 0 22px; }
-  .reader-body .diagram { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
-  .reader-body .diagram svg { display: block; width: 100%; height: auto; }
+  /* .diagram is shared by the hub hero AND reader figures, so this is
+     intentionally NOT scoped under .reader-body — both contexts need the
+     same card treatment and the same img/svg sizing rules. */
+  .diagram { border-radius: 16px; overflow: hidden; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); }
+  .diagram img, .diagram svg { display: block; width: 100%; height: auto; }
+
+  /* Terrain chooser — 4 separate photos laid out in the app's own grid
+     (not a single baked composite), so spacing/radius stays consistent
+     with the rest of the app. */
+  .lv-terrain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .lv-terrain-cell { overflow: hidden; border-radius: 8px; aspect-ratio: 1 / 1; }
+  .lv-terrain-cell img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .reader-body figcaption { text-align: center; font-size: .82rem; color: var(--text-muted); margin-top: 9px; font-weight: 500; }
   .reader-body figcaption b { color: var(--honey); font-weight: 700; }
 
