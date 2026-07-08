@@ -1575,6 +1575,35 @@ const TRACK_META = {
   maker:   { title:"I'm a maker / techie", desc:"Theory, kit, and the tech tie-in", icon:'tools' },
 };
 
+// End-of-track screen shown after the last module in a guided sequence —
+// a deliberate landing point rather than firing a CTA (like opening the Add
+// Hive form) straight off the reader's last "Next" tap. Someone who read a
+// track just to learn shouldn't be dropped into a form; they land here and
+// choose.
+const TRACK_END = {
+  tryit: {
+    kicker: "You're Ready",
+    title: "You've Got Everything for a First Hunt",
+    body: "Pick a warm, calm day, grab your box, and give it a try. Found a colony? Log it here — every wild survivor you map helps the research. Not heading out today? No rush, the guide's always here to reread.",
+    ctaLabel: "🐝 Log a Hive",
+    cta: () => setTab('add'),
+  },
+  curious: {
+    kicker: "The Wonder of It",
+    title: "That's How Bees Talk to Each Other",
+    body: "You now know the same trick the bees use on each other. Want to see it for real? The Try It path walks through everything — safety included — for a first hunt.",
+    ctaLabel: "Start the Try-It Path",
+    cta: () => learnStartTrack('tryit'),
+  },
+  maker: {
+    kicker: "Theory, Kit & the Tech",
+    title: "You've Got the Full Picture",
+    body: "From triangulation to the Pathfinder tool's honest limits — you've seen how the pieces fit together and where the app's own edges are.",
+    ctaLabel: "Back to Learn",
+    cta: () => learnBackToHub(),
+  },
+};
+
 // ── progress (read state), persisted the same way dark mode is ──
 function lvGetProgress() {
   try { return JSON.parse(localStorage.getItem('learnProgress') || '{}'); }
@@ -1762,7 +1791,36 @@ function lvBlockHTML(b) {
   }
 }
 
+function learnRenderTrackEnd() {
+  const t = TRACK_END[lvSession.track];
+  if (!t) { learnBackToHub(); return; }
+
+  document.getElementById('learn-hub').style.display = 'none';
+  document.getElementById('learn-reader').style.display = '';
+
+  document.getElementById('lv-modcount').textContent = 'Track complete';
+  document.getElementById('lv-readchip-text').textContent = 'Done';
+  document.getElementById('lv-progress-fill').style.width = '100%';
+
+  document.getElementById('lv-reader-body').innerHTML = `
+    <p class="kicker">${t.kicker}</p>
+    <h1 class="title">${t.title}</h1>
+    <p class="lead">${lvFmt(t.body)}</p>
+  `;
+  document.getElementById('lv-reader-body').scrollTop = 0;
+  const scroller = document.getElementById('learn-reader');
+  if (scroller) scroller.scrollTop = 0;
+
+  const prevBtn = document.getElementById('lv-prev-btn');
+  const nextBtn = document.getElementById('lv-next-btn');
+  const nextLabel = document.getElementById('lv-next-label');
+  prevBtn.style.visibility = '';
+  nextLabel.textContent = t.ctaLabel;
+  nextBtn.onclick = t.cta;
+}
+
 function learnRenderReader() {
+  if (lvSession.moduleId === 'end') { learnRenderTrackEnd(); return; }
   const m = lvModule(lvSession.moduleId);
   if (!m) return;
   lvMarkRead(m.id);
@@ -1803,15 +1861,12 @@ function learnRenderReader() {
       nextLabel.textContent = `Next: ${nm.title}`;
       nextBtn.onclick = learnNext;
     } else {
-      // End of a guided track — Try-it ends on a CTA; Curious/Maker end on
-      // a soft "want to try?" nudge back to the hub (brief §4).
-      if (lvSession.track === 'tryit') {
-        nextLabel.textContent = 'Log a Hive →';
-        nextBtn.onclick = () => { setTab('add'); };
-      } else {
-        nextLabel.textContent = 'Done — Back to Learn';
-        nextBtn.onclick = learnBackToHub;
-      }
+      // Last real module in the track — Continue takes you to a dedicated
+      // completion screen (learnRenderTrackEnd), not straight into a CTA/
+      // form. Someone just reading through shouldn't be dropped into
+      // "Log a Hive" without a deliberate choice to do so.
+      nextLabel.textContent = 'Continue';
+      nextBtn.onclick = learnNext;
     }
   } else {
     // Free browsing — walk sequential module order, wrap to hub at the end.
@@ -1828,13 +1883,16 @@ function learnRenderReader() {
 
 function learnNext() {
   if (lvSession.track) {
+    if (lvSession.moduleId === 'end') return; // the end screen's own button is the way forward from here
     const seq = TRACKS[lvSession.track];
     const idx = seq.indexOf(lvSession.moduleId);
     if (idx < seq.length - 1) {
       lvSession.index = idx + 1;
       lvSession.moduleId = seq[idx + 1];
-      learnRenderReader();
+    } else {
+      lvSession.moduleId = 'end'; // last module done — land on the completion screen, not a CTA
     }
+    learnRenderReader();
   } else if (lvSession.moduleId < MODULES.length) {
     lvSession.moduleId += 1;
     learnRenderReader();
@@ -1844,6 +1902,11 @@ function learnNext() {
 function learnPrev() {
   if (lvSession.track) {
     const seq = TRACKS[lvSession.track];
+    if (lvSession.moduleId === 'end') {
+      lvSession.moduleId = seq[seq.length - 1];
+      learnRenderReader();
+      return;
+    }
     const idx = seq.indexOf(lvSession.moduleId);
     if (idx > 0) {
       lvSession.index = idx - 1;

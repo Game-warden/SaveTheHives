@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.7.0'; // Learn tab (Tier A): hub landing, data-driven module reader, Follow-the-Dance guided tracks
+const CACHE_VERSION = 'v2.7.1'; // Learn tab: guided tracks now end on a completion screen (choice), not straight into the Add Hive CTA
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
