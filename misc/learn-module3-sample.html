@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Learn — Module 3 (sample)</title>
+<!--
+  SAMPLE ONLY — a single fully-realized Module Reader screen for the Learn tab.
+  Standalone preview so Ronnie can approve the look/feel before all 9 modules
+  are built. Content = MODULE 3 from BEELINING_GUIDE.md. Palette + font match
+  the app (Outfit / honey vars from styles.css). Graphic = shot-list #2 (A/B
+  triangulation), light+dark aware. Not wired into app.js yet.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --honey:       #c8821a;
+    --honey-dark:  #a06010;
+    --honey-light: #f5a623;
+    --bg:          #f5f2ea;
+    --surface:     #fffcf4;
+    --surface2:    #eeeade;
+    --surface3:    #e8e3d4;
+    --text:        #1c1508;
+    --text-muted:  #7a6535;
+    --border:      rgba(122, 101, 53, 0.18);
+    --shadow-md:   0 6px 20px rgba(60, 45, 12, 0.10);
+    --sky:         #dfeaf0;
+    --ground:      #e6ddc4;
+    --tree:        #6f8f4f;
+    --tree-dark:   #4d6b34;
+  }
+  [data-theme="dark"] {
+    --honey:       #f5a623;
+    --honey-dark:  #c8821a;
+    --honey-light: #ffd166;
+    --bg:          #0f0d07;
+    --surface:     #1c1a10;
+    --surface2:    #1e1c12;
+    --surface3:    #252316;
+    --text:        #f0e8d0;
+    --text-muted:  #9a8d6a;
+    --border:      rgba(240, 232, 208, 0.12);
+    --shadow-md:   0 6px 20px rgba(0, 0, 0, 0.45);
+    --sky:         #15202b;
+    --ground:      #1d2415;
+    --tree:        #6f8f4f;
+    --tree-dark:   #3c5228;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    transition: background .25s ease, color .25s ease;
+  }
+
+  /* phone frame so the sample reads as an in-app screen */
+  .phone {
+    max-width: 430px;
+    margin: 24px auto;
+    background: var(--bg);
+    min-height: 80vh;
+    border-radius: 28px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border);
+  }
+
+  /* --- reader top bar --- */
+  .reader-top {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 18px 12px;
+    backdrop-filter: blur(8px);
+  }
+  .reader-topline {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-muted); font-size: .82rem; font-weight: 600;
+    background: none; border: none; cursor: pointer; padding: 4px 0;
+    font-family: inherit;
+  }
+  .back svg { width: 16px; height: 16px; }
+  .modcount { font-size: .74rem; font-weight: 600; color: var(--text-muted); letter-spacing: .02em; }
+  .readchip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .72rem; font-weight: 600; color: var(--honey);
+    background: color-mix(in srgb, var(--honey) 12%, transparent);
+    padding: 4px 9px; border-radius: 999px;
+  }
+  .readchip svg { width: 13px; height: 13px; }
+  .progress-track {
+    height: 5px; border-radius: 999px; background: var(--surface3);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 33%;
+    background: linear-gradient(90deg, var(--honey), var(--honey-light));
+    border-radius: 999px;
+  }
+
+  /* --- reader body --- */
+  .reader-body { padding: 22px 20px 120px; }
+  .kicker { font-size: .74rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--honey); margin: 0 0 6px; }
+  h1.title { font-size: 1.62rem; font-weight: 700; line-height: 1.2; margin: 0 0 14px; letter-spacing: -.01em; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+  .chip {
+    font-size: .72rem; font-weight: 600; color: var(--text-muted);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 4px 10px; border-radius: 999px;
+  }
+  .chip.level { color: var(--honey-dark); border-color: color-mix(in srgb, var(--honey) 30%, transparent); }
+
+  p { margin: 0 0 16px; font-size: 1rem; }
+  .lead { font-size: 1.06rem; color: var(--text); }
+
+  .fact {
+    display: flex; gap: 13px; margin: 0 0 18px;
+    padding: 14px 15px; border-radius: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+  }
+  .fact .num {
+    flex: 0 0 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--honey); color: #fff; font-weight: 700; font-size: .95rem;
+  }
+  [data-theme="dark"] .fact .num { color: #1c1508; }
+  .fact .body { flex: 1; }
+  .fact .body strong { display: block; margin-bottom: 3px; }
+  .fact p { margin: 0; font-size: .94rem; color: var(--text); }
+  sup.ref { color: var(--honey); font-weight: 600; font-size: .68rem; margin-left: 1px; }
+
+  /* round-trip table */
+  .tbl-wrap { margin: 0 0 20px; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  caption {
+    text-align: left; font-size: .78rem; font-weight: 700; color: var(--text-muted);
+    padding: 11px 14px 0; caption-side: top;
+  }
+  th, td { text-align: left; padding: 10px 14px; }
+  thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); font-weight: 700; }
+  tbody tr { border-top: 1px solid var(--border); }
+  tbody tr td:first-child { font-weight: 600; color: var(--honey-dark); white-space: nowrap; }
+  [data-theme="dark"] tbody tr td:first-child { color: var(--honey); }
+  tbody tr:nth-child(odd) { background: color-mix(in srgb, var(--surface2) 55%, transparent); }
+
+  .note { font-size: .86rem; color: var(--text-muted); font-style: italic; margin: -6px 0 22px; }
+
+  /* figure / diagram */
+  figure { margin: 6px 0 24px; }
+  .diagram {
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid var(--border); background: var(--surface);
+    box-shadow: var(--shadow-md);
+  }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  figcaption {
+    text-align: center; font-size: .82rem; color: var(--text-muted);
+    margin-top: 9px; font-weight: 500;
+  }
+  figcaption b { color: var(--honey); font-weight: 700; }
+
+  .callout {
+    border-left: 3px solid var(--honey);
+    background: color-mix(in srgb, var(--honey) 8%, transparent);
+    padding: 13px 15px; border-radius: 0 12px 12px 0;
+    font-size: .95rem; margin: 0 0 8px;
+  }
+  .callout strong { color: var(--honey-dark); }
+  [data-theme="dark"] .callout strong { color: var(--honey-light); }
+
+  /* --- reader nav footer --- */
+  .reader-nav {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 10px; padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+    background: linear-gradient(to top, var(--bg) 72%, transparent);
+  }
+  .navbtn {
+    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 13px 16px; border-radius: 13px; font-family: inherit;
+    font-weight: 700; font-size: .95rem; cursor: pointer; border: none;
+  }
+  .navbtn svg { width: 17px; height: 17px; }
+  .navbtn.ghost { flex: 0 0 auto; background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
+  .navbtn.primary { background: var(--honey); color: #fff; box-shadow: var(--shadow-md); }
+  [data-theme="dark"] .navbtn.primary { color: #1c1508; }
+  .navbtn.primary:hover { background: var(--honey-light); }
+
+  /* theme toggle (sample-only chrome) */
+  .toggle {
+    position: fixed; top: 14px; right: 16px; z-index: 30;
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: inherit; font-weight: 600; font-size: .8rem;
+    padding: 8px 13px; border-radius: 999px; cursor: pointer; box-shadow: var(--shadow-md);
+  }
+  .toggle svg { width: 15px; height: 15px; }
+  .samplebar {
+    max-width: 430px; margin: 0 auto; text-align: center;
+    font-size: .72rem; color: var(--text-muted); padding: 4px 0 0;
+  }
+</style>
+</head>
+<body>
+
+<button class="toggle" id="themeBtn" aria-label="Toggle theme">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v1M12 20v1M4.2 4.2l.7.7M19.1 19.1l.7.7M3 12h1M20 12h1M4.2 19.8l.7-.7M19.1 4.9l.7-.7"/><circle cx="12" cy="12" r="4"/></svg>
+  <span id="themeLabel">Dark</span>
+</button>
+
+<div class="phone">
+
+  <!-- ===== reader top ===== -->
+  <div class="reader-top">
+    <div class="reader-topline">
+      <button class="back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Learn
+      </button>
+      <span class="modcount">Module 3 of 9</span>
+      <span class="readchip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        4 min
+      </span>
+    </div>
+    <div class="progress-track"><div class="progress-fill"></div></div>
+  </div>
+
+  <!-- ===== reader body ===== -->
+  <div class="reader-body">
+    <p class="kicker">The Theory</p>
+    <h1 class="title">Why a Fed Bee Points Home</h1>
+
+    <div class="chips">
+      <span class="chip">Anyone curious about the <em>why</em></span>
+      <span class="chip level">Beginner–Intermediate</span>
+      <span class="chip">Builds on Module 1</span>
+    </div>
+
+    <p class="lead">Three simple facts about honey bees make the whole craft possible.</p>
+
+    <div class="fact">
+      <div class="num">1</div>
+      <div class="body">
+        <strong>A fed forager flies straight home.</strong>
+        <p>When a bee finds a rich, reliable food source, she fills her honey crop and returns to the nest by the most direct route she can — a straight line. Watch her leave and you have a <em>bearing</em> pointing (roughly) at the colony.<sup class="ref">[1][2]</sup></p>
+      </div>
+    </div>
+
+    <div class="fact">
+      <div class="num">2</div>
+      <div class="body">
+        <strong>Bees are fast and steady, so time equals distance.</strong>
+        <p>An unloaded forager flies at roughly 15 mph; loaded with syrup, closer to 12 mph.<sup class="ref">[5]</sup> Because that speed is fairly consistent, the <em>round-trip time</em> — from when she leaves your bait to when she comes back for more — is a rough odometer for how far away home is.</p>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <caption>Round-trip time → distance to the colony</caption>
+        <thead><tr><th>Round-trip time</th><th>Approx. distance</th></tr></thead>
+        <tbody>
+          <tr><td>Under ~3 min</td><td>Very close — under ¼ mile, maybe in sight</td></tr>
+          <tr><td>~5 min</td><td>Up to about half a mile</td></tr>
+          <tr><td>~10 min</td><td>About a mile</td></tr>
+          <tr><td>10–20 min</td><td>Up to a couple of miles</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">These are field rules of thumb, not precision instruments — terrain, wind, and the individual bee all matter. Flat open ground gives the fastest, most reliable times; hills and thick woods slow bees down.<sup class="ref">[4][5]</sup></p>
+
+    <div class="fact">
+      <div class="num">3</div>
+      <div class="body">
+        <strong>Two lines cross at one point.</strong>
+        <p>A single bearing tells you the <em>direction</em> home but not the <em>distance</em> along it — the colony could be anywhere on that line. Take a second bearing from a different spot, and the two lines cross. Where they intersect is the colony.<sup class="ref">[3]</sup></p>
+      </div>
+    </div>
+
+    <!-- ===== DIAGRAM: shot-list #2, A/B triangulation ===== -->
+    <figure>
+      <div class="diagram">
+        <svg viewBox="0 0 400 300" role="img" aria-label="Two observer positions A and B, each with a dashed bearing line; the lines cross at a bee tree.">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0 0 L7 4 L0 8 z" fill="var(--honey)"/>
+            </marker>
+          </defs>
+          <!-- sky / ground -->
+          <rect x="0" y="0" width="400" height="300" fill="var(--sky)"/>
+          <path d="M0 210 Q120 188 220 205 T400 200 L400 300 L0 300 Z" fill="var(--ground)"/>
+
+          <!-- the bee tree at the intersection -->
+          <g transform="translate(300 96)">
+            <rect x="-5" y="10" width="10" height="42" rx="3" fill="var(--tree-dark)"/>
+            <circle cx="0" cy="2" r="26" fill="var(--tree)"/>
+            <circle cx="-16" cy="12" r="17" fill="var(--tree)"/>
+            <circle cx="16" cy="12" r="17" fill="var(--tree)"/>
+            <circle cx="0" cy="20" r="7" fill="var(--tree-dark)" opacity="0.55"/>
+          </g>
+
+          <!-- crossing bearing lines -->
+          <line x1="72" y1="238" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+          <line x1="250" y1="252" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+
+          <!-- intersection X -->
+          <g transform="translate(300 112)" stroke="var(--honey-dark)" stroke-width="2.6" stroke-linecap="round">
+            <line x1="-7" y1="-7" x2="7" y2="7"/>
+            <line x1="-7" y1="7" x2="7" y2="-7"/>
+          </g>
+
+          <!-- station A -->
+          <g transform="translate(72 238)">
+            <circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/>
+            <text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">A</text>
+          </g>
+          <!-- station B -->
+          <g transform="translate(250 252)">
+            <circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/>
+            <text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">B</text>
+          </g>
+
+          <!-- a little bee on line A -->
+          <g transform="translate(176 172) rotate(-29)">
+            <ellipse cx="0" cy="0" rx="6" ry="3.6" fill="#3a2c10"/>
+            <rect x="-3.5" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+            <rect x="1" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+            <ellipse cx="-1" cy="-5" rx="5" ry="2.6" fill="#fff" opacity="0.85"/>
+          </g>
+        </svg>
+      </div>
+      <figcaption><b>Two lines, one answer.</b> Where the bearings cross, the colony waits.</figcaption>
+    </figure>
+
+    <div class="callout">
+      <p style="margin:0"><strong>The honest heart of it:</strong> you can never get a perfect line from a single bee's departure.<sup class="ref">[3]</sup> Bees circle to orient before settling onto their line; your compass has its own error; the wind nudges things. So beelining is a game of <strong>repetition and refinement</strong> — many bees, several stations, closing in. The colony reveals itself gradually, not in one triumphant measurement.</p>
+    </div>
+  </div>
+
+  <!-- ===== reader nav ===== -->
+  <nav class="reader-nav">
+    <button class="navbtn ghost">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Prev
+    </button>
+    <button class="navbtn primary">
+      Next: The Methods
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </nav>
+
+</div>
+<p class="samplebar">Sample screen — Module 3 of 9 · tap the toggle to preview light / dark</p>
+
+<script>
+  const btn = document.getElementById('themeBtn');
+  const label = document.getElementById('themeLabel');
+  btn.addEventListener('click', () => {
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+    label.textContent = dark ? 'Dark' : 'Light';
+  });
+</script>
+</body>
+</html>

@@ -201,6 +201,24 @@
 ║        Debug panel fix: Step, Point A, Point B, Candidate, and       ║
 ║        Bearing readings now populate during navigation phase (were    ║
 ║        never written — stayed at "—" the whole time).               ║
+║  v2.7  LEARN TAB (Tier A) — data-driven beelining learning path,      ║
+║        per LEARN_TAB_BUILD_BRIEF.md:                                  ║
+║        • Reused the hidden Records nav slot for a new Learn tab       ║
+║          (compass icon); Records stays reachable via setTab('list'). ║
+║        • Hub landing: hero, 3 path cards (Curious/Try-it/Maker), and  ║
+║          a 9-module checklist with done/current/soft-locked states.  ║
+║        • Data-driven Module Reader: MODULES array (transcribed from  ║
+║          BEELINING_GUIDE.md) + renderModule()-style block renderer    ║
+║          (paragraphs, numbered facts, tables, callouts, diagrams).    ║
+║        • "Follow the Dance" guided TRACKS (curious/tryit/maker)       ║
+║          sequence modules per brief §4; tryit ends on a Log-a-Hive    ║
+║          CTA; Module 5 (safety) always precedes it.                   ║
+║        • Read-state persisted to localStorage (learnProgress), same  ║
+║          pattern as the existing dark-mode toggle.                   ║
+║        • Hero + Module 3 A/B-triangulation SVGs drawn; remaining      ║
+║        shot-list diagrams stubbed with a placeholder pending Tier A  ║
+║        follow-up passes. Waggle Compass (Tier B) intentionally NOT   ║
+║        built yet, per brief.                                         ║
 ╚══════════════════════════════════════════════════════════════════════╝
 -->
 <html lang="en">
@@ -239,7 +257,7 @@
 <div id="app-header">
   <img class="logo" src="logo.jpg" alt="SaveTheHives">
   <div class="title">
-    SaveTheHives <span id="app-version-badge" class="version-badge">v2.6</span>
+    SaveTheHives <span id="app-version-badge" class="version-badge">v2.7</span>
     <span>Feral Honeybee Mapping Network</span>
   </div>
   <!-- debug toggle hidden in production; restore for field testing -->
@@ -403,6 +421,55 @@
 
 </div>
 
+<!-- ═══ LEARN VIEW ═══ -->
+<div id="learn-view" style="display:none;">
+
+  <!-- Hub screen -->
+  <div id="learn-hub" class="learn-screen">
+    <div class="lv-hero" id="lv-hero">
+      <!-- hero SVG + headline injected by renderLearnHub() -->
+    </div>
+    <div class="lv-path-cards" id="lv-path-cards"></div>
+    <div class="lv-checklist-head">
+      <span class="lv-checklist-title">All Modules</span>
+      <span class="lv-checklist-sub" id="lv-checklist-sub"></span>
+    </div>
+    <div class="lv-checklist" id="lv-checklist"></div>
+  </div>
+
+  <!-- Module Reader screen -->
+  <div id="learn-reader" class="learn-screen" style="display:none;">
+    <div class="reader-top">
+      <div class="reader-topline">
+        <button class="back" onclick="learnBackToHub()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Learn
+        </button>
+        <span class="modcount" id="lv-modcount">Module 1 of 9</span>
+        <span class="readchip" id="lv-readchip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span id="lv-readchip-text">2 min</span>
+        </span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="lv-progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="reader-body" id="lv-reader-body"></div>
+
+    <nav class="reader-nav">
+      <button class="navbtn ghost" id="lv-prev-btn" onclick="learnPrev()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        Prev
+      </button>
+      <button class="navbtn primary" id="lv-next-btn" onclick="learnNext()">
+        <span id="lv-next-label">Next</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </nav>
+  </div>
+
+</div>
+
 <!-- BOTTOM TABS -->
 <div id="bottom-tabs">
 
@@ -427,13 +494,14 @@
     </svg>
     Pathfinder
   </button>
-  <!-- Records: hidden until v3 — setTab('list') still works -->
-  <button class="tab-btn" onclick="setTab('list')" style="display:none">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-      <circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/>
+  <!-- Learn: reuses the hidden Records nav slot (Records not in active use;
+       this keeps Pathfinder's ?pf=1 field-test wiring untouched). Records
+       stays reachable via setTab('list') if needed later. -->
+  <button class="tab-btn" onclick="setTab('learn')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="9"/><polygon points="12,7 14.5,12 12,17 9.5,12" fill="currentColor" stroke="none"/>
     </svg>
-    Records
+    Learn
   </button>
   <button class="tab-btn" onclick="setTab('about')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -590,6 +658,14 @@
       that survive 3+ winters without treatment are flagged as <strong style="color:var(--honey)">Genetic Goldmines</strong> —
       valuable breeding stock for disease-resistant bee populations.
     </p>
+
+    <!-- Cross-link to the new Learn tab (brief §1) -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(245,166,35,0.12);border:1px solid var(--border);margin-bottom:16px;cursor:pointer;"
+      onclick="closeAboutModal();setTab('learn');">
+      <span style="font-size:0.86rem;font-weight:600;color:var(--text);">🧭 New: Learn to beeline</span>
+      <span style="color:var(--honey);font-weight:700;font-size:0.9rem;">→</span>
+    </div>
+
     <div class="legend-box">
       <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
@@ -627,7 +703,7 @@
     </div>
 
     <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
-      SaveTheHives v2.6 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
+      SaveTheHives v2.7 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
     </div>
 
     <button class="btn" style="width:100%;padding:12px;margin-top:16px;font-size:1rem;" onclick="closeAboutModal()">

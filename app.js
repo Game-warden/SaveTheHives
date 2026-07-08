@@ -870,12 +870,30 @@ function showSearchUI() {
 
 function setTab(tab) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  const tabs = ['map','add','pathfinder','list','about'];
+  // DECIDED: reuse the hidden Records nav slot for Learn (brief §1). 'list'
+  // (Records) has no nav button anymore but stays reachable by calling
+  // setTab('list') directly — kept out of this array on purpose so no
+  // button index points at it.
+  const tabs = ['map','add','pathfinder','learn','about'];
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
 
-  if (tab === 'pathfinder') hideSearchUI();
+  if (tab === 'pathfinder' || tab === 'learn') hideSearchUI();
   else showSearchUI();
+
+  // Learn is a full-screen replacement for the map (not an overlay like
+  // Pathfinder), so hide/show #map-container alongside it.
+  const mapEl = document.getElementById('map-container');
+  const learnEl = document.getElementById('learn-view');
+  if (tab === 'learn') {
+    if (mapEl) mapEl.style.display = 'none';
+    if (learnEl) learnEl.style.display = 'flex';
+    openLearnHub();
+  } else {
+    if (mapEl) mapEl.style.display = '';
+    if (learnEl) learnEl.style.display = 'none';
+    if (tab === 'map' && map) setTimeout(() => map.invalidateSize(), 50);
+  }
 
   if (tab === 'add') openAddPanel();
   else if (tab === 'pathfinder') openPathfinder();
@@ -1366,4 +1384,479 @@ filterType = function(type) {
   });
   updateFilterBadge();
 };
+
+// ═══════════════════════════════════════
+// LEARN TAB — data-driven hub + module reader
+// Content source of truth: BEELINING_GUIDE.md. Every module below is one
+// "## MODULE n" from that guide; don't re-author facts here — if the guide
+// changes, update the matching module object so the two never drift.
+// See LEARN_TAB_BUILD_BRIEF.md §2 for the content-model rationale.
+// ═══════════════════════════════════════
+
+// Tiny inline formatter: **bold**, *italic*, and [1][2]-style citation
+// markers (rendered as small superscript refs, matching the approved
+// learn-module3-sample.html treatment).
+function lvFmt(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/((?:\[\d+\])+)/g, '<sup class="ref">$1</sup>');
+}
+
+const MODULES = [
+  {
+    id: 1, title: "What Beelining Is", kicker: "The Hook",
+    level: "Beginner", readMin: 2, prereq: [], track: ['curious','tryit'],
+    chips: ["Everyone", "Beginner", "No prereqs"], diagram: 'hero',
+    blocks: [
+      { type:'p', cls:'lead', text:"Somewhere within a mile or two of where you're standing, there is almost certainly a colony of honey bees living wild — inside a hollow tree, a wall cavity, or an old chimney. You can't see it. But the bees visiting the flowers around you know exactly where it is, and if you know the trick, they will lead you straight to it." },
+      { type:'p', text:"That trick is called **beelining** (also *bee hunting* or *bee coursing*). You catch a few foraging bees, feed them sugar syrup until they're happy, and let them go. A fed bee flies in a straight, purposeful line directly home — the original \"beeline.\" You note the direction, move along it, and repeat, closing in until you find the colony in its tree.[1][2]" },
+      { type:'diagram', id:'hero', caption:"A bee's beeline — from flowers to the colony." },
+      { type:'p', text:"It has been described as a blend of orienteering, treasure hunting, and geocaching — a genuine encounter with wild nature that challenges both mind and body.[8] No expensive gear, no need to own bees, and every colony you find is a real scientific data point." },
+      { type:'callout', label:"Why it matters to SaveTheHives", text:"Wild colonies that survive winter after winter without any human treatment are living proof of natural disease resistance. They are the untreated control group that honey bee research desperately needs. Every wild hive you locate and log helps map where these survivors are. You are not just having an adventure — you are doing frontline citizen science." },
+    ],
+  },
+  {
+    id: 2, title: "A Short History", kicker: "The Story",
+    level: "Beginner", readMin: 3, prereq: [], track: ['curious'],
+    chips: ["Curious readers", "Beginner", "No prereqs"], diagram: null,
+    blocks: [
+      { type:'p', cls:'lead', text:"Beelining is old. As early as the 1700s, people used bait, compasses, and patient observation to find wild bee nests.[1] In the days before cheap sugar, a wild \"bee tree\" full of honey was a genuine prize, and in Appalachia bee hunting was a serious occupation — a way to get a season's sweetener, and sometimes to capture a wild colony to keep.[2] Henry David Thoreau went bee hunting; so did countless farmers and woodsmen whose names we'll never know." },
+      { type:'p', text:"The craft nearly disappeared as cheap sugar and managed beekeeping made wild honey unnecessary. But it never fully died, and it has had two great chroniclers:" },
+      { type:'list', items:[
+        "**George Harold Edgell**, a Harvard art historian and bee hunter of fifty years, wrote *The Bee Hunter* (Harvard University Press, 1949) — a slim, witty classic now in the public domain and free to read online.[3] Much of the practical method traces to Edgell.",
+        "**Thomas D. Seeley**, a Cornell biologist and one of the world's leading honey bee scientists, revived the pastime for a modern audience in *Following the Wild Bees* (Princeton University Press, 2016), weaving the how-to together with the biology of wild colonies.[8]",
+      ]},
+      { type:'p', text:"There's also a scientific thread running underneath all of this. In the mid-20th century, **Karl von Frisch** decoded the honey bee \"waggle dance\" — the figure-eight movement by which a returning forager tells her sisters both the *direction* and the *distance* of a food source. He won a Nobel Prize for it in 1973.[6][7] Beelining is, in a sense, you eavesdropping on the same information the bees share with each other." },
+      { type:'callout', label:"A living tradition", text:"You are stepping into a genuinely centuries-old tradition. That's part of the fun." },
+    ],
+  },
+  {
+    id: 3, title: "Why a Fed Bee Points Home", kicker: "The Theory",
+    level: "Beginner–Intermediate", readMin: 4, prereq: [1], track: ['curious','tryit','maker'],
+    chips: ["Anyone curious about the why", "Beginner–Intermediate", "Builds on Module 1"], diagram: 'triangulation',
+    blocks: [
+      { type:'p', cls:'lead', text:"Three simple facts about honey bees make the whole craft possible." },
+      { type:'fact', num:1, title:"A fed forager flies straight home.", text:"When a bee finds a rich, reliable food source, she fills her honey crop and returns to the nest by the most direct route she can — a straight line. Watch her leave and you have a *bearing* pointing (roughly) at the colony.[1][2]" },
+      { type:'fact', num:2, title:"Bees are fast and steady, so time equals distance.", text:"An unloaded forager flies at roughly 15 mph; loaded with syrup, closer to 12 mph.[5] Because that speed is fairly consistent, the *round-trip time* — from when she leaves your bait to when she comes back for more — is a rough odometer for how far away home is." },
+      { type:'table', caption:"Round-trip time → distance to the colony", headers:["Round-trip time","Approx. distance"], rows:[
+        ["Under ~3 min","Very close — under ¼ mile, maybe in sight"],
+        ["~5 min","Up to about half a mile"],
+        ["~10 min","About a mile"],
+        ["10–20 min","Up to a couple of miles"],
+      ]},
+      { type:'note', text:"These are field rules of thumb, not precision instruments — terrain, wind, and the individual bee all matter. Flat open ground gives the fastest, most reliable times; hills and thick woods slow bees down.[4][5]" },
+      { type:'fact', num:3, title:"Two lines cross at one point.", text:"A single bearing tells you the *direction* home but not the *distance* along it — the colony could be anywhere on that line. Take a second bearing from a different spot, and the two lines cross. Where they intersect is the colony.[3]" },
+      { type:'diagram', id:'triangulation', caption:"<b>Two lines, one answer.</b> Where the bearings cross, the colony waits." },
+      { type:'callout', label:"The honest heart of it", text:"You can never get a perfect line from a single bee's departure.[3] Bees circle to orient before settling onto their line; your compass has its own error; the wind nudges things. So beelining is a game of **repetition and refinement** — many bees, several stations, closing in. The colony reveals itself gradually, not in one triumphant measurement." },
+    ],
+  },
+  {
+    id: 4, title: "Choose Your Method", kicker: "The Methods",
+    level: "Intermediate", readMin: 6, prereq: [1,3], track: ['tryit','maker'],
+    chips: ["Ready to try", "Intermediate", "Builds on Modules 1 & 3"], diagram: 'terrain-chooser',
+    blocks: [
+      { type:'p', cls:'lead', text:"There is no single \"right\" way to beeline. The best method depends on your terrain, how much room you have to move, and how much time you've got. Here are the three main approaches, from simplest to most rigorous. Many hunters combine them." },
+      { type:'h3', text:"Method A — Single-Line \"Follow and Leapfrog\"" },
+      { type:'sub', text:"Best for: open country, fields, farmland, meadows — anywhere you can see a distance and walk freely." },
+      { type:'p', text:"The oldest and most intuitive method. Establish your bait, get bees coming and going, and note the direction they leave. Then pick up your box and **move 100–300 yards along that line**, re-establish the bait, and get a fresh direction from closer in. Repeat. Each move shortens the distance to the colony, so each new bearing is more accurate than the last, until you're close enough to spot the nest entrance.[3][2]" },
+      { type:'p', text:"This is the \"leapfrog,\" and it's powerful because triangulation error shrinks as you get closer. Its weakness is that it needs open, walkable ground: if a river, cliff, highway, or fence line sits between you and the bees, you can't follow." },
+      { type:'h3', text:"Method B — Two-Station Triangulation" },
+      { type:'sub', text:"Best for: broken terrain where you can reach two good vantage points but can't walk a straight line between them." },
+      { type:'p', text:"Take a bearing from Station A. Then move a good distance to the side — a quarter mile is classic — and take a bearing on the same colony from Station B. Draw both lines on a map; the colony is where they cross.[3] You never have to walk the bee line itself, which is what makes this the method of choice when the direct path is blocked." },
+      { type:'callout', label:"The critical subtlety", text:"the angle between your two lines matters more than the distance you walked. Two bearings that cross at a wide angle (closer to 90°) pin the spot tightly; two that cross at a shallow angle leave a long, uncertain smear. So move *across* the bee line, not along it." },
+      { type:'h3', text:"Method C — Timed Distance + Direction" },
+      { type:'sub', text:"Best for: adding a distance estimate to any single line, or when you can only work from one spot." },
+      { type:'p', text:"Mark a few bees (a dab of paint — see Module 6) and use a stopwatch. The direction of departure gives your line; the round-trip time (Module 3's table) tells you roughly *how far* along it to look.[4] It's the least precise on its own, but it turns a single bearing into a rough \"somewhere about half a mile that-a-way.\"" },
+      { type:'table', caption:"Which to choose — a quick guide", headers:["Your situation","Best method"], rows:[
+        ["Open fields, can walk freely","A — Follow & leapfrog"],
+        ["Rivers/roads/fences blocking the path","B — Two-station triangulation"],
+        ["Stuck at one good spot","C — Timed distance + a bearing"],
+        ["Hilly, wooded, mixed","Combine B and C, then finish with A"],
+        ["You want the tightest possible fix","Start with B, then leapfrog (A) the final stretch"],
+      ]},
+      { type:'diagram', id:'terrain-chooser', caption:"Match your terrain to a method." },
+    ],
+  },
+  {
+    id: 5, title: "Safety, Ethics & the Law", kicker: "Read Before You Go",
+    level: "All — mandatory before fieldwork", readMin: 4, prereq: [], track: ['tryit'],
+    chips: ["Everyone", "Read before fieldwork", "No prereqs"], diagram: null,
+    blocks: [
+      { type:'p', cls:'lead', text:"Beelining is gentle, low-impact, and safe when done thoughtfully — but a few things genuinely matter." },
+      { type:'callout', label:"Leave the colony where it is", text:"For SaveTheHives, the goal is to *find, log, and study* wild colonies — never to cut, rob, or remove them. A wild colony that has survived on its own is exactly the treatment-free survivor stock that matters most to research. Finding it and marking it on the map is the whole win." },
+      { type:'callout', label:"Know whose land you're on", text:"Bees that nest in a tree legally belong to the owner of the land the tree stands on, and you cannot enter someone's property to pursue them without risking trespass.[9] Get permission before following a line onto private land. A friendly knock and an explanation of the citizen-science project goes a long way." },
+      { type:'callout', label:"Don't handle a colony you find", text:"Locating a nest is safe. Poking at it is not. Feral colonies in parts of the U.S. — especially the Southwest — can be Africanized and defensive.[9] Observe from a comfortable distance. If a colony needs removing for human safety, that's a job for a licensed professional." },
+      { type:'callout', label:"Mind yourself in the field", text:"You'll be watching the sky and walking with your head up. Watch your footing, carry water, tell someone where you're going, and be tick- and terrain-aware. Getting *your* stings while beelining is rare, but a dab of common sense keeps it that way." },
+      { type:'callout', label:"A note on the bees you catch", text:"You're borrowing them for a few minutes and feeding them well. Release them unharmed. The paint dot used for marking (Module 6) is a standard, bee-safe beekeeping product and does them no harm." },
+    ],
+  },
+  {
+    id: 6, title: "The Bee Box & Your Kit", kicker: "Build or Buy",
+    level: "Intermediate", readMin: 6, prereq: [4], track: ['tryit','maker'],
+    chips: ["Ready to equip", "Intermediate", "Builds on Module 4"], diagram: 'bee-box',
+    blocks: [
+      { type:'p', cls:'lead', text:"The **bee box** (or *bee lining box*) is a small wooden box, roughly the size of a paperback, with two compartments and a sliding or hinged lid. The design most people use is patterned on the one in Edgell's *The Bee Hunter*.[3][10] It does three jobs:" },
+      { type:'list', items:[
+        "**Catch** — you trap a forager from a flower in one compartment.",
+        "**Feed** — you slide her through to a second compartment holding a small piece of honeycomb soaked in sugar syrup, scented with anise. She calms, drinks her fill.",
+        "**Release & watch** — you open the lid and watch which way she flies home.[10]",
+      ]},
+      { type:'p', text:"Other bees she recruits will start arriving at the box too, and *their* departure direction is your bee line.[10]" },
+      { type:'diagram', id:'bee-box', caption:"Catch chamber, feed chamber with comb, sliding lid — plus the kit." },
+      { type:'p', text:"**Buy one:** ready-made bee lining boxes (often sold with the comb and a plug) are available from beekeeping suppliers such as Betterbee and PerfectBee, typically as an inexpensive kit.[10][11] A good starting point if you'd rather not build." },
+      { type:'p', text:"**Build one:** it's a genuinely easy weekend woodworking project — untreated pine or cedar, a couple of compartments, a clear or sliding top so you can see the bee, and a way to move her from the catch side to the feed side. (SaveTheHives plans to publish a free printable plan.)[3][10]" },
+      { type:'table', caption:"The rest of the kit", headers:["Item","What it's for"], rows:[
+        ["Sugar syrup","The bait that fills the bee's crop — roughly 1:1 sugar and water."],
+        ["Anise oil (or lemongrass/wintergreen)","Scent that draws more bees to the box.[11] Avoid plain store honey — disease risk."],
+        ["Compass","Reading the bee line's bearing — a baseplate compass, or your phone."],
+        ["Marking pen","Bee-safe queen-marking pens for timing round trips and telling bees apart.[12]"],
+        ["Stopwatch","Timing round trips for distance (Method C). Your phone is fine."],
+        ["Notebook or the app","Logging bearings, times, and the find — straight into the SaveTheHives map."],
+        ["Water, hat, sturdy shoes","You. Bee season is hot and you'll be out a while."],
+      ]},
+    ],
+  },
+  {
+    id: 7, title: "Step by Step: Your First Hunt", kicker: "The Walkthrough",
+    level: "Intermediate", readMin: 7, prereq: [4,5,6], track: ['tryit'],
+    chips: ["Doers", "Intermediate", "Builds on Modules 4, 5 & 6"], diagram: null,
+    blocks: [
+      { type:'p', cls:'lead', text:"A walkthrough of a classic hunt, combining the methods above. Pick a **warm, calm, sunny day**. Late summer into early fall is prime — bees are working hard to stock up for winter and are eager for an easy food source.[1]" },
+      { type:'fact', num:1, title:"Find foragers.", text:"Locate a patch of flowers with honey bees actively working it. Goldenrod, aster, and other late-season bloom are magnets." },
+      { type:'fact', num:2, title:"Catch and feed.", text:"Trap a forager in the box, move her to the syrup-and-comb compartment, and let her drink. A calm, fully-fed bee is the goal — a startled one won't give a clean line.[1]" },
+      { type:'fact', num:3, title:"Mark her (optional but useful).", text:"A tiny dab of paint on the thorax lets you recognize this individual when she returns, and time her round trip.[12]" },
+      { type:'fact', num:4, title:"Release and take the line.", text:"Open the lid. She'll circle a moment to orient, then set off. Sight along her departure with your compass. *Don't trust the very first bee* — take several and average them.[3]" },
+      { type:'fact', num:5, title:"Time the round trip (for distance).", text:"Note the clock when she leaves and when she returns for more syrup. Compare to Module 3's table for a rough distance.[4]" },
+      { type:'fact', num:6, title:"Establish the line, then close in.", text:"Once several bees agree on a direction, you have your bee line. Open ground → leapfrog (Method A). Blocked path → triangulate (Method B). Repeat, tightening each time." },
+      { type:'fact', num:7, title:"Find the nest.", text:"Watch for bees streaming in and out of a knothole, a gap in a wall, a hollow limb. Look on the sunny side of trunks; watch the sky for flight lines converging." },
+      { type:'fact', num:8, title:"Log it — don't disturb it.", text:"Mark the location in SaveTheHives: coordinates, the kind of cavity, a photo if you can get one safely from a distance. Then leave it in peace. You've just added a wild survivor colony to the map." },
+      { type:'callout', label:"A realistic expectation", text:"Your first hunt may not end in a found tree, and that's normal. Beelining rewards repeat outings and local knowledge. Even a partial line is useful data and a foundation for next time." },
+    ],
+  },
+  {
+    id: 8, title: "Beelining Meets Modern Tech", kicker: "Where SaveTheHives Fits",
+    level: "Intermediate", readMin: 3, prereq: [3], track: ['maker'],
+    chips: ["Tech-curious", "Intermediate", "Builds on Module 3"], diagram: null,
+    blocks: [
+      { type:'p', cls:'lead', text:"The classic method uses a paper map, a compass, and mental arithmetic. Modern tools can assist — with a big honest caveat." },
+      { type:'p', text:"A smartphone gives you GPS coordinates, a compass, and a map in your pocket, which makes recording bearings and logging finds far easier than sketching lines on paper. SaveTheHives has experimented with a built-in **Pathfinder** tool that captures two bearings and triangulates a candidate location on the map automatically." },
+      { type:'callout', label:"The honest limitation", text:"a phone can only be as good as its sensors. Phone compasses carry several degrees of error, and GPS under a tree canopy can wander by 10–20 meters. Those errors get *magnified* by distance and by shallow crossing angles — exactly like they do for a human with a handheld compass. **A bearing taken closer to the colony is always worth more than a clever calculation from far away.**" },
+      { type:'p', text:"So think of technology as a *logbook and a rough guide*, not an autopilot. The craft is still the craft. The bees still have the last word." },
+    ],
+  },
+  {
+    id: 9, title: "The Waggle Dance", kicker: "How Bees Beeline to Each Other",
+    level: "Beginner", readMin: 3, prereq: [], track: ['curious','maker'],
+    chips: ["Everyone", "Beginner", "Pairs with Module 3"], diagram: 'waggle-decoder',
+    blocks: [
+      { type:'p', cls:'lead', text:"Here's the wonderful part: bees have been beelining to *each other* for millions of years. When a scout finds a rich patch of flowers, she flies home and — in the pitch dark of the hive, on the vertical face of the comb — she *dances* the directions to her sisters. It's called the **waggle dance**, and decoding it won Karl von Frisch a share of the 1973 Nobel Prize.[6][7]" },
+      { type:'p', text:"The dance is a figure-eight with a straight \"waggle run\" up the middle, where she shimmies her abdomen rapidly side to side. Three things are encoded in it, and they are exactly the three things *you* work out when you beeline:[6][7][13]" },
+      { type:'fact', num:1, title:"Direction — the angle of the run.", text:"The angle of the waggle run away from straight-up equals the angle of the flowers away from the sun. She translates the sky into gravity, in the dark, and her sisters translate it back into a heading when they fly out." },
+      { type:'fact', num:2, title:"Distance — the length of the run.", text:"The longer she waggles, the farther the food. Roughly one second of waggling per kilometre. A quick little run means \"just outside\"; a long one means \"pack a lunch.\"" },
+      { type:'fact', num:3, title:"Quality — the vigor of the dance.", text:"The faster she waggles and the more times she repeats the figure-eight, the better the find. The colony effectively *votes with its feet*, sending more foragers to the richest sources.[13]" },
+      { type:'diagram', id:'waggle-decoder', caption:"Angle = direction, length = distance, vigor = quality." },
+      { type:'p', text:"There's even a simpler version — the **round dance**, a plain little circle with no waggle, which means \"the food is close, just go out and search nearby.\" Near gets a round dance; far gets a waggle dance. Sound familiar? It's the same near/far logic as a bee's round-trip time being under three minutes versus twenty." },
+      { type:'callout', label:"Same language", text:"When you stand in a field reading a bee's flight line, you're doing by eye and compass what she does by dance and gravity. Direction, distance, and how good the destination is — that's the actual structure of how bees share a location. SaveTheHives borrows these same three axes to guide you through this very guide. Watch for it." },
+    ],
+  },
+];
+
+const TRACKS = {
+  curious: [1,2,9,3],
+  tryit:   [1,3,4,5,6,7],
+  maker:   [3,9,4,6,8],
+};
+
+const TRACK_META = {
+  curious: { title:"I'm just curious", desc:"10 min · the wonder of it", icon:'eye' },
+  tryit:   { title:"I want to try this", desc:"The full how-to, safety-first", icon:'compass', badge:'Popular' },
+  maker:   { title:"I'm a maker / techie", desc:"Theory, kit, and the tech tie-in", icon:'tools' },
+};
+
+// ── progress (read state), persisted the same way dark mode is ──
+function lvGetProgress() {
+  try { return JSON.parse(localStorage.getItem('learnProgress') || '{}'); }
+  catch { return {}; }
+}
+function lvMarkRead(id) {
+  const p = lvGetProgress();
+  p[id] = true;
+  localStorage.setItem('learnProgress', JSON.stringify(p));
+}
+function lvIsRead(id) { return !!lvGetProgress()[id]; }
+function lvModule(id) { return MODULES.find(m => m.id === id); }
+
+// ── current reading session (either a guided track or free browsing) ──
+let lvSession = { track: null, index: 0, moduleId: null };
+
+function lvIconSVG(name) {
+  const icons = {
+    eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+    compass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="12,7 14.5,12 12,17 9.5,12" fill="currentColor" stroke="none"/></svg>',
+    tools: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.1 2.1-2-2z"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  };
+  return icons[name] || '';
+}
+
+// ── SVG diagrams ──
+function lvDiagramSVG(id) {
+  if (id === 'hero') {
+    return `<svg viewBox="0 0 400 220" role="img" aria-label="A bee flying a dashed line from flowers to a distant tree.">
+      <rect x="0" y="0" width="400" height="220" fill="var(--sky)"/>
+      <path d="M0 150 Q120 130 220 145 T400 140 L400 220 L0 220 Z" fill="var(--ground)"/>
+      <g transform="translate(320 66)">
+        <rect x="-5" y="10" width="10" height="42" rx="3" fill="var(--tree-dark)"/>
+        <circle cx="0" cy="2" r="26" fill="var(--tree)"/>
+        <circle cx="-16" cy="12" r="17" fill="var(--tree)"/>
+        <circle cx="16" cy="12" r="17" fill="var(--tree)"/>
+      </g>
+      <g transform="translate(55 168)">
+        <circle r="10" fill="#e05a8a"/><circle cx="16" cy="4" r="9" fill="#e05a8a"/><circle cx="-14" cy="6" r="9" fill="#e05a8a"/>
+        <circle r="4" fill="#ffd166"/><circle cx="16" cy="4" r="3.5" fill="#ffd166"/><circle cx="-14" cy="6" r="3.5" fill="#ffd166"/>
+      </g>
+      <defs><marker id="lv-arrow-hero" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="var(--honey)"/></marker></defs>
+      <line x1="70" y1="150" x2="300" y2="80" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-hero)"/>
+      <g transform="translate(150 122) rotate(-24)">
+        <ellipse cx="0" cy="0" rx="6" ry="3.6" fill="#3a2c10"/>
+        <rect x="-3.5" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+        <rect x="1" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+        <ellipse cx="-1" cy="-5" rx="5" ry="2.6" fill="#fff" opacity="0.85"/>
+      </g>
+    </svg>`;
+  }
+  if (id === 'triangulation') {
+    return `<svg viewBox="0 0 400 300" role="img" aria-label="Two observer positions A and B, each with a dashed bearing line; the lines cross at a bee tree.">
+      <defs><marker id="lv-arrow-tri" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L7 4 L0 8 z" fill="var(--honey)"/></marker></defs>
+      <rect x="0" y="0" width="400" height="300" fill="var(--sky)"/>
+      <path d="M0 210 Q120 188 220 205 T400 200 L400 300 L0 300 Z" fill="var(--ground)"/>
+      <g transform="translate(300 96)">
+        <rect x="-5" y="10" width="10" height="42" rx="3" fill="var(--tree-dark)"/>
+        <circle cx="0" cy="2" r="26" fill="var(--tree)"/>
+        <circle cx="-16" cy="12" r="17" fill="var(--tree)"/>
+        <circle cx="16" cy="12" r="17" fill="var(--tree)"/>
+        <circle cx="0" cy="20" r="7" fill="var(--tree-dark)" opacity="0.55"/>
+      </g>
+      <line x1="72" y1="238" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-tri)"/>
+      <line x1="250" y1="252" x2="300" y2="112" stroke="var(--honey)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#lv-arrow-tri)"/>
+      <g transform="translate(300 112)" stroke="var(--honey-dark)" stroke-width="2.6" stroke-linecap="round">
+        <line x1="-7" y1="-7" x2="7" y2="7"/><line x1="-7" y1="7" x2="7" y2="-7"/>
+      </g>
+      <g transform="translate(72 238)"><circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/><text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">A</text></g>
+      <g transform="translate(250 252)"><circle r="15" fill="var(--surface)" stroke="var(--honey)" stroke-width="2.4"/><text x="0" y="5" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="700" font-size="16" fill="var(--honey-dark)">B</text></g>
+      <g transform="translate(176 172) rotate(-29)">
+        <ellipse cx="0" cy="0" rx="6" ry="3.6" fill="#3a2c10"/>
+        <rect x="-3.5" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+        <rect x="1" y="-3.6" width="2.6" height="7.2" fill="var(--honey-light)"/>
+        <ellipse cx="-1" cy="-5" rx="5" ry="2.6" fill="#fff" opacity="0.85"/>
+      </g>
+    </svg>`;
+  }
+  // Remaining shot-list diagrams (terrain-chooser, bee-box, waggle-decoder,
+  // round-trip strip) get a simple placeholder for now — drawn progressively
+  // per LEARN_TAB_BUILD_BRIEF.md §6 build order, step 4.
+  return `<svg viewBox="0 0 400 180" role="img" aria-label="Illustration coming soon">
+    <rect x="0" y="0" width="400" height="180" fill="var(--surface2)"/>
+    <g transform="translate(200 90)">
+      <path d="M-26 -15 L0 -30 L26 -15 L26 15 L0 30 L-26 15 Z" fill="none" stroke="var(--honey)" stroke-width="2.5" opacity="0.55"/>
+      <ellipse cx="0" cy="0" rx="9" ry="5.4" fill="var(--honey)" opacity="0.85"/>
+      <rect x="-5.2" y="-5.4" width="4" height="10.8" fill="var(--honey-light)"/>
+      <rect x="1.2" y="-5.4" width="4" height="10.8" fill="var(--honey-light)"/>
+    </g>
+  </svg>`;
+}
+
+// ── Hub ──
+function renderLearnHub() {
+  const hero = document.getElementById('lv-hero');
+  if (hero) {
+    hero.innerHTML = `
+      <div class="diagram" style="margin-bottom:16px;">${lvDiagramSVG('hero')}</div>
+      <h1 class="lv-hero-title">There's a wild bee colony within a mile of you right now.</h1>
+      <p class="lv-hero-sub">The bees know where. Learn beelining — the 300-year-old craft of making them show you.</p>
+    `;
+  }
+
+  const cards = document.getElementById('lv-path-cards');
+  if (cards) {
+    cards.innerHTML = Object.keys(TRACKS).map(key => {
+      const meta = TRACK_META[key];
+      return `
+        <div class="lv-card" onclick="learnStartTrack('${key}')">
+          <div class="lv-card-icon">${lvIconSVG(meta.icon)}</div>
+          <div class="lv-card-body">
+            <div class="lv-card-title">${meta.title}${meta.badge ? `<span class="lv-card-badge">${meta.badge}</span>` : ''}</div>
+            <div class="lv-card-desc">${meta.desc}</div>
+          </div>
+          <div class="lv-card-chevron">${lvIconSVG('chevron')}</div>
+        </div>`;
+    }).join('');
+  }
+
+  const sub = document.getElementById('lv-checklist-sub');
+  const readCount = MODULES.filter(m => lvIsRead(m.id)).length;
+  if (sub) sub.textContent = `${readCount} of ${MODULES.length} read`;
+
+  const list = document.getElementById('lv-checklist');
+  if (list) {
+    const firstUnreadId = (MODULES.find(m => !lvIsRead(m.id)) || {}).id;
+    list.innerHTML = MODULES.map(m => {
+      const done = lvIsRead(m.id);
+      const isCurrent = !done && m.id === firstUnreadId;
+      const softLocked = !done && m.prereq.length && !m.prereq.every(p => lvIsRead(p));
+      const stateGlyph = done ? '✓' : (softLocked ? '🔒' : (isCurrent ? '▶' : ''));
+      const rowClass = done ? 'done' : (isCurrent ? 'current' : (softLocked ? 'locked' : ''));
+      return `
+        <div class="lv-row ${rowClass}" onclick="learnOpenModule(${m.id})">
+          <div class="lv-row-num">${m.id}</div>
+          <div class="lv-row-body">
+            <div class="lv-row-title">${m.title}</div>
+            <div class="lv-row-meta">
+              <span class="lv-row-chip">${m.readMin} min</span>
+              <span class="lv-row-chip">${m.level.split(' ')[0].split('–')[0]}</span>
+            </div>
+          </div>
+          <div class="lv-row-state">${stateGlyph}</div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function openLearnHub() {
+  document.getElementById('learn-hub').style.display = '';
+  document.getElementById('learn-reader').style.display = 'none';
+  renderLearnHub();
+}
+function learnBackToHub() {
+  lvSession = { track: null, index: 0, moduleId: null };
+  openLearnHub();
+}
+
+function learnStartTrack(trackKey) {
+  const seq = TRACKS[trackKey];
+  if (!seq || !seq.length) return;
+  lvSession = { track: trackKey, index: 0, moduleId: seq[0] };
+  learnRenderReader();
+}
+
+// Freely browse a single module from the checklist (no track context).
+function learnOpenModule(id) {
+  lvSession = { track: null, index: 0, moduleId: id };
+  learnRenderReader();
+}
+
+function lvBlockHTML(b) {
+  switch (b.type) {
+    case 'p': return `<p class="${b.cls || ''}">${lvFmt(b.text)}</p>`;
+    case 'h3': return `<h3 class="lv-h3" style="font-size:1.05rem;font-weight:700;margin:22px 0 4px;color:var(--text);">${lvFmt(b.text)}</h3>`;
+    case 'sub': return `<p class="note" style="margin-top:-2px;">${lvFmt(b.text)}</p>`;
+    case 'note': return `<p class="note">${lvFmt(b.text)}</p>`;
+    case 'list': return `<ul class="lv-list">${b.items.map(i => `<li>${lvFmt(i)}</li>`).join('')}</ul>`;
+    case 'fact': return `<div class="fact"><div class="num">${b.num}</div><div class="body"><strong>${lvFmt(b.title)}</strong><p>${lvFmt(b.text)}</p></div></div>`;
+    case 'callout': return `<div class="callout"><p style="margin:0"><strong>${lvFmt(b.label)}:</strong> ${lvFmt(b.text)}</p></div>`;
+    case 'table': return `<div class="tbl-wrap"><table><caption>${lvFmt(b.caption)}</caption><thead><tr>${b.headers.map(h => `<th>${lvFmt(h)}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${lvFmt(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    case 'diagram': return `<figure><div class="diagram">${lvDiagramSVG(b.id)}</div><figcaption>${lvFmt(b.caption)}</figcaption></figure>`;
+    default: return '';
+  }
+}
+
+function learnRenderReader() {
+  const m = lvModule(lvSession.moduleId);
+  if (!m) return;
+  lvMarkRead(m.id);
+
+  document.getElementById('learn-hub').style.display = 'none';
+  document.getElementById('learn-reader').style.display = '';
+
+  const seq = lvSession.track ? TRACKS[lvSession.track] : null;
+  const posInSeq = seq ? seq.indexOf(m.id) : -1;
+  const totalInSeq = seq ? seq.length : MODULES.length;
+  const displayN = seq ? posInSeq + 1 : m.id;
+
+  document.getElementById('lv-modcount').textContent = `Module ${displayN} of ${totalInSeq}`;
+  document.getElementById('lv-readchip-text').textContent = `${m.readMin} min`;
+  document.getElementById('lv-progress-fill').style.width = `${Math.round((displayN / totalInSeq) * 100)}%`;
+
+  const chipsHTML = m.chips.map((c, i) => `<span class="chip${i === 1 ? ' level' : ''}">${c}</span>`).join('');
+  const bodyHTML = m.blocks.map(lvBlockHTML).join('');
+  document.getElementById('lv-reader-body').innerHTML = `
+    <p class="kicker">${m.kicker}</p>
+    <h1 class="title">${m.title}</h1>
+    <div class="chips">${chipsHTML}</div>
+    ${bodyHTML}
+  `;
+  document.getElementById('lv-reader-body').scrollTop = 0;
+  const scroller = document.getElementById('learn-reader');
+  if (scroller) scroller.scrollTop = 0;
+
+  // Prev / Next wiring
+  const prevBtn = document.getElementById('lv-prev-btn');
+  const nextBtn = document.getElementById('lv-next-btn');
+  const nextLabel = document.getElementById('lv-next-label');
+
+  if (seq) {
+    prevBtn.style.visibility = posInSeq > 0 ? '' : 'hidden';
+    if (posInSeq < seq.length - 1) {
+      const nm = lvModule(seq[posInSeq + 1]);
+      nextLabel.textContent = `Next: ${nm.title}`;
+      nextBtn.onclick = learnNext;
+    } else {
+      // End of a guided track — Try-it ends on a CTA; Curious/Maker end on
+      // a soft "want to try?" nudge back to the hub (brief §4).
+      if (lvSession.track === 'tryit') {
+        nextLabel.textContent = 'Log a Hive →';
+        nextBtn.onclick = () => { setTab('add'); };
+      } else {
+        nextLabel.textContent = 'Done — Back to Learn';
+        nextBtn.onclick = learnBackToHub;
+      }
+    }
+  } else {
+    // Free browsing — walk sequential module order, wrap to hub at the end.
+    prevBtn.style.visibility = m.id > 1 ? '' : 'hidden';
+    if (m.id < MODULES.length) {
+      nextLabel.textContent = `Next: ${lvModule(m.id + 1).title}`;
+      nextBtn.onclick = learnNext;
+    } else {
+      nextLabel.textContent = 'Done — Back to Learn';
+      nextBtn.onclick = learnBackToHub;
+    }
+  }
+}
+
+function learnNext() {
+  if (lvSession.track) {
+    const seq = TRACKS[lvSession.track];
+    const idx = seq.indexOf(lvSession.moduleId);
+    if (idx < seq.length - 1) {
+      lvSession.index = idx + 1;
+      lvSession.moduleId = seq[idx + 1];
+      learnRenderReader();
+    }
+  } else if (lvSession.moduleId < MODULES.length) {
+    lvSession.moduleId += 1;
+    learnRenderReader();
+  }
+}
+
+function learnPrev() {
+  if (lvSession.track) {
+    const seq = TRACKS[lvSession.track];
+    const idx = seq.indexOf(lvSession.moduleId);
+    if (idx > 0) {
+      lvSession.index = idx - 1;
+      lvSession.moduleId = seq[idx - 1];
+      learnRenderReader();
+    } else {
+      learnBackToHub();
+    }
+  } else if (lvSession.moduleId > 1) {
+    lvSession.moduleId -= 1;
+    learnRenderReader();
+  } else {
+    learnBackToHub();
+  }
+}
 
