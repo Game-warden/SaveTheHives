@@ -1551,6 +1551,23 @@
   .reader-body ul.lv-list { margin: 0 0 16px; padding-left: 1.2em; }
   .reader-body ul.lv-list li { font-size: 1rem; margin-bottom: 8px; }
 
+  /* Sources — collapsible, per-module citation list (only the [n]s that
+     module actually cites). Native <details> so it's keyboard/AT friendly
+     with zero extra JS. */
+  .reader-body details.lv-sources { margin: 24px 0 4px; border-top: 1px solid var(--border); padding-top: 14px; }
+  .reader-body details.lv-sources summary {
+    cursor: pointer; font-size: 0.82rem; font-weight: 700; color: var(--honey-dark);
+    list-style: none; user-select: none;
+  }
+  body.dark-mode .reader-body details.lv-sources summary { color: var(--honey); }
+  .reader-body details.lv-sources summary::-webkit-details-marker { display: none; }
+  .reader-body details.lv-sources summary::before { content: '▸ '; }
+  .reader-body details.lv-sources[open] summary::before { content: '▾ '; }
+  .reader-body .lv-sources-list { margin: 10px 0 0; padding-left: 1.3em; font-size: 0.8rem; color: var(--text-muted); }
+  .reader-body .lv-sources-list li { margin-bottom: 8px; }
+  .reader-body .lv-sources-list a { color: var(--honey-dark); text-decoration: underline; }
+  body.dark-mode .reader-body .lv-sources-list a { color: var(--honey); }
+
   .reader-body .callout {
     border-left: 3px solid var(--honey);
     background: color-mix(in srgb, var(--honey) 8%, transparent);

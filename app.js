@@ -1604,6 +1604,53 @@ const TRACK_END = {
   },
 };
 
+// Numbered references from BEELINING_GUIDE.md's REFERENCES section — kept
+// keyed by the same numbers used inline in module prose ([1], [2], etc.)
+// so a module's citations resolve to a real, tappable source list instead
+// of dangling superscript numbers.
+const REFERENCES = {
+  1: { title: "University of Arkansas Division of Agriculture — What is bee lining? | How to find feral bee colonies.", url: "https://www.uaex.uada.edu/farm-ranch/special-programs/beekeeping/beeliner.aspx" },
+  2: { title: "Bee Lining: The Oldtimers' Way to Find Wild Beehives, Northern Woodlands.", url: "https://northernwoodlands.org/articles/article/bee-lining-the-oldtimers-way-to-find-wild-beehives" },
+  3: { title: "George Harold Edgell, The Bee Hunter (Harvard University Press, 1949) — full public-domain text.", url: "https://www.gutenberg.org/files/65820/65820-h/65820-h.htm" },
+  4: { title: "Beesource Beekeeping Forums — Wild bees, distance from bait per minute round trip.", url: "https://www.beesource.com/threads/wild-bees-distance-from-bait-per-minute-round-trip.320013/" },
+  5: { title: "How Far Do Bees Travel? The Foraging Range Explained, Apiary Project.", url: "https://apiaryproject.com/blog/how-far-do-bees-travel-foraging-range" },
+  6: { title: "Frisch Discovers That Bees Communicate Through Body Movements, EBSCO Research Starters.", url: "https://www.ebsco.com/research-starters/history/frisch-discovers-bees-communicate-through-body-movements" },
+  7: { title: "The Honey Bee Dance Language, NC State Extension.", url: "https://content.ces.ncsu.edu/honey-bee-dance-language" },
+  8: { title: "Thomas D. Seeley, Following the Wild Bees: The Craft and Science of Bee Hunting (Princeton University Press, 2016).", url: "https://press.princeton.edu/books/paperback/9780691191409/following-the-wild-bees" },
+  9: { title: "County of San Diego — Feral Bees (property, liability, Africanized-bee cautions).", url: "https://www.sandiegocounty.gov/content/sdc/awm/bees/feral-bees.html" },
+  10: { title: "Betterbee — Bee Lining Box, Comb and Plug.", url: "https://www.betterbee.com/bee-lining-bee-hunting/blb-bee-lining-box.asp" },
+  11: { title: "PerfectBee — Bee Lining Box.", url: "https://www.perfectbee.com/store/accessories-and-tools/nucs-and-swarm-retrieval/bee-lining-box" },
+  12: { title: "The Apiarist — How to: Queen marking.", url: "https://theapiarist.org/how-to-queen-marking/" },
+  13: { title: "The Waggle Dance — How Bees Encode Distance and Direction, Apiary Project / Wikipedia.", url: "https://apiaryproject.com/blog/waggle-dance-how-bees-communicate" },
+};
+
+// Scan a module's blocks for every [n] citation actually used in its prose,
+// so each module only shows the sources it really cites (not all 13 every
+// time).
+function lvCitedRefs(m) {
+  const nums = new Set();
+  const scan = (s) => { if (typeof s === 'string') (s.match(/\[(\d+)\]/g) || []).forEach(tag => nums.add(Number(tag.slice(1, -1)))); };
+  m.blocks.forEach(b => {
+    scan(b.text); scan(b.label); scan(b.title); scan(b.caption);
+    if (b.items) b.items.forEach(scan);
+    if (b.rows) b.rows.forEach(row => row.forEach(scan));
+  });
+  return [...nums].sort((a, b) => a - b);
+}
+
+function lvSourcesHTML(m) {
+  const nums = lvCitedRefs(m);
+  if (!nums.length) return '';
+  const items = nums.map(n => {
+    const ref = REFERENCES[n];
+    return ref ? `<li><sup class="ref">[${n}]</sup> <a href="${ref.url}" target="_blank" rel="noopener noreferrer">${lvFmt(ref.title)}</a></li>` : '';
+  }).join('');
+  return `<details class="lv-sources">
+    <summary>Sources (${nums.length})</summary>
+    <ol class="lv-sources-list">${items}</ol>
+  </details>`;
+}
+
 // ── progress (read state), persisted the same way dark mode is ──
 function lvGetProgress() {
   try { return JSON.parse(localStorage.getItem('learnProgress') || '{}'); }
@@ -1682,7 +1729,7 @@ function renderLearnHub() {
   if (hero) {
     hero.innerHTML = `
       <div class="diagram" style="margin-bottom:16px;">${lvDiagramSVG('hero')}</div>
-      <h1 class="lv-hero-title">There's a wild bee colony within a mile of you right now.</h1>
+      <h1 class="lv-hero-title">Could there be a wild bee colony within a mile of you right now?</h1>
       <p class="lv-hero-sub">The bees know where. Learn beelining — the 300-year-old craft of making them show you.</p>
     `;
   }
@@ -1817,7 +1864,7 @@ function learnRenderReader() {
   document.getElementById('lv-progress-fill').style.width = `${Math.round((displayN / totalInSeq) * 100)}%`;
 
   const chipsHTML = m.chips.map((c, i) => `<span class="chip${i === 1 ? ' level' : ''}">${c}</span>`).join('');
-  const bodyHTML = m.blocks.map(lvBlockHTML).join('');
+  const bodyHTML = m.blocks.map(lvBlockHTML).join('') + lvSourcesHTML(m);
   document.getElementById('lv-reader-body').innerHTML = `
     <p class="kicker">${m.kicker}</p>
     <h1 class="title">${m.title}</h1>
