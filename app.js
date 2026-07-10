@@ -97,13 +97,16 @@ function toggleMapSearch(open) {
   const wrap = document.getElementById('map-search');
   if (!wrap) return;
   wrap.classList.toggle('collapsed', !open);
-  // Expanded search takes over the whole top bar (matches the approved
-  // mockup); hide the radius/filter controls it would otherwise overlap
-  // rather than truly removing them, so nothing reflows.
+  // Expanded search now spans the bottom row (v2.8.1 — moved off Leaflet's
+  // top-left zoom control), overlapping the radius/filter stack (top-right)
+  // and fab-locate (same bottom-left row). Hide them rather than truly
+  // removing them, so nothing reflows.
   const filters = document.getElementById('map-filters');
   const radius = document.getElementById('radius-toggle');
+  const locate = document.getElementById('fab-locate');
   if (filters) filters.style.visibility = open ? 'hidden' : '';
   if (radius) radius.style.visibility = open ? 'hidden' : '';
+  if (locate) locate.style.visibility = open ? 'hidden' : '';
   if (open) {
     const input = document.getElementById('smart-search-input');
     if (input) setTimeout(() => input.focus(), 60);
