@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.8.1'; // Fix: search FAB moved from top-left to bottom-left (Leaflet's own zoom +/- control sits top-left by default and was eating the search icon's taps); fab-locate now hides while search is expanded too
+const CACHE_VERSION = 'v2.8.2'; // Fix: search icon's inline SVG had no explicit width/height, so it fell back to each browser's own default intrinsic size — fine in Chrome, rendered as a blank circle in iOS Safari. Now explicitly sized like every other icon button in the app.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

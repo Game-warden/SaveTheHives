@@ -1179,10 +1179,11 @@
   ::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.25); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.4); }
 
-  /* ── FLOATING SEARCH (v2.8) — replaces the old static search bar row ──
-     Collapsed: a 44px circular icon button, top-left over the map.
-     Expanded (.collapsed removed): morphs in place into a full-width
-     pill with an inline input, matching the approved mockup. */
+  /* ── FLOATING SEARCH (v2.8, repositioned in v2.8.1) — replaces the old
+     static search bar row ── Collapsed: a 44px circular icon button,
+     bottom-left over the map (see #map-search below for why it's not
+     top-left). Expanded (.collapsed removed): morphs in place into a
+     full-width pill along the same bottom row. */
   #map-search {
     /* Bottom-left, matching #fab-locate's row (v2.8.1) — top-left is
        Leaflet's own zoom +/- control (zoomControl:true, default
@@ -1221,6 +1222,13 @@
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
+  /* Explicit size — without this, an inline SVG with only a viewBox (no
+     width/height attributes) falls back to each browser's own default
+     intrinsic size. Chrome happened to constrain it reasonably inside the
+     36px flex button; iOS Safari did not, which is why the icon rendered
+     as a blank circle there (every other icon button in the app already
+     has this same explicit sizing — this one was missed). */
+  #map-search-icon svg { width: 20px; height: 20px; flex-shrink: 0; }
   #map-search.collapsed #smart-search-input,
   #map-search.collapsed #map-search-close { display: none; }
   #smart-search-input {
