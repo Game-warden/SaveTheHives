@@ -731,7 +731,7 @@
   /* ── TOAST ── */
   #toast {
     position: fixed;
-    bottom: 90px;
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%) translateY(16px);
     background: var(--surface);
@@ -760,11 +760,14 @@
      already calls openAddPanel() via setTab('add'). */
 
   /* ── LOCATE FAB ──
-     Repositioned lower now that fab-add is gone; still comfortably clears
-     the floating bottom nav pill (top edge ~72px from viewport bottom). */
+     Repositioned lower now that fab-add is gone; clears the floating
+     bottom nav pill. bottom uses env(safe-area-inset-bottom) to match
+     #bottom-tabs's own inset (v2.8.3 fix) — without this, the pill rises
+     to clear a notched iPhone's home-indicator strip but this FAB stayed
+     put, ending up tucked behind the now-higher pill. */
   #fab-locate {
     position: absolute;
-    bottom: 88px;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     right: 16px;
     z-index: 900;
     width: 44px; height: 44px;
@@ -1188,9 +1191,12 @@
     /* Bottom-left, matching #fab-locate's row (v2.8.1) — top-left is
        Leaflet's own zoom +/- control (zoomControl:true, default
        'topleft' position), which was sitting on top of the search icon
-       and eating its taps entirely. */
+       and eating its taps entirely. bottom uses env(safe-area-inset-bottom)
+       to match #fab-locate and #bottom-tabs (v2.8.3 fix) — otherwise this
+       stays put while the nav pill rises to clear a notched iPhone's
+       home-indicator strip, tucking this behind it. */
     position: absolute;
-    bottom: 88px;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
     left: 16px;
     right: auto;
     z-index: 900;
