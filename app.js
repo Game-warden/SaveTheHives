@@ -75,10 +75,47 @@ let selectedType = 'Live Tree';
 let pendingLat = null, pendingLng = null;
 
 // ═══════════════════════════════════════
+// FIRST-VISIT ON-RAMP OVERLAY (v2.8)
+// ═══════════════════════════════════════
+const ONRAMP_SEEN_KEY = 'onrampSeen';
+function maybeShowOnramp() {
+  const overlay = document.getElementById('onramp-overlay');
+  if (!overlay) return;
+  if (localStorage.getItem(ONRAMP_SEEN_KEY)) return; // stays hidden (default state)
+  overlay.classList.remove('hidden');
+}
+function dismissOnramp() {
+  localStorage.setItem(ONRAMP_SEEN_KEY, '1');
+  const overlay = document.getElementById('onramp-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// FLOATING SEARCH (v2.8) — morphs the map-search icon into an inline field
+// ═══════════════════════════════════════
+function toggleMapSearch(open) {
+  const wrap = document.getElementById('map-search');
+  if (!wrap) return;
+  wrap.classList.toggle('collapsed', !open);
+  // Expanded search takes over the whole top bar (matches the approved
+  // mockup); hide the radius/filter controls it would otherwise overlap
+  // rather than truly removing them, so nothing reflows.
+  const filters = document.getElementById('map-filters');
+  const radius = document.getElementById('radius-toggle');
+  if (filters) filters.style.visibility = open ? 'hidden' : '';
+  if (radius) radius.style.visibility = open ? 'hidden' : '';
+  if (open) {
+    const input = document.getElementById('smart-search-input');
+    if (input) setTimeout(() => input.focus(), 60);
+  }
+}
+
+// ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 async function init() {
   initDarkMode();
+  maybeShowOnramp();
 
   // Init map — start at US overview, then fly to user location
   map = L.map('map', {
@@ -856,16 +893,16 @@ function locateMe() {
 // TABS & MODALS
 // ═══════════════════════════════════════
 function hideSearchUI() {
-  const sw = document.getElementById('search-wrapper');
-  const sb = document.getElementById('stats-bar');
-  if (sw) sw.style.display = 'none';
-  if (sb) sb.style.display = 'none';
+  const ms = document.getElementById('map-search');
+  const mf = document.getElementById('map-filters');
+  if (ms) ms.style.display = 'none';
+  if (mf) mf.style.display = 'none';
 }
 function showSearchUI() {
-  const sw = document.getElementById('search-wrapper');
-  const sb = document.getElementById('stats-bar');
-  if (sw) sw.style.display = '';
-  if (sb) sb.style.display = '';
+  const ms = document.getElementById('map-search');
+  const mf = document.getElementById('map-filters');
+  if (ms) ms.style.display = '';
+  if (mf) mf.style.display = '';
 }
 
 function setTab(tab) {
@@ -880,6 +917,13 @@ function setTab(tab) {
 
   if (tab === 'pathfinder' || tab === 'learn') hideSearchUI();
   else showSearchUI();
+
+  // Bottom nav floats over the map now (v2.8), which means it would
+  // otherwise sit on top of the pathfinder panel's lower controls once
+  // that panel expands to the true screen bottom. Hide it while
+  // Pathfinder is active; exitPathfinder() (pathfinder.js) restores it.
+  const bottomTabs = document.getElementById('bottom-tabs');
+  if (bottomTabs) bottomTabs.style.display = (tab === 'pathfinder') ? 'none' : '';
 
   // Learn is a full-screen replacement for the map (not an overlay like
   // Pathfinder), so hide/show #map-container alongside it.
@@ -1257,6 +1301,7 @@ function doSmartSearch() {
       }
       const [lng, lat] = data.features[0].geometry.coordinates;
       map.setView([lat, lng], 11);
+      toggleMapSearch(false); // collapse back to the icon on a successful search
     })
     .catch(() => showToast('Search unavailable — check your connection'));
 }

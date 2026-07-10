@@ -219,6 +219,19 @@
 ║        shot-list diagrams stubbed with a placeholder pending Tier A  ║
 ║        follow-up passes. Waggle Compass (Tier B) intentionally NOT   ║
 ║        built yet, per brief.                                         ║
+║  v2.8  FLOATING UI + FIRST-VISIT ON-RAMP:                             ║
+║        • Static search bar row removed — replaced by a floating       ║
+║          magnifying-glass button (#map-search) that morphs in place   ║
+║          into an inline field on tap; Enter searches and auto-closes  ║
+║          it, ✕ closes without searching. Filter controls moved to a   ║
+║          small floating stack (#map-filters) under Mating Radius.     ║
+║        • Bottom nav (#bottom-tabs) now floats as a rounded pill over  ║
+║          the map/Learn view instead of a fixed full-width bar — map   ║
+║          and Learn content get that height back.                     ║
+║        • First-visit on-ramp: a dimmed overlay over the map (not a    ║
+║          blocking modal) shown once via localStorage, mission copy    ║
+║          + "Explore the map" / "How it works" (→ Learn tab).          ║
+║        • Removed #fab-add (duplicated the bottom nav's Add tab).      ║
 ╚══════════════════════════════════════════════════════════════════════╝
 -->
 <html lang="en">
@@ -257,7 +270,7 @@
 <div id="app-header">
   <img class="logo" src="logo.jpg" alt="SaveTheHives">
   <div class="title">
-    SaveTheHives <span id="app-version-badge" class="version-badge">v2.7</span>
+    SaveTheHives <span id="app-version-badge" class="version-badge">v2.8</span>
     <span>Feral Honeybee Mapping Network</span>
   </div>
   <!-- debug toggle hidden in production; restore for field testing -->
@@ -288,19 +301,9 @@
   <div class="debug-row"><span>Compass self-reported error</span><span id="dbg-compass-acc">—</span></div>
 </div>
 
-<!-- SINGLE SMART SEARCH BAR (v2.3) -->
-<div id="search-wrapper">
-  <input type="text" id="smart-search-input"
-    placeholder="Enter a city, landmark, or address"
-    onkeydown="if(event.key==='Enter') doSmartSearch()">
-  <button class="btn" id="search-go-btn" onclick="doSmartSearch()">Go</button>
-  <button id="filter-drawer-btn" onclick="openFilterDrawer()" title="Filter hives">
-    <span>Filter</span>
-    <span id="filter-drawer-badge"></span>
-  </button>
-  <button id="filter-clear-btn" onclick="clearAllFilters()" title="Clear all filters — filtered view active" style="display:none;">✕</button>
-</div>
-
+<!-- Smart search + filter controls moved into #map-container (v2.8) —
+     see #map-search / #map-filters below. They now float over the map
+     instead of taking their own full-width row. -->
 <!-- Stats bar removed — counts now in filter drawer -->
 
 <!-- MAP CONTAINER -->
@@ -316,11 +319,27 @@
       <circle cx="12" cy="12" r="7" stroke-dasharray="2 2"/>
     </svg>
   </button>
-  <button id="fab-add" onclick="openAddPanel()" title="Add Hive">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-  </button>
+  <!-- fab-add removed (v2.8) — duplicated the bottom nav's Add tab -->
+
+  <!-- Floating search (replaces the old static search bar row, v2.8) -->
+  <div id="map-search" class="collapsed">
+    <button id="map-search-icon" onclick="toggleMapSearch(true)" title="Search location" aria-label="Search location">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <input type="text" id="smart-search-input"
+      placeholder="City, landmark, or address"
+      onkeydown="if(event.key==='Enter') doSmartSearch()">
+    <button id="map-search-close" onclick="toggleMapSearch(false)" title="Close search" aria-label="Close search">✕</button>
+  </div>
+
+  <!-- Filter controls, stacked under the Mating Radius toggle (v2.8) -->
+  <div id="map-filters">
+    <button id="filter-drawer-btn" onclick="openFilterDrawer()" title="Filter hives">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
+      <span id="filter-drawer-badge"></span>
+    </button>
+    <button id="filter-clear-btn" onclick="clearAllFilters()" title="Clear all filters — filtered view active" style="display:none;">✕</button>
+  </div>
 
   <!-- ═══ PATHFINDER PANEL ═══ -->
   <div id="pathfinder-panel" class="pf-hidden">
@@ -417,6 +436,20 @@
     <button class="btn btn-outline pf-secondary-btn" id="pf-secondary-btn" style="display:none;" onclick="pathfinderReset()">
       🔄 Start Over
     </button>
+  </div>
+
+  <!-- First-visit on-ramp overlay (v2.8) — shown once via localStorage,
+       dimmed background over the map itself rather than a blocking modal. -->
+  <div id="onramp-overlay" class="onramp-overlay hidden">
+    <div class="onramp-card">
+      <div class="onramp-emoji" aria-hidden="true">🐝</div>
+      <div class="onramp-title">Could there be a wild bee colony within a mile of you?</div>
+      <div class="onramp-body">1,152+ feral hives logged since 2008 by citizen scientists. Tap any pin to see what's been found.</div>
+      <div class="onramp-actions">
+        <button class="btn onramp-primary" onclick="dismissOnramp()">Explore the map</button>
+        <button class="btn btn-outline onramp-secondary" onclick="dismissOnramp();setTab('learn');">How it works</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -703,7 +736,7 @@
     </div>
 
     <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
-      SaveTheHives v2.7 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
+      SaveTheHives v2.8 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
     </div>
 
     <button class="btn" style="width:100%;padding:12px;margin-top:16px;font-size:1rem;" onclick="closeAboutModal()">

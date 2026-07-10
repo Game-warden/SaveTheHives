@@ -412,6 +412,11 @@ function exitPathfinder() {
   document.getElementById('pathfinder-panel').classList.add('pf-hidden');
   document.getElementById('pathfinder-panel').classList.remove('pf-compact');
   showSearchUI();
+  // Bottom nav floats over the map (v2.8) and is hidden by setTab() while
+  // Pathfinder is active — restore it here since exitPathfinder() manages
+  // its own state rather than calling setTab('map').
+  const bottomTabs = document.getElementById('bottom-tabs');
+  if (bottomTabs) bottomTabs.style.display = '';
   // Switch bottom tab back to map, but keep any drawn pathfinder layers visible
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-btn')[0].classList.add('active');

@@ -421,24 +421,32 @@
     z-index: 1;
   }
 
-  /* ── BOTTOM TABS — glassmorphism + safe area ── */
+  /* ── BOTTOM TABS — floating pill over the map/content (v2.8) ──
+     Was a fixed-height flex row bracketing the map from below; now floats
+     as an inset pill via position:fixed, so #map-container/#learn-view
+     (both flex:1 with nothing reserving this height anymore) expand to
+     fill the space it used to occupy. See .learn-screen padding-bottom
+     and setTab()'s pathfinder guard for the two places that compensate. */
   #bottom-tabs {
+    position: fixed;
+    left: 14px;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
     background: var(--surface);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-lg);
     display: flex;
-    flex-shrink: 0;
     z-index: 1000;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .tab-btn {
     flex: 1;
     background: none;
     border: none;
     color: var(--text-muted);
-    padding: 10px 4px 8px;
+    padding: 8px 4px 7px;
     cursor: pointer;
     font-size: 0.6rem;
     font-weight: 500;
@@ -448,20 +456,20 @@
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    min-height: 56px;
+    min-height: 50px;
     transition: color 0.18s, transform 0.1s;
     font-family: inherit;
     position: relative;
     -webkit-tap-highlight-color: transparent;
   }
-  .tab-btn svg { width: 22px; height: 22px; transition: transform 0.15s; }
+  .tab-btn svg { width: 21px; height: 21px; transition: transform 0.15s; }
   .tab-btn.active { color: var(--honey); }
   .tab-btn.active svg { transform: translateY(-1px); }
   .tab-btn.active::after {
     content: '';
     position: absolute;
-    bottom: calc(4px + env(safe-area-inset-bottom, 0px) / 2);
-    width: 20px; height: 2px;
+    bottom: 2px;
+    width: 16px; height: 2px;
     background: var(--honey);
     border-radius: 2px;
   }
@@ -747,30 +755,16 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ── MAP FAB ── */
-  #fab-add {
-    position: absolute;
-    bottom: 80px;
-    right: 16px;
-    z-index: 900;
-    width: 54px; height: 54px;
-    border-radius: var(--radius-pill);
-    background: var(--honey);
-    border: none;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 20px rgba(245,166,35,0.5), 0 2px 8px rgba(0,0,0,0.3);
-    transition: transform 0.18s, box-shadow 0.18s;
-    color: var(--comb);
-  }
-  #fab-add:hover { transform: scale(1.07); box-shadow: 0 6px 28px rgba(245,166,35,0.65), 0 2px 8px rgba(0,0,0,0.3); }
-  #fab-add:active { transform: scale(0.94); box-shadow: 0 2px 10px rgba(245,166,35,0.3); }
-  #fab-add svg { width: 26px; height: 26px; }
+  /* ── MAP FAB ──
+     #fab-add removed (v2.8) — duplicated the bottom nav's Add tab, which
+     already calls openAddPanel() via setTab('add'). */
 
-  /* ── LOCATE FAB ── */
+  /* ── LOCATE FAB ──
+     Repositioned lower now that fab-add is gone; still comfortably clears
+     the floating bottom nav pill (top edge ~72px from viewport bottom). */
   #fab-locate {
     position: absolute;
-    bottom: 148px;
+    bottom: 88px;
     right: 16px;
     z-index: 900;
     width: 44px; height: 44px;
@@ -1185,52 +1179,98 @@
   ::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.25); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.4); }
 
-  /* ── SINGLE SMART SEARCH BAR (v2.3) ── */
-  #search-wrapper {
+  /* ── FLOATING SEARCH (v2.8) — replaces the old static search bar row ──
+     Collapsed: a 44px circular icon button, top-left over the map.
+     Expanded (.collapsed removed): morphs in place into a full-width
+     pill with an inline input, matching the approved mockup. */
+  #map-search {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    z-index: 900;
     display: flex;
-    flex-shrink: 0;
-    z-index: 999;
-    padding: 8px 12px;
-    gap: 8px;
     align-items: center;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-  #smart-search-input {
-    flex: 1 1 0;
-    min-width: 0;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid var(--border);
+    gap: 4px;
+    height: 44px;
+    padding: 0 4px;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
+    box-shadow: var(--shadow-md);
+    width: 44px;
+    overflow: hidden;
+    transition: width 0.22s cubic-bezier(.32,1.1,.6,1), right 0.22s;
+  }
+  #map-search.collapsed { width: 44px; right: auto; }
+  #map-search:not(.collapsed) { width: auto; }
+  #map-search-icon {
+    flex: 0 0 auto;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #map-search.collapsed #smart-search-input,
+  #map-search.collapsed #map-search-close { display: none; }
+  #smart-search-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: none;
+    border: none;
     color: var(--text);
     font-size: 0.88rem;
-    padding: 9px 14px;
+    padding: 0 4px;
     font-family: inherit;
     outline: none;
-    transition: border-color 0.15s;
   }
-  #smart-search-input:focus { border-color: var(--honey); }
   #smart-search-input::placeholder { color: var(--text-muted); }
-  #search-go-btn {
-    flex-shrink: 0;
-    padding: 9px 16px;
+  #map-search-close {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--text-muted);
     font-size: 0.85rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── FLOATING FILTER CONTROLS (v2.8) — stacked under Mating Radius ── */
+  #map-filters {
+    position: absolute;
+    top: 58px;
+    right: 12px;
+    z-index: 900;
+    display: flex;
+    gap: 8px;
   }
   #filter-drawer-btn {
     flex-shrink: 0;
     position: relative;
-    background: rgba(255,255,255,0.07);
-    border: 1px solid var(--border);
+    width: 40px; height: 40px;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
     color: var(--text-muted);
-    font-size: 0.85rem;
-    padding: 8px 12px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
     transition: border-color 0.15s, color 0.15s;
   }
+  #filter-drawer-btn svg { width: 18px; height: 18px; }
   #filter-drawer-btn.active {
     border-color: var(--honey);
     color: var(--honey);
@@ -1238,7 +1278,7 @@
   #filter-drawer-badge {
     display: none;
     position: absolute;
-    top: -4px; right: -4px;
+    top: -2px; right: -2px;
     width: 8px; height: 8px;
     background: var(--honey);
     border-radius: 50%;
@@ -1246,17 +1286,55 @@
   #filter-drawer-btn.active #filter-drawer-badge { display: block; }
   #filter-clear-btn {
     flex-shrink: 0;
+    width: 40px; height: 40px;
     background: rgba(245,166,35,0.12);
     border: 1.5px solid var(--honey);
     border-radius: var(--radius-pill);
     color: var(--honey);
     font-size: 0.9rem;
     font-weight: 700;
-    padding: 8px 11px;
     cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
     line-height: 1;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* ── FIRST-VISIT ON-RAMP OVERLAY (v2.8) ──
+     Dims the map itself rather than a blocking modal-overlay; shown once
+     via localStorage (see maybeShowOnramp()/dismissOnramp() in app.js). */
+  .onramp-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 970;
+    background: rgba(28,21,8,0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .onramp-overlay.hidden { display: none; }
+  .onramp-card {
+    background: var(--surface);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 22px 20px;
+    max-width: 300px;
+    text-align: center;
+  }
+  .onramp-emoji { font-size: 28px; margin-bottom: 10px; }
+  .onramp-title {
+    font-size: 1.02rem; font-weight: 700; color: var(--text);
+    margin-bottom: 8px; line-height: 1.35;
+  }
+  .onramp-body {
+    font-size: 0.85rem; color: var(--text-muted);
+    line-height: 1.55; margin-bottom: 16px;
+  }
+  .onramp-actions { display: flex; flex-direction: column; gap: 8px; }
+  .onramp-primary, .onramp-secondary { width: 100%; }
 
   /* ── FILTER DRAWER (v2.3) ── */
   #filter-drawer {
@@ -1382,6 +1460,13 @@
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* Clearance for the floating bottom-nav pill (v2.8) — #bottom-tabs is
+       position:fixed now, so nothing else reserves this space; without
+       this, the last checklist row / reader-nav buttons would sit behind
+       the pill. position:sticky children (see .reader-nav) respect this
+       container's padding box, so this also pushes the sticky Prev/Next
+       row up above the pill automatically. */
+    padding-bottom: 76px;
   }
 
   /* ── Hub ── */
