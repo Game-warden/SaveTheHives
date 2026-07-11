@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.8.3'; // Fix: fab-locate/map-search were pinned at a flat bottom offset while #bottom-tabs already added env(safe-area-inset-bottom) to clear a notched iPhone's home-indicator strip — the nav rose to clear it, these two didn't, so they ended up tucked behind it. Toast bumped up to match.
+const CACHE_VERSION = 'v2.8.4'; // Sticky footer buttons in the About and Add Hive modals (same position:sticky + gradient-fade technique as the Learn tab's reader-nav) — Back to Map / Submit no longer require scrolling all the way down to reach.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

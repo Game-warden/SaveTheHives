@@ -634,12 +634,16 @@
       📍 This location will be <strong>publicly visible</strong> on the SaveTheHives map.
     </p>
 
-    <button class="btn" style="width:100%;padding:12px;font-size:1rem;margin-top:6px;" onclick="submitHive()">
-      🐝 Submit Hive Record
-    </button>
-    <button class="btn btn-outline" style="width:100%;padding:12px;margin-top:10px;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="closeAddModal()">
-      ← Back to Map
-    </button>
+    <!-- Sticky footer (v2.8.4) — always reachable without scrolling to the
+         bottom of the form, matching the Learn tab reader's Prev/Next row. -->
+    <div class="modal-sticky-footer">
+      <button class="btn" style="width:100%;padding:12px;font-size:1rem;" onclick="submitHive()">
+        🐝 Submit Hive Record
+      </button>
+      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:1rem;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="closeAddModal()">
+        ← Back to Map
+      </button>
+    </div>
   </div>
 </div>
 
@@ -739,9 +743,13 @@
       SaveTheHives v2.8 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
     </div>
 
-    <button class="btn" style="width:100%;padding:12px;margin-top:16px;font-size:1rem;" onclick="closeAboutModal()">
-      ← Back to Map
-    </button>
+    <!-- Sticky footer (v2.8.4) — always reachable without scrolling all
+         the way down through Mission/Contribute/Data/Ideas. -->
+    <div class="modal-sticky-footer">
+      <button class="btn" style="width:100%;padding:12px;font-size:1rem;" onclick="closeAboutModal()">
+        ← Back to Map
+      </button>
+    </div>
   </div>
 </div>
 

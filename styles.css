@@ -510,6 +510,26 @@
   .modal-overlay.open .modal-sheet {
     transform: translateY(0);
   }
+  /* Sticky footer for long modal-sheet content (v2.8.4) — same technique
+     already proven on the Learn tab's .reader-nav (position:sticky inside
+     the scrolling container + a gradient fade so scrolled content doesn't
+     look like it's cutting through it). Without this, a "Back to Map" /
+     primary action button at the end of a long scrollable sheet requires
+     scrolling all the way down to find it. Negative margin/positive
+     padding bleed it out to the sheet's true edges (undoing .modal-sheet's
+     own 20px/safe-area padding) so it sits flush like the rest of the UI's
+     floating controls. */
+  .modal-sticky-footer {
+    position: sticky;
+    bottom: calc(-20px - env(safe-area-inset-bottom, 0px));
+    margin: 16px -20px calc(-20px - env(safe-area-inset-bottom, 0px));
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, var(--surface) 75%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 5;
+  }
   .modal-handle {
     width: 36px; height: 4px;
     background: var(--border);
