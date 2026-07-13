@@ -1337,6 +1337,47 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* ── VALIDATE BANNER (v2.9) ──
+     left:60px (not 14px) deliberately clears Leaflet's own zoom +/-
+     control, which defaults to top-left and already caused one bug on
+     the search icon — see #map-search's comment above. */
+  .validate-banner {
+    position: absolute;
+    top: 14px;
+    left: 60px;
+    right: 14px;
+    z-index: 900;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 10px 12px;
+  }
+  .validate-banner-text { flex: 1 1 auto; min-width: 0; }
+  .validate-banner-title {
+    font-size: 0.82rem; font-weight: 700; color: var(--text); line-height: 1.3;
+  }
+  .validate-banner-sub {
+    font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; line-height: 1.35;
+  }
+  .validate-banner-close {
+    flex: 0 0 auto;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* ── FIRST-VISIT ON-RAMP OVERLAY (v2.8) ──
      Dims the map itself rather than a blocking modal-overlay; shown once
      via localStorage (see maybeShowOnramp()/dismissOnramp() in app.js). */

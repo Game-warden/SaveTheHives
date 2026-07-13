@@ -73,6 +73,7 @@ let showRadii = false;
 let activeFilter = 'all';
 let selectedType = 'Live Tree';
 let pendingLat = null, pendingLng = null;
+let validateActive = false; // v2.9 — Validate mode temporarily narrows the visible pins to a radius; never mutates activeFilter/activeNotesQuery so exiting restores exactly what was there before
 
 // ═══════════════════════════════════════
 // FIRST-VISIT ON-RAMP OVERLAY (v2.8)
@@ -908,13 +909,106 @@ function showSearchUI() {
   if (mf) mf.style.display = '';
 }
 
+// ═══════════════════════════════════════
+// VALIDATE (v2.9) — narrows the existing map to hives within driving
+// distance instead of a separate screen; see the Validate tab button.
+// ═══════════════════════════════════════
+const VALIDATE_RADIUS_MILES = 50; // straight-line approximation of "about
+                                   // an hour's drive" — a true isochrone
+                                   // needs a routing API, deferred for now
+
+function openValidate() {
+  showToast('Finding hives near you…');
+  // The banner spans nearly the full top row (same as the expanded search
+  // field), which would overlap the radius/filter stack in the top-right —
+  // hide them for the duration, same visibility trick used there.
+  const filters = document.getElementById('map-filters');
+  const radius = document.getElementById('radius-toggle');
+  if (filters) filters.style.visibility = 'hidden';
+  if (radius) radius.style.visibility = 'hidden';
+  if (!navigator.geolocation) {
+    runValidateFilter(map.getCenter().lat, map.getCenter().lng);
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => runValidateFilter(pos.coords.latitude, pos.coords.longitude),
+    () => {
+      showToast('Location access denied — showing hives near the current map view instead');
+      runValidateFilter(map.getCenter().lat, map.getCenter().lng);
+    },
+    { timeout: 8000 }
+  );
+}
+
+function runValidateFilter(lat, lng) {
+  validateActive = true;
+  const radiusM = VALIDATE_RADIUS_MILES * 1609.34;
+
+  // Deliberately ignores activeFilter/activeNotesQuery (v2.9 §"Validate
+  // never mutates activeFilter") — Validate shows every type within
+  // range so exiting can restore the prior filter state untouched.
+  clusterGroup.clearLayers();
+  const nearby = allHives.filter(h => h.lat && h.lng && haversine(lat, lng, h.lat, h.lng) <= radiusM);
+  nearby.forEach(h => clusterGroup.addLayer(h._marker));
+  visibleHives = nearby;
+
+  if (singleRadii['validate']) map.removeLayer(singleRadii['validate']);
+  singleRadii['validate'] = L.circle([lat, lng], {
+    radius: radiusM, color: '#c8821a', fillColor: '#c8821a', fillOpacity: 0.04, weight: 2, dashArray: '8 4',
+  }).addTo(map);
+  map.setView([lat, lng], 9);
+
+  const FIVE_YEARS_MS = 5 * 365.25 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const stale = nearby.filter(h => !h.last_verified_at || (now - new Date(h.last_verified_at).getTime()) > FIVE_YEARS_MS).length;
+  updateValidateBanner(nearby.length, stale);
+}
+
+function updateValidateBanner(total, stale) {
+  const banner = document.getElementById('validate-banner');
+  const title = document.getElementById('validate-banner-title');
+  const sub = document.getElementById('validate-banner-sub');
+  if (!banner || !title || !sub) return;
+  if (total === 0) {
+    title.textContent = `No hives within ${VALIDATE_RADIUS_MILES} miles yet`;
+    sub.textContent = 'Be the first to log one nearby, or zoom out to explore further.';
+  } else {
+    title.textContent = `${total} hive${total !== 1 ? 's' : ''} within about an hour of you`;
+    sub.textContent = stale > 0
+      ? `${stale} haven't been checked in 5+ years — tap a pin to see its details`
+      : 'Tap any pin to see its details and check in';
+  }
+  banner.style.display = 'flex';
+}
+
+function exitValidate() {
+  validateActive = false;
+  const banner = document.getElementById('validate-banner');
+  if (banner) banner.style.display = 'none';
+  if (singleRadii['validate']) { map.removeLayer(singleRadii['validate']); delete singleRadii['validate']; }
+  const filters = document.getElementById('map-filters');
+  const radius = document.getElementById('radius-toggle');
+  if (filters) filters.style.visibility = '';
+  if (radius) radius.style.visibility = '';
+  reapplyFilters(); // restores whatever activeFilter/activeNotesQuery already were — Validate never touched them
+}
+
+// Exit via the banner's own ✕ (as opposed to switching to a different
+// bottom-nav tab, which already triggers the same cleanup in setTab()).
+function exitValidateToMap() {
+  setTab('map');
+}
+
 function setTab(tab) {
+  // Leaving Validate mode for any other tab restores the normal view.
+  if (validateActive && tab !== 'validate') exitValidate();
+
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   // DECIDED: reuse the hidden Records nav slot for Learn (brief §1). 'list'
   // (Records) has no nav button anymore but stays reachable by calling
   // setTab('list') directly — kept out of this array on purpose so no
   // button index points at it.
-  const tabs = ['map','add','pathfinder','learn','about'];
+  const tabs = ['map','add','validate','pathfinder','learn','about'];
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
 
@@ -929,7 +1023,8 @@ function setTab(tab) {
   if (bottomTabs) bottomTabs.style.display = (tab === 'pathfinder') ? 'none' : '';
 
   // Learn is a full-screen replacement for the map (not an overlay like
-  // Pathfinder), so hide/show #map-container alongside it.
+  // Pathfinder), so hide/show #map-container alongside it. Validate
+  // stays on the map itself, same as the 'map' tab.
   const mapEl = document.getElementById('map-container');
   const learnEl = document.getElementById('learn-view');
   if (tab === 'learn') {
@@ -939,10 +1034,11 @@ function setTab(tab) {
   } else {
     if (mapEl) mapEl.style.display = '';
     if (learnEl) learnEl.style.display = 'none';
-    if (tab === 'map' && map) setTimeout(() => map.invalidateSize(), 50);
+    if ((tab === 'map' || tab === 'validate') && map) setTimeout(() => map.invalidateSize(), 50);
   }
 
   if (tab === 'add') openAddPanel();
+  else if (tab === 'validate') openValidate();
   else if (tab === 'pathfinder') openPathfinder();
   else if (tab === 'list') openRecords();
   else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); loadIdeas(); }

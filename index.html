@@ -232,6 +232,24 @@
 ║          blocking modal) shown once via localStorage, mission copy    ║
 ║          + "Explore the map" / "How it works" (→ Learn tab).          ║
 ║        • Removed #fab-add (duplicated the bottom nav's Add tab).      ║
+║  v2.8.4 Sticky footer buttons in About/Add Hive modals (same           ║
+║        position:sticky + gradient-fade technique as the Learn tab's   ║
+║        reader-nav) — no longer requires scrolling to the bottom to    ║
+║        find Back to Map / Submit.                                     ║
+║  v2.9  VALIDATE TAB — reframes participation around confirming an      ║
+║        existing hive (lower barrier than beelining a brand-new one):   ║
+║        • New bottom-nav tab next to Add. Opens on the existing map     ║
+║          (not a separate screen) via openValidate() in app.js.        ║
+║        • Geolocates the user (falls back to the current map center     ║
+║          if denied/unavailable), filters allHives to a 50-mile radius  ║
+║          via the existing haversine() helper — a straight-line        ║
+║          approximation of "about an hour's drive," not a true         ║
+║          routing/isochrone calculation.                               ║
+║        • Floating banner reports the count and how many haven't been  ║
+║          checked in 5+ years (or never verified) — no forced          ║
+║          navigation to a specific pin; browsing/tapping is the point. ║
+║        • Exiting restores the prior filter/notes-query state          ║
+║          untouched (Validate never mutates activeFilter).             ║
 ╚══════════════════════════════════════════════════════════════════════╝
 -->
 <html lang="en">
@@ -270,7 +288,7 @@
 <div id="app-header">
   <img class="logo" src="logo.jpg" alt="SaveTheHives">
   <div class="title">
-    SaveTheHives <span id="app-version-badge" class="version-badge">v2.8</span>
+    SaveTheHives <span id="app-version-badge" class="version-badge">v2.9</span>
     <span>Feral Honeybee Mapping Network</span>
   </div>
   <!-- debug toggle hidden in production; restore for field testing -->
@@ -320,6 +338,16 @@
     </svg>
   </button>
   <!-- fab-add removed (v2.8) — duplicated the bottom nav's Add tab -->
+
+  <!-- Validate mode banner (v2.9) — shown while browsing the nearby-hives
+       view opened from the Validate tab; see openValidate() in app.js. -->
+  <div id="validate-banner" class="validate-banner" style="display:none;">
+    <div class="validate-banner-text">
+      <div class="validate-banner-title" id="validate-banner-title"></div>
+      <div class="validate-banner-sub" id="validate-banner-sub"></div>
+    </div>
+    <button class="validate-banner-close" onclick="exitValidateToMap()" title="Exit Validate mode" aria-label="Exit Validate mode">✕</button>
+  </div>
 
   <!-- Floating search (replaces the old static search bar row, v2.8) -->
   <div id="map-search" class="collapsed">
@@ -517,6 +545,15 @@
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
     </svg>
     Add
+  </button>
+  <!-- Validate (v2.9) — reframes participation around confirming an
+       existing hive instead of only logging a new one; see
+       openValidate() in app.js. -->
+  <button class="tab-btn" onclick="setTab('validate')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+    </svg>
+    Validate
   </button>
   <!-- Pathfinder: hidden until v3 polish — setTab('pathfinder') still works.
        Field-testing access: visiting /?pf=1 unhides this tab + the 🐞 debug
@@ -726,7 +763,7 @@
       <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">How to Contribute</div>
       <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
         <p style="margin-bottom:8px;">🐝 <strong>Log a hive</strong> — Tap <em>Add</em>, center the map crosshair on the hive, fill in what you know, and submit. Sign-in required to prevent spam.</p>
-        <p style="margin-bottom:8px;">✅ <strong>Verify existing hives</strong> — Tap any pin, then tap <em>Check In</em> to report whether it's still active, gone, or uncertain. Every verification helps track colony survival over time.</p>
+        <p style="margin-bottom:8px;">✅ <strong>Verify existing hives</strong> — Tap any pin, then tap <em>Check In</em> to report whether it's still active, gone, or uncertain. Every verification helps track colony survival over time. Tap <em>Validate</em> in the bottom menu to jump straight to hives near you that need it.</p>
         <p>📍 <strong>Legacy records</strong> — The 1,100+ records from 2008–2017 are unverified historical data. If you can ground-truth one, please check in.</p>
       </div>
     </div>
@@ -740,7 +777,7 @@
     </div>
 
     <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
-      SaveTheHives v2.8 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
+      SaveTheHives v2.9 · <a href="privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
     </div>
 
     <!-- Sticky footer (v2.8.4) — always reachable without scrolling all
