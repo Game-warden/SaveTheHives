@@ -96,6 +96,8 @@ Concrete moves (see the mockups from the Jul 17 2026 session for visual directio
 
 Not yet built — UI mockups reviewed, no code changed.
 
+**Data integrity note (Jul 17 2026):** driving more casual validation traffic raises the question of false/careless check-ins. A photo + GPS-proximity verification approach was scoped but shelved for now — see `SAVETHEHIVES_SPEC.md` §11 "Shelved Jul 17 2026" for the full technical writeup. Current decision: ship the existing self-report form as-is (honor system, same as check-ins have always worked) and revisit if bad data actually shows up.
+
 ---
 
 ## A few cross-cutting notes
