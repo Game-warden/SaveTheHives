@@ -82,11 +82,25 @@ A public-friendly version of the Pathfinder handoff: the triangulation physics, 
 **Audience:** everyone · **Effort:** low, but ongoing
 A living page of real finds — photo, short story, what made it interesting (a 5-winter survivor, an odd nest site). Social proof is the best recruiter; every logged colony is potential content. Start small, grow it as records come in.
 
+### 15. Elevate Validate as the Primary On-Ramp (raised Jul 17 2026)
+**Audience:** first-time/casual visitors · **Effort:** low-medium (UI reframing + copy, no new backend)
+Right now Validate (v2.9) is just another bottom-nav tab, discovered the same way as Add. But it's a fundamentally easier ask: confirming a hive that's already on the map (tap, "still active?", done) takes under a minute and requires no field skill, versus Add or the Learn-tab tracks, which ask someone to go find and log a brand-new wild colony. That asymmetry is worth designing around deliberately rather than leaving Validate to be discovered incidentally.
+
+**Why this matters beyond engagement:** every stale record that gets reconfirmed (or flagged gone) directly improves the dataset researchers care about — a colony verified active across multiple years is exactly the "genetic goldmine" survivor signal the project's science story is built on (see item #2). Validate turns casual visitors into unpaid, distributed data-quality reviewers, which no comparable citizen-science mapping project (HoneyBeeWatch, iNaturalist-style feral-species trackers, etc.) appears to be doing explicitly for existing records — most only solicit new submissions. **This may be a genuinely novel mechanic worth leading with, not burying in the nav.**
+
+Concrete moves (see the mockups from the Jul 17 2026 session for visual direction):
+- Reframe the first-visit on-ramp overlay (`#onramp-overlay` in `index.html`) to lead with Validate, not just "Explore the map" / "How it works" — e.g., a stat-driven hook ("╳ hives near you haven't been checked in years — confirm one in under a minute") with Validate as the primary button.
+- A persistent, low-key nudge for returning visitors who already dismissed the on-ramp — a small badge/banner surfacing a live stale-hive count near the visitor, separate from the one-time overlay.
+- A fourth "path card" or explicit mention on the Learn hub (alongside Curious/Try-it/Maker) positioning Validate as the lowest-effort way to help — the funnel currently only points toward logging new hives.
+- Lightweight social proof once volume exists: a running count of hives validated (e.g., "confirmed by 40 citizen scientists this month").
+
+Not yet built — UI mockups reviewed, no code changed.
+
 ---
 
 ## A few cross-cutting notes
 
 - **Reuse, don't duplicate.** Most Tier-1/2 items are re-cuts of the beelining guide's modules at different lengths for different audiences. Write the fact once (in the guide), express it many ways. Keep the guide as the source of truth so facts don't drift.
-- **Every public piece should end in one action:** *log a hive*, *build a box*, or *share this*. Content that doesn't funnel toward contributing is just decoration.
+- **Every public piece should end in one action:** *log a hive*, *validate one that's already logged*, *build a box*, or *share this*. Content that doesn't funnel toward contributing is just decoration. Validate (added v2.9) is worth treating as its own funnel destination, not folded silently into "log a hive" — see item #15.
 - **Visual debt is the real bottleneck.** Much of this needs diagrams/photos, not prose. The `[DIAGRAM: ...]` callouts in the beelining guide are a starting shot list; a small set of clean SVGs in the app's honey/dark palette would lift everything.
 - **Sequencing suggestion:** items 1, 2, 3 give you a launch kit (a tool plan, a mission story, and a posting pack). That trio is enough to start drumming up interest immediately; the rest can follow as the community grows.
