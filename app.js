@@ -16,7 +16,8 @@ const SUPABASE_URL = 'https://nsujmizdawyoictpawxt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zdWptaXpkYXd5b2ljdHBhd3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDEyNDgsImV4cCI6MjA5ODMxNzI0OH0.VOXEk4uyFq1jH0mvRW83LPPW8ZJp3MbylY6KiPKixTc';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
-let pendingAction = null; // resumes after sign-in
+let pendingAction = null; // resumes after sign-in: 'add' | 'validate' | 'checkin'
+let pendingCheckinHiveId = null; // only set when pendingAction === 'checkin'
 db.auth.getSession().then(({ data: { session } }) => {
   if (session) { currentUser = session.user; updateAuthUI(); }
 });
@@ -27,6 +28,16 @@ db.auth.onAuthStateChange((_event, session) => {
     pendingAction = null;
     closeSignInModal();
     setTimeout(() => openAddPanelUnified({}), 300);
+  } else if (_event === 'SIGNED_IN' && pendingAction === 'validate') {
+    pendingAction = null;
+    closeSignInModal();
+    setTimeout(() => openValidate(), 300);
+  } else if (_event === 'SIGNED_IN' && pendingAction === 'checkin') {
+    pendingAction = null;
+    const hiveId = pendingCheckinHiveId;
+    pendingCheckinHiveId = null;
+    closeSignInModal();
+    setTimeout(() => openCheckin(hiveId), 300);
   }
   // Bug fix: once a session is parsed out of the URL's #access_token=...
   // hash, strip that hash from the address bar. Otherwise it lingers, and
@@ -918,6 +929,12 @@ const VALIDATE_RADIUS_MILES = 50; // straight-line approximation of "about
                                    // needs a routing API, deferred for now
 
 function openValidate() {
+  if (!currentUser) {
+    pendingAction = 'validate';
+    showToast('Sign in to validate hives 🐝');
+    handleAuth();
+    return;
+  }
   showToast('Finding hives near you…');
   // The banner spans nearly the full top row (same as the expanded search
   // field), which would overlap the radius/filter stack in the top-right —
@@ -1295,6 +1312,13 @@ let _checkinHiveId = null;
 let _checkinStatus = null;
 
 function openCheckin(hiveId) {
+  if (!currentUser) {
+    pendingAction = 'checkin';
+    pendingCheckinHiveId = hiveId;
+    showToast('Sign in to check in on a hive 🐝');
+    handleAuth();
+    return;
+  }
   _checkinHiveId = hiveId;
   _checkinStatus = null;
   ['active','gone','uncertain'].forEach(s => {

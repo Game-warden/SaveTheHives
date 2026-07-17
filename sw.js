@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.0'; // Validate tab: new bottom-nav entry next to Add, geolocates and narrows the map to a 50-mile radius (straight-line approximation of "about an hour's drive") with a banner showing how many nearby hives haven't been checked in 5+ years — a lower-barrier alternative to logging brand-new hives.
+const CACHE_VERSION = 'v2.9.1'; // Validate + check-in now require sign-in, same gate/resume pattern as Add — closes a gap where anonymous check-ins could reach the server and be rejected (or silently unattributed) instead of being asked to sign in up front.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
