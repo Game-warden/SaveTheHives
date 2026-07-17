@@ -440,6 +440,7 @@ function addMarker(hive) {
       <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;font-family:monospace;">${hive.lat.toFixed(2)}, ${hive.lng.toFixed(2)}</div>
       <button class="popup-radius-btn" onclick="toggleSingleRadius(${hive.id},${hive.lat},${hive.lng})">◎ 3-Mile Mating Radius</button>
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Update / Check In</button>
+      <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
     </div>
   `, {maxWidth: 300, minWidth: 200, autoPanPadding: [16, 70]});
 
@@ -1058,7 +1059,7 @@ function setTab(tab) {
   else if (tab === 'validate') openValidate();
   else if (tab === 'pathfinder') openPathfinder();
   else if (tab === 'list') openRecords();
-  else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); loadIdeas(); }
+  else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); loadIdeas(); updateInstallUI(); }
 }
 
 function closeModal(e, id) {
@@ -1202,6 +1203,95 @@ document.getElementById('smart-search-input')?.addEventListener('keydown', e => 
 // START
 // ═══════════════════════════════════════
 init();
+
+// ═══════════════════════════════════════
+// SHARE (v2.9.2) — Web Share API where supported, clipboard-copy fallback
+// otherwise. Two entry points: shareApp() for the app itself (About modal),
+// shareHive(id) for a single hive (popup). Neither deep-links to a specific
+// pin — the app has no URL-based hive routing yet — so shareHive() shares
+// the app URL plus hive-specific text rather than promising a link that
+// wouldn't actually open to that pin.
+// ═══════════════════════════════════════
+async function doShare(shareData) {
+  if (navigator.share) {
+    try { await navigator.share(shareData); } catch (e) { /* user cancelled the native share sheet — no-op */ }
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(shareData.url);
+    showToast('Link copied — paste it anywhere to share');
+  } catch (e) {
+    showToast('Share this link: ' + shareData.url);
+  }
+}
+
+function shareApp() {
+  doShare({
+    title: 'SaveTheHives',
+    text: "There's probably a wild honeybee colony within a mile of you. Help map them — SaveTheHives is a citizen-science project tracking feral bee colonies across North America.",
+    url: window.location.origin + window.location.pathname,
+  });
+}
+
+function shareHive(id) {
+  const hive = allHives.find(h => h.id === id);
+  const loc = hive && hive.city ? ` near ${hive.city}${hive.state ? ', ' + hive.state : ''}` : '';
+  doShare({
+    title: 'SaveTheHives',
+    text: `Found on SaveTheHives: a ${hive ? hive.type.toLowerCase() : 'wild'} hive${loc}. Help map feral honeybee colonies near you too.`,
+    url: window.location.origin + window.location.pathname,
+  });
+}
+
+// ═══════════════════════════════════════
+// INSTALL PROMPT (v2.9.2) — platform-aware install nudge, shown inside the
+// About modal rather than as a new floating overlay on the map. Deliberate:
+// the map's floating UI (search FAB, locate FAB, radius toggle, filter
+// drawer, Validate banner) has a real history of collision bugs from
+// adding "just one more" floating element — see Known Gotchas. iOS Safari
+// has no beforeinstallprompt API at all (Apple doesn't implement it), so
+// its only path is showing the manual Share -> Add to Home Screen steps;
+// browsers that do support the API get a real one-tap Install button.
+// ═══════════════════════════════════════
+let deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  updateInstallUI();
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  updateInstallUI();
+});
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+}
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function updateInstallUI() {
+  const box = document.getElementById('install-box');
+  if (!box) return;
+  if (isStandalone()) {
+    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);">✓ Installed — you\'re using the installed app.</div>';
+  } else if (deferredInstallPrompt) {
+    box.innerHTML = '<button class="btn btn-outline" style="width:100%;" onclick="promptInstall()">📲 Install SaveTheHives</button>';
+  } else if (isIOS()) {
+    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">📲 <strong style="color:var(--text);">Install for offline field use:</strong> tap the Share icon in Safari\'s toolbar, then "Add to Home Screen."</div>';
+  } else {
+    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);">📲 Install for offline field use from your browser\'s menu (usually "Add to Home Screen" or "Install App").</div>';
+  }
+}
+
+async function promptInstall() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  updateInstallUI();
+}
 
 // ═══════════════════════════════════════
 // AUTH — MAGIC LINK

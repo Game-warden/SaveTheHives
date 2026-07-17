@@ -729,8 +729,8 @@
       SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America —
       <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing.
       Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors; feral bees
-      that survive 3+ winters without treatment are flagged as <strong style="color:var(--honey)">Genetic Goldmines</strong> —
-      valuable breeding stock for disease-resistant bee populations.
+      that survive 3+ winters without treatment are what this project calls <strong style="color:var(--honey)">Genetic Goldmines</strong> —
+      valuable breeding stock for disease-resistant bee populations. Check-ins are how survival gets tracked today; automatic badges are coming soon.
     </p>
 
     <!-- Cross-link to the new Learn tab (brief §1) -->
@@ -740,6 +740,17 @@
       <span style="color:var(--honey);font-weight:700;font-size:0.9rem;">→</span>
     </div>
 
+    <!-- Share (v2.9.2) — Web Share API with clipboard fallback, see shareApp() in app.js -->
+    <button class="btn btn-outline" style="width:100%;margin-bottom:16px;" onclick="shareApp()">
+      ↗ Share SaveTheHives
+    </button>
+
+    <!-- Install nudge (v2.9.2) — platform-aware, populated by updateInstallUI()
+         in app.js when this modal opens. In-modal rather than a new floating
+         overlay on the map, deliberately — see the comment above
+         updateInstallUI() for why. -->
+    <div id="install-box" style="padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;"></div>
+
     <div class="legend-box">
       <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
@@ -748,7 +759,7 @@
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
     </div>
     <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;text-align:center;">
-      Coming soon: DCA Mapping · Resilience Heatmaps · Guardian Network
+      Coming soon: Genetic Goldmine badges · DCA Mapping · Resilience Heatmaps · Guardian Network
     </p>
 
     <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">

@@ -654,6 +654,14 @@
     box-shadow: var(--shadow-lg);
   }
   .hive-popup .popup-type {
+    /* Explicit color, not inherited (v2.9.2 fix) — .hive-popup's background
+       is a hardcoded near-black regardless of light/dark mode, but this was
+       the only line in the popup relying on the inherited var(--text)
+       default, which is near-black in light mode — nearly invisible
+       against the popup's own near-black background. Every sibling line
+       (name, dates, desc) already has an explicit honey/muted color for
+       exactly this reason; this one was missed. */
+    color: var(--text-muted);
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
