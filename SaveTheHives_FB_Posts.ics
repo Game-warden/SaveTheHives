@@ -1,0 +1,108 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SaveTheHives//Facebook Posting Schedule//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post #2 — Beelining
+DTSTART:20260722T150000Z
+DTEND:20260722T153000Z
+DTSTAMP:20260721T184000Z
+UID:savethehives-fbpost-2@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:POST 2 — What is beelining (recruiting angle)\n\nPost text:\
+ nEver heard of beelining? It's a nearly 300-year-old trick: catch a foragi
+ ng bee\, feed it sugar syrup\, and watch which direction it flies home. Fo
+ llow that line\, repeat a few times\, and you can walk right up to a wild 
+ colony's tree.\n\nIt's part orienteering\, part treasure hunt — and ever
+ y colony you find is a real scientific data point. We've got a full field 
+ guide to get you started: savethehives.org (Learn tab)\n\nImage: images/1.
+  Hero — "The Beeline" (Module 1 + hub landing).png — the illustrated b
+ ee-line-to-a-tree artwork already used in the app's Learn tab\; literally 
+ depicts the concept\n\nAlt text: "Illustration of a bee flying a straight 
+ line from wildflowers to a hollow tree\, showing the beelining technique."
+ \n\nLink: this points to the Learn tab specifically rather than the homepa
+ ge — either say "link in bio" or leave the plain-text mention as written
+ . Facebook can't deep-link to an in-app tab\, so don't expect an auto prev
+ iew card here.\n\nSuggested timing: launch week\, day 3–4\n\nFull copy i
+ n FACEBOOK_STARTER_PACK.md §3.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post #3 — Validate/Map screenshot
+DTSTART:20260726T150000Z
+DTEND:20260726T153000Z
+DTSTAMP:20260721T184000Z
+UID:savethehives-fbpost-3@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:POST 3 — How to help without leaving your couch\n\nPost text
+ :\nNot ready to go bee hunting? You can still help. SaveTheHives has 1\,15
+ 0+ historical hive records from 2008–2017 that nobody has checked on in 
+ years. If one happens to be near you\, confirming whether it's still activ
+ e takes under a minute — tap a pin\, tap Validate\, done.\n\nEvery confi
+ rmation is real data for researchers. savethehives.org\n\nImage: SaveTheHi
+ ves_map_screenshot_cropped.jpg (live screenshot of the map around Raleigh\
+ , browser chrome cropped out — captured Jul 20 2026)\n\nAlt text: "Scree
+ nshot of the SaveTheHives map showing hive pin locations around Raleigh\, 
+ NC."\n\nLink: keep the trailing URL as-is — no preview card will generat
+ e since a photo is attached. The plain text is the only way readers get th
+ e link.\n\nSuggested timing: launch week\, day 6–7\n\nFull copy in FACEB
+ OOK_STARTER_PACK.md §3.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post #4 — The bigger why (research framing)
+DTSTART:20260727T150000Z
+DTEND:20260727T153000Z
+DTSTAMP:20260721T184000Z
+UID:savethehives-fbpost-4@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:POST 4 — The bigger why (research framing)\n\nPost text:\nHo
+ ney bees have lost 30–50% of managed colonies most years since the mid-2
+ 000s. Most of the survivors only make it because of constant human interve
+ ntion.\n\nThe colonies that make it on their own — no treatment\, no hel
+ p — are living proof that natural resistance is possible. Finding and tr
+ acking them is the whole point of SaveTheHives. Every pin on our map is a 
+ lead worth following. savethehives.org\n\nImage: images/learn-hero.jpg (sa
+ me bee-line/tree illustration set\, alternate crop — keeps visual consis
+ tency with Post 2 without literally repeating it)\n\nAlt text: "Illustrati
+ on of a honey bee in a wildflower meadow with a hollow tree in the distanc
+ e."\n\nLink: keep the trailing URL as-is — no preview card will generate
+  since a photo is attached.\n\nSuggested timing: week 2\, day 2–3\n\nNot
+ e: the 30–50% loss-rate figure is a general\, widely-cited industry rang
+ e\, not SaveTheHives-collected data — fine for casual Facebook use\, but
+  add a source if this copy ever moves to a press pitch.\n\nFull copy in FA
+ CEBOOK_STARTER_PACK.md §3.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post #5 — Call for founding contributors
+DTSTART:20260802T150000Z
+DTEND:20260802T153000Z
+DTSTAMP:20260721T184000Z
+UID:savethehives-fbpost-5@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:POST 5 — Call for founding contributors\n\nPost text:\nSaveT
+ heHives is entirely volunteer-run — no funding\, no ad budget\, just peo
+ ple who care about wild bees. If you're a beekeeper\, a Scout leader\, a h
+ iker\, or just someone who likes a good treasure hunt\, we could use you. 
+ Log a hive\, confirm one that's already logged\, or just share this with s
+ omeone who'd like it. savethehives.org 🐝\n\nImage: logo.jpg — closes 
+ the launch sequence on the brand mark itself\, appropriate for a "join us"
+  post\n\nAlt text: "SaveTheHives logo."\n\nLink: keep the trailing URL as-
+ is — no preview card will generate since a photo is attached.\n\nSuggest
+ ed timing: week 2\, day 5–6\n\nAfter this\, ongoing weekly cadence begin
+ s per FACEBOOK_STARTER_PACK.md §5 — Mon/Wed/Sun rotation\, delivered vi
+ a the savethehives-fb-weekly-digest scheduled task each Sunday evening.\n\
+ nFull copy in FACEBOOK_STARTER_PACK.md §3.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

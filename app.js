@@ -1204,6 +1204,19 @@ document.getElementById('smart-search-input')?.addEventListener('keydown', e => 
 // ═══════════════════════════════════════
 init();
 
+// ── DEEP-LINK TAB SUPPORT (added Jul 22 2026) ──
+// Lets external links (Facebook posts, etc.) open directly on a specific
+// tab, e.g. savethehives.org/?tab=learn or ?tab=validate. Validated against
+// the same tab list setTab() already uses; 'pathfinder' deliberately
+// excluded — that stays gated behind ?pf=1 (see pathfinder.js) since it's
+// not ready for general links yet. Runs after init() kicks off; setTab()
+// itself doesn't depend on hive data being loaded yet, so no need to await.
+(function deepLinkTab() {
+  const requested = new URLSearchParams(location.search).get('tab');
+  const allowed = ['map', 'add', 'validate', 'learn', 'about'];
+  if (requested && allowed.includes(requested)) setTab(requested);
+})();
+
 // ═══════════════════════════════════════
 // SHARE (v2.9.2) — Web Share API where supported, clipboard-copy fallback
 // otherwise. Two entry points: shareApp() for the app itself (About modal),
@@ -1354,8 +1367,15 @@ function getTurnstileToken() {
     // Execute the invisible challenge
     try { window.turnstile.execute(_turnstileWidgetId); } catch(e) {}
 
-    // Timeout after 6 seconds — proceed without token if Turnstile is slow
-    setTimeout(() => done(null), 6000);
+    // Timeout after 15 seconds (bumped from 6s on Jul 22 2026 — the 6s
+    // window was losing the race on slower networks/DNS filtering, e.g.
+    // home Wi-Fi with a Pi-hole or ad-blocker in the path to
+    // challenges.cloudflare.com. Since Supabase Attack Protection requires
+    // a captcha token, a race the client lost meant signInWithOtp() got
+    // called with no token and was rejected outright — see submitSignIn(),
+    // which now also refuses to even attempt the request without a token
+    // rather than send a doomed one.
+    setTimeout(() => done(null), 15000);
   });
 }
 
@@ -1379,8 +1399,15 @@ async function submitSignIn() {
     btn.disabled = true; btn.textContent = 'Sending…';
 
     const captchaToken = await getTurnstileToken();
-    const otpOptions = { emailRedirectTo: window.location.href };
-    if (captchaToken) otpOptions.captchaToken = captchaToken;
+    if (!captchaToken) {
+      // Don't send a request we know Supabase will reject (Attack
+      // Protection requires a captcha token) — show a clear, actionable
+      // error instead of a confusing rejection from Supabase.
+      btn.disabled = false; btn.textContent = 'Send Link';
+      showSignInError('Security check failed to load — check your connection (or try disabling any ad-blocker/VPN) and tap Send Link again.');
+      return;
+    }
+    const otpOptions = { emailRedirectTo: window.location.href, captchaToken };
 
     const { error } = await db.auth.signInWithOtp({ email, options: otpOptions });
     btn.disabled = false; btn.textContent = 'Send Link';

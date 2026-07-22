@@ -12,6 +12,21 @@ SaveTheHives has been rebuilt from scratch twice. It's now live at **savethehive
 
 ---
 
+## Era 0 — the original savethehives.com (2008–2015)
+
+Predates every era below by roughly a decade. Reconstructed Jul 22 2026 from an old marketing one-pager Ronnie used to hand out/send around at the time (last footer-dated 2015).
+
+- **Origin:** Ronnie was an active beekeeper in the mid-to-late 2000s and met Dr. Tarpy at an NC State beekeepers meeting — one thing led to another, and the two started what became "The Feral Bee Project" together.
+- **2008:** Formalized as a joint effort between Ronnie Bouchon and **Dr. David Tarpy** (NC State) — researchers needed known locations of feral honey bee colonies to do genetic sampling for Colony Collapse Disorder (CCD) research. Domain `www.savethehives.com` registered the same year; the site let "citizen scientists" log feral-bee sightings with lat/long and field notes, including an option to keep entries private.
+- Got real press: a **News & Observer** article featuring Dr. Tarpy covered the original launch — explains the unusually high density of legacy hive records still concentrated around Raleigh, NC in today's dataset.
+- Grew wider recognition: known across beekeeping associations, and pulled entries from countries around the world.
+- **August 2012:** shipped an iPhone app, **Honey Bee Mapper**, on the Apple App Store — gave contributors more precise lat/long mapping than the web form alone.
+- By the marketing sheet's own count, the project held **1,095 records** at that point, averaging 3–5 hives per update.
+- **Cited in outside research** — most notably by **Dr. Debbie Delaney**, who still lists savethehives.com as a resource on her University of Delaware faculty page as of 2026 (see `KEY_PEOPLE_CONTACTS.md`) — plus a Dr. Tarpy Google Hangout and his "The Buzz on Bees: Coping with Vanishing Colonies" piece, and various bee journals.
+- **Shutdown, ~2015:** the site and iPhone app went dark as Apple's security/API requirements for apps became too demanding to keep maintaining solo — not from loss of interest, funding, or data. The `www.savethehives.com` domain and its data lapsed after that; the ~1,150+ "legacy records" loaded into the current (2026) app trace back to this original dataset.
+
+This is the direct predecessor to everything below — Dr. Tarpy's 2026 return as scientific advisor (see `KEY_PEOPLE_CONTACTS.md`, `MEETING_NOTES_2026-07-21_Tarpy.md`) is a continuation of this original 2008 collaboration, not a new relationship.
+
 ## Era 1 — React + Leaflet PWA (Feb 23–24, 2026)
 
 Original build. React/Vite app, `react-leaflet`, marker clustering, ZIP search via Nominatim, iOS PWA polish. This is `git log`'s earliest history (`3ee1349 Initial commit` through `00f3804 Final UI Polish`). Lives only in git history now — the actual React source files (`src/App.jsx`, `src/components/MapComponent.jsx`, etc.) were deleted from the working tree at some point and only survive as git blobs plus copies under `archive/`.

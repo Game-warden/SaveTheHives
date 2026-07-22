@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.2'; // Fixed unreadable hive-type label in popups (light mode contrast bug); softened the Genetic Goldmine copy in About to match what's actually built; added Share (Web Share API + clipboard fallback) on the app and per-hive; added a platform-aware install nudge in About.
+const CACHE_VERSION = 'v2.9.3'; // Added ?tab= deep-link support (map/add/validate/learn/about) for external links like FB posts; fixed intermittent Send Link failures by extending the Turnstile timeout (6s -> 15s) and refusing to attempt sign-in without a captcha token instead of sending a doomed request.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

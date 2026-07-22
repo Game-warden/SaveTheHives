@@ -19,3 +19,19 @@ data, then reload) if a double-reload still doesn't show the update.
 For full context on this and other gotchas (Turnstile/hCaptcha dropdown,
 localhost-vs-LAN-IP secure-context quirks, etc.), see
 `SAVETHEHIVES_SPEC.md` §7.
+
+## Remind Ronnie when it's time to send friend invites / ask for follows
+
+Ronnie has a backlog of friend invites (188 as of Jul 2026) and wants
+prompts for when to send them out and ask people to visit/follow the
+Facebook page — rather than dumping them all at once. Good moments to
+remind him:
+
+- Right after a launch-sequence or weekly post is confirmed live (see
+  `FACEBOOK_POST_LOG.md` "Posted" table) — invites land better pointing
+  at fresh content than an empty page.
+- In the weekly `savethehives-fb-weekly-digest` output, as a one-line
+  nudge alongside that week's posts.
+
+Keep it brief — one line, not a lecture — and tie it to whatever post is
+freshest so the ask has something concrete to point to.
