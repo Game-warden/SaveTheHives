@@ -782,6 +782,26 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+  /* 4a: error+retry variant — needs actual clicks, so pointer-events must
+     be re-enabled (the base rule above is none so normal toasts don't
+     block taps on the map behind them). */
+  #toast.toast-has-retry {
+    pointer-events: auto;
+    white-space: normal;
+    max-width: 320px;
+    text-align: center;
+  }
+  .toast-retry-btn {
+    margin-left: 10px;
+    padding: 4px 12px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--honey-light);
+    color: #1c1508;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
   /* ── MAP FAB ──
      #fab-add removed (v2.8) — duplicated the bottom nav's Add tab, which

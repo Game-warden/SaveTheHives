@@ -248,6 +248,20 @@ async function init() {
     }
   });
 
+  // 5a: Leaflet only reflows to fill its container when told to. setTab()
+  // already handles that on tab switches (line ~1116), but a same-tab
+  // resize — window resize on desktop, or a phone rotation, which fires
+  // 'resize' too — left the map stuck at its old dimensions with a blank
+  // grey gap. Debounced so a drag-resize or a burst of rotation events
+  // doesn't call invalidateSize() dozens of times.
+  let resizeDebounce;
+  const handleViewportResize = () => {
+    clearTimeout(resizeDebounce);
+    resizeDebounce = setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+  };
+  window.addEventListener('resize', handleViewportResize);
+  window.addEventListener('orientationchange', handleViewportResize);
+
   await loadHivesFromSupabase();
   visibleHives = [...allHives];
   updateCounts();
@@ -393,15 +407,26 @@ async function loadHivesFromSupabase() {
   // First-ever load (no cache yet): existing full paginated fetch.
   let all = [];
   let from = 0;
+  let loadError = null;
   while (true) {
     const { data, error } = await db.from('hives').select(HIVE_COLUMNS).range(from, from+999).order('id');
-    if (error || !data || !data.length) break;
+    if (error) { loadError = error; break; }
+    if (!data || !data.length) break;
     all = all.concat(data);
     if (data.length < 1000) break;
     from += 1000;
   }
   all.forEach(row => { const h = dbRowToHive(row); allHives.push(h); addMarker(h); });
-  showToast(`🐝 ${all.length.toLocaleString()} hives loaded`);
+
+  if (all.length === 0 && loadError) {
+    // 4a: a brand-new visitor with no cache yet, whose very first fetch
+    // failed, would otherwise see a blank map with no explanation. Distinguish
+    // that from a legitimately-empty table (no error) and offer a retry.
+    console.warn('Initial hive load failed:', loadError);
+    showToastWithRetry('⚠ Couldn\'t load hives — check your connection', () => location.reload());
+  } else {
+    showToast(`🐝 ${all.length.toLocaleString()} hives loaded`);
+  }
 
   if (all.length) {
     await idbPutHives(all);
@@ -1190,9 +1215,35 @@ let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  t.classList.remove('toast-has-retry');
   t.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Error toast with a Retry button, for failures the user can actually
+// recover from by trying again (e.g. cold-load fetch failure — 4a).
+// Stays up longer than a normal toast and re-enables pointer events,
+// since #toast is normally pointer-events:none.
+function showToastWithRetry(msg, retryFn) {
+  const t = document.getElementById('toast');
+  t.textContent = '';
+  const span = document.createElement('span');
+  span.textContent = msg;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = 'Retry';
+  btn.className = 'toast-retry-btn';
+  btn.onclick = () => {
+    clearTimeout(toastTimer);
+    t.classList.remove('show', 'toast-has-retry');
+    retryFn();
+  };
+  t.appendChild(span);
+  t.appendChild(btn);
+  t.classList.add('show', 'toast-has-retry');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show', 'toast-has-retry'), 8000);
 }
 
 // ═══════════════════════════════════════

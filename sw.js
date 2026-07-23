@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.7'; // 1a: pinned supabase-js to @2.106.1 (was floating @2); added a BroadcastChannel multi-tab warning toast shown when opening the sign-in modal if another tab is open.
+const CACHE_VERSION = 'v2.9.8'; // 4a: cold-load fetch failures now show a Retry toast instead of a silent blank map; 5a: window resize/orientationchange now calls map.invalidateSize() (fixes stuck-dimensions map on phone rotation / desktop resize).
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
