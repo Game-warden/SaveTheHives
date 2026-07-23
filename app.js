@@ -1133,6 +1133,27 @@ function runValidateFilter(lat, lng) {
   const now = Date.now();
   const stale = nearby.filter(h => !h.last_verified_at || (now - new Date(h.last_verified_at).getTime()) > FIVE_YEARS_MS).length;
   updateValidateBanner(nearby.length, stale);
+
+  // 2026-07-23 (Ronnie, live-testing feedback): first-time Validate users
+  // were landing on a zoomed-out map full of cluster bubbles with no clear
+  // next step — nothing told them to zoom in, tap a pin, then tap
+  // Update/Check In. This app needs to work for a mass, non-technical
+  // audience, so guessing isn't good enough. Auto-open the single nearest
+  // hive's popup (same clusterGroup.zoomToShowLayer pattern as
+  // flyToHive()) so the very first thing they see after signing in is an
+  // actual Update/Check-in button, not a map they have to decode. Banner
+  // copy above already updated to match ("We opened the closest one...").
+  if (nearby.length) {
+    let nearest = nearby[0], nearestDist = haversine(lat, lng, nearest.lat, nearest.lng);
+    nearby.forEach(h => {
+      const d = haversine(lat, lng, h.lat, h.lng);
+      if (d < nearestDist) { nearest = h; nearestDist = d; }
+    });
+    // Small delay so this doesn't fight the map.setView() animation above.
+    setTimeout(() => {
+      if (nearest._marker) clusterGroup.zoomToShowLayer(nearest._marker, () => nearest._marker.openPopup());
+    }, 350);
+  }
 }
 
 function updateValidateBanner(total, stale) {
@@ -1145,9 +1166,14 @@ function updateValidateBanner(total, stale) {
     sub.textContent = 'Be the first to log one nearby, or zoom out to explore further.';
   } else {
     title.textContent = `${total} hive${total !== 1 ? 's' : ''} within about an hour of you`;
+    // 2026-07-23 (Ronnie): "tap a pin" wasn't a concrete enough instruction
+    // for a mass, non-technical audience landing on a zoomed-out map full
+    // of cluster bubbles. runValidateFilter() now auto-opens the nearest
+    // hive's popup, so the banner should say so explicitly rather than
+    // still reading like the map is untouched.
     sub.textContent = stale > 0
-      ? `${stale} haven't been checked in 5+ years — tap a pin to see its details`
-      : 'Tap any pin to see its details and check in';
+      ? `We opened the closest one below — tap Update / Check In, or tap any other pin (${stale} haven't been checked in 5+ years)`
+      : 'We opened the closest one below — tap Update / Check In, or tap any other pin';
   }
   banner.style.display = 'flex';
 }

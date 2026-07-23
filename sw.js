@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.4'; // Fix: install handler's cache.addAll(SHELL_ASSETS) could populate a brand-new SHELL_CACHE with STALE files pulled from the browser's ordinary HTTP cache (v2.10.3's Learn tab changes didn't show up despite a correct new cache name). Now fetches each shell asset with {cache:'reload'} to force a real network hit. This bump exists specifically to force one more fresh install past the bad v2.10.3 cache.
+const CACHE_VERSION = 'v2.10.5'; // Two adds: (1) Dr. Tarpy credit line added to the app's own About modal (Data & Research section) — was previously mentioned nowhere in-app, only on Facebook. (2) Validate now auto-opens the nearest hive's popup instead of dropping first-time users on a zoomed-out map full of cluster bubbles with only a small banner telling them to "tap a pin" — banner copy updated to match.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
