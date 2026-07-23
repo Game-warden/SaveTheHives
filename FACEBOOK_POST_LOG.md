@@ -25,6 +25,7 @@ adds/updates the row then — not part of the automated weekly run.
 
 - **Launch sequence (FACEBOOK_STARTER_PACK.md §3):** All 5 posts now suggested/assigned as of this run (Jul 21 2026). The Pinned Post (§2) was already published and pinned manually on Jul 20–21 2026, before this log/task existed.
 - **Next up:** Launch sequence complete after Post 5 (Aug 2). Next scheduled run should switch to the ongoing Mon/Wed/Sun rotation (§4/§5) — mixing fixed categories with a fresh research hook for the Monday science slot.
+- **Reserved for Monday Aug 3 2026 (first ongoing-rotation Monday):** a ready, pre-verified research-hook post is already written and waiting in `FACEBOOK_STARTER_PACK.md` §4 — "Why do queens mate so much?", covering Tarpy/Delaney/Seeley (2015, PLOS ONE) on queen mating frequency in feral colonies. Both authors are already in `KEY_PEOPLE_CONTACTS.md`, so this is exactly the kind of match the expert-authorship check (Part A step 2 of the scheduled task) is meant to catch — but it's already been found, verified against primary sources, and written, so the Jul 26/Aug 2 run should use this directly for Aug 3 rather than searching for a new hook that week. Resume normal fresh-hook searching the Monday after (Aug 10).
 - **Ongoing-category rotation pointer:** not yet started — begins with the run after this one.
 
 ## Log

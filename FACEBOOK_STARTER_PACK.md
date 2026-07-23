@@ -137,6 +137,15 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   - **Suggested slot:** Sunday (community/reflective) — good candidate whenever the ongoing rotation needs a Sunday post
   - **Source:** full origin story in `PROJECT_HISTORY.md` (Era 0)
 
+- **Ready post — "Why do queens mate so much?" (research hook, added Jul 22 2026, reserved for Monday Aug 3 2026 — the first Monday of the ongoing rotation once the launch sequence finishes):**
+  - **Post text:**
+    > Turns out one of honey bees' strangest traits might be a survival trick. Queens mate with 10–20+ drones each — far more than needed just for genetic diversity. A 2015 study by Dr. David Tarpy, Dr. Debbie Delaney, and Dr. Thomas Seeley (our own scientific advisor among them) genotyped offspring from feral colonies in NY's Arnot Forest and found their queens mate at the same high rate as managed-colony queens — no more, no less. That points to something interesting: this level of polyandry likely evolved over deep evolutionary time, not as a recent adaptation to survive Varroa. It's baked in. Every non-managed colony we map carries that same trait — one more reason each one is worth finding. savethehives.org
+  - **Image:** no asset fits yet — consider a fresh photo, or fall back to `images/honeybee-on-comb.jpg`
+  - **Alt text:** (set based on whichever image is used)
+  - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
+  - **Source (verified Jul 22 2026, primary source checked directly — see PLOS's own citation line):** Tarpy DR, Delaney DA, Seeley TD (2015). "Mating Frequencies of Honey Bee Queens (Apis mellifera L.) in a Population of Feral Colonies in the Northeastern United States." PLOS ONE 10(3). https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118734
+  - **Note:** a companion paper by the same three authors — Seeley, Tarpy, Griffin, Carcione, Delaney (2015), *Apidologie* 46:654–666, "A survivor population of wild colonies of European honeybees..." — is already referenced in `KEY_PEOPLE_CONTACTS.md`. Good candidate for a follow-up post a few weeks after this one; don't use both back-to-back.
+
 - **Meet our scientific advisor** (new, added Jul 21 2026) — once Dr. Tarpy sends his bio synopsis (see `KEY_PEOPLE_CONTACTS.md`), a post introducing him lends real credibility and is a natural press-adjacent piece. Hold until the synopsis arrives — don't publish one written on his behalf.
 
 **Strategic note (Jul 21 2026):** Dr. Tarpy's read at the first advisor meeting was that Validate should be the project's central focus over recruiting new hive submissions — re-verifying the 1,150+ legacy records is more scientifically valuable right now than growing the map further. This reinforces `CONTENT_LIBRARY_IDEAS.md` item #15 ("Elevate Validate as the Primary On-Ramp"), which was already scoped but unbuilt. Worth weighting future post content (and eventually the on-ramp UI itself) more toward Validate messaging than the launch sequence currently does — Post 3 already covers it, but ongoing content should lean this direction too.
