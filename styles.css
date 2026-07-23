@@ -19,6 +19,7 @@
     --pin-live:    #2e7d32;
     --pin-dead:    #5d4037;
     --pin-building:#1565c0;
+    --pin-beehive: #6a1b9a;
     --pin-ground:  #e65100;
 
     --shadow-sm:   0 1px 4px rgba(0,0,0,0.12), 0 0 0 1px rgba(140,110,50,0.12);
@@ -57,6 +58,7 @@
     --pin-live:    #4caf50;
     --pin-dead:    #795548;
     --pin-building:#2196f3;
+    --pin-beehive: #ab47bc;
     --pin-ground:  #ff9800;
     --shadow-sm:   0 1px 4px rgba(0,0,0,0.35), 0 0 0 1px rgba(90,80,45,0.18);
     --shadow-md:   0 4px 16px rgba(0,0,0,0.45), 0 0 0 1px rgba(90,80,45,0.15);
@@ -1483,7 +1485,7 @@
   }
   .filter-type-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-bottom: 20px;
   }

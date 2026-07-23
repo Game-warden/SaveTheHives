@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.5'; // Two adds: (1) Dr. Tarpy credit line added to the app's own About modal (Data & Research section) — was previously mentioned nowhere in-app, only on Facebook. (2) Validate now auto-opens the nearest hive's popup instead of dropping first-time users on a zoomed-out map full of cluster bubbles with only a small banner telling them to "tap a pin" — banner copy updated to match.
+const CACHE_VERSION = 'v2.10.6'; // Split the "Man Made" hive-type bucket into two real categories, Beehive and Structure, driven by a raw hivetype SQL audit that found the DB already distinguishes them ('Manmade Beehive' vs everything else that used to collapse into "Man Made"). Updated map pin colors/icons, filter drawer, Add-hive form (now writes the precise raw string on new submissions), and legend.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

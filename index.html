@@ -30,7 +30,7 @@
 ║  DATA MODEL (hive record)                                            ║
 ║  { id, name, lat, lng, type, description, city, state, zip, year,   ║
 ║    userAdded? }                                                      ║
-║  Types: Live Tree | Dead Tree | Man Made | Ground                    ║
+║  Types: Live Tree | Dead Tree | Beehive | Structure | Ground         ║
 ║  Legacy: 1,152 records from honeybee1.sql (2008–2017)               ║
 ║  Mating Radius: 4,828m (3 miles) per pin                             ║
 ╠══════════════════════════════════════════════════════════════════════╣
@@ -642,9 +642,13 @@
           <span class="type-icon">🪵</span>
           <span class="type-name">Dead Tree</span>
         </div>
-        <div class="type-card" onclick="selectType('Man Made',this)">
+        <div class="type-card" onclick="selectType('Manmade Beehive',this)">
+          <span class="type-icon">🍯</span>
+          <span class="type-name">Beehive</span>
+        </div>
+        <div class="type-card" onclick="selectType('Manmade structure',this)">
           <span class="type-icon">🏠</span>
-          <span class="type-name">Man Made</span>
+          <span class="type-name">Structure</span>
         </div>
         <div class="type-card" onclick="selectType('Ground',this)">
           <span class="type-icon">🌿</span>
@@ -777,7 +781,8 @@
       <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-dead)"></div> Dead Tree — Colony in snag or fallen timber</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Man Made — Building, wall, structure, or managed hive</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-beehive)"></div> Beehive — Managed langstroth/top-bar box</div>
+      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Structure — Colony in a wall, building, or other structure</div>
       <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
     </div>
     <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;text-align:center;">
@@ -901,10 +906,15 @@
         <span>Dead Tree</span>
         <small id="count-Dead Tree" style="color:var(--text-muted);">—</small>
       </div>
-      <div class="filter-type-btn" id="fd-Man Made" onclick="fdFilterType('Man Made')">
+      <div class="filter-type-btn" id="fd-Beehive" onclick="fdFilterType('Beehive')">
+        <div class="filter-type-dot" style="background:var(--pin-beehive)"></div>
+        <span>Beehive</span>
+        <small id="count-Beehive" style="color:var(--text-muted);">—</small>
+      </div>
+      <div class="filter-type-btn" id="fd-Structure" onclick="fdFilterType('Structure')">
         <div class="filter-type-dot" style="background:var(--pin-building)"></div>
-        <span>Man Made</span>
-        <small id="count-Man Made" style="color:var(--text-muted);">—</small>
+        <span>Structure</span>
+        <small id="count-Structure" style="color:var(--text-muted);">—</small>
       </div>
       <div class="filter-type-btn" id="fd-Ground" onclick="fdFilterType('Ground')">
         <div class="filter-type-dot" style="background:var(--pin-ground)"></div>

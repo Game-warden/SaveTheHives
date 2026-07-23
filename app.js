@@ -113,19 +113,26 @@ db.auth.onAuthStateChange((_event, session) => {
 const TYPE_COLORS = {
   'Live Tree':  '#4caf50',
   'Dead Tree':  '#795548',
-  'Man Made':   '#2196f3',
+  'Beehive':    '#ab47bc',
+  'Structure':  '#2196f3',
   'Ground':     '#ff9800',
 };
 const TYPE_ICONS = {
-  'Live Tree':'🌳','Dead Tree':'🪵','Man Made':'🏠','Ground':'🌿'
+  'Live Tree':'🌳','Dead Tree':'🪵','Beehive':'🍯','Structure':'🏠','Ground':'🌿'
 };
 
-// Normalize legacy types to new categories
+// Normalize legacy types to new categories.
+// v2.10.6 — split the old catch-all "Man Made" bucket in two: a raw-value
+// SQL audit (2026-07-23) confirmed the DB already distinguishes physical
+// managed beehives from colonies living inside a structure (wall, building),
+// it was only the app's display layer collapsing them together. 'Manmade
+// Beehive' → Beehive; everything else that used to mean "Man Made" → Structure.
 function normalizeType(t) {
   if (!t) return 'Live Tree';
   if (t === 'Living Tree') return 'Live Tree';
-  if (['Building','Managed','Manmade Beehive','Manmade structure',
-       'Manmade Structure','Man Made'].includes(t)) return 'Man Made';
+  if (t === 'Manmade Beehive') return 'Beehive';
+  if (['Building','Managed','Manmade structure',
+       'Manmade Structure','Man Made'].includes(t)) return 'Structure';
   if (t === 'In the ground') return 'Ground';
   return t;
 }
@@ -673,7 +680,7 @@ function filterType(type) {
 }
 
 function updateCounts() {
-  const types = ['all','Live Tree','Dead Tree','Man Made','Ground'];
+  const types = ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'];
   types.forEach(t => {
     const el = document.getElementById('count-' + t);
     if (!el) return;
@@ -1820,7 +1827,7 @@ function updateDrawerCounts() {
   const notesFiltered = allHives.filter(h => matchesNotesQuery(h, q));
   const elAll = document.getElementById('count-all');
   if (elAll) elAll.textContent = notesFiltered.length.toLocaleString();
-  ['Live Tree','Dead Tree','Man Made','Ground'].forEach(t => {
+  ['Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
     const el = document.getElementById('count-' + t);
     if (el) el.textContent = notesFiltered.filter(h => h.type === t).length;
   });
@@ -1844,7 +1851,7 @@ function clearAllFilters() {
   activeFilter = 'all';
   const ni = document.getElementById('fd-notes-input');
   if (ni) ni.value = '';
-  ['all','Live Tree','Dead Tree','Man Made','Ground'].forEach(t => {
+  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
     const el = document.getElementById('fd-' + t);
     if (el) el.classList.toggle('active', t === 'all');
   });
@@ -1874,7 +1881,7 @@ function closeFilterDrawer() {
 
 function fdFilterType(type) {
   activeFilter = type;
-  ['all','Live Tree','Dead Tree','Man Made','Ground'].forEach(t => {
+  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
     const el = document.getElementById('fd-' + t);
     if (el) el.classList.toggle('active', t === type);
   });
@@ -1901,7 +1908,7 @@ function syncRadiusToggleUI(on) {
 const _origFilterType = filterType;
 filterType = function(type) {
   _origFilterType(type);
-  ['all','Live Tree','Dead Tree','Man Made','Ground'].forEach(t => {
+  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
     const el = document.getElementById('fd-' + t);
     if (el) el.classList.toggle('active', t === type);
   });
