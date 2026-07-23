@@ -153,6 +153,11 @@ function maybeShowOnramp() {
   const overlay = document.getElementById('onramp-overlay');
   if (!overlay) return;
   if (localStorage.getItem(ONRAMP_SEEN_KEY)) return; // stays hidden (default state)
+  // Skip for a ?hive=<id> deep link (2026-07-23) — a first-time visitor
+  // arriving via a shared hive link (the exact case this feature exists
+  // for) would otherwise get this generic overlay sitting on top of the
+  // map, burying the specific pin's popup that flyToHive() just opened.
+  if (new URLSearchParams(location.search).has('hive')) return;
   overlay.classList.remove('hidden');
 }
 function dismissOnramp() {
@@ -197,8 +202,18 @@ async function init() {
     zoom: 5,
     zoomControl: true,
   });
-  // Geolocate on first load (silently, no prompt)
-  if (navigator.geolocation) {
+  // Geolocate on first load (silently, no prompt) — skipped entirely when
+  // a ?hive=<id> deep link is present. Bug found 2026-07-23: this call
+  // fires immediately, but the permission prompt can sit unanswered for
+  // several seconds while the rest of init() runs — including flyToHive(),
+  // which flies to and opens the shared hive's popup. Once the user
+  // responds to the (unrelated) location prompt, this callback fires and
+  // silently recenters the map to their own position, undoing the fly and
+  // leaving the popup open on a pin that's no longer where the crosshair
+  // is. A deep link already says exactly where the user should land, so
+  // geolocation has nothing useful to add there.
+  const hasHiveDeepLink = new URLSearchParams(location.search).has('hive');
+  if (navigator.geolocation && !hasHiveDeepLink) {
     navigator.geolocation.getCurrentPosition(
       pos => map.setView([pos.coords.latitude, pos.coords.longitude], 10),
       () => {} // denied / unavailable — stay at US overview
