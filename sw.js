@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.3'; // Elevate Validate as a primary on-ramp (CONTENT_LIBRARY_IDEAS.md item #15, scoped Jul 17, built now that FB traffic made the gap concrete): Learn hub hero + a new "Confirm a hive" action card (green, rendered first) now offer Validate alongside the three beelining tracks, which previously were the only path out of Learn. On-ramp overlay copy/button relabeled to match ("How can I help?" instead of "How it works").
+const CACHE_VERSION = 'v2.10.4'; // Fix: install handler's cache.addAll(SHELL_ASSETS) could populate a brand-new SHELL_CACHE with STALE files pulled from the browser's ordinary HTTP cache (v2.10.3's Learn tab changes didn't show up despite a correct new cache name). Now fetches each shell asset with {cache:'reload'} to force a real network hit. This bump exists specifically to force one more fresh install past the bad v2.10.3 cache.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
@@ -44,9 +44,26 @@ function isMapTile(url) {
 }
 
 self.addEventListener('install', event => {
+  // Bug found 2026-07-23: cache.addAll(SHELL_ASSETS) with plain URL strings
+  // fetches each one using the browser's default HTTP cache behavior — so
+  // even on a genuine CACHE_VERSION bump (a real new SHELL_CACHE key),
+  // addAll() could silently populate it with a *stale* app.js/index.html
+  // pulled straight from the ordinary HTTP cache instead of the network,
+  // if that file's Cache-Control headers hadn't expired yet. The key was
+  // fresh; the bytes inside it weren't. Confirmed live: v2.10.3's Learn
+  // tab still showed pre-v2.10.3 content despite Cache Storage showing
+  // the correct new shell cache name. Fixed by building explicit Request
+  // objects with {cache:'reload'}, which forces each precache fetch to
+  // bypass HTTP cache and hit the network for real — the standard fix for
+  // this well-documented Cache.addAll() gotcha.
   event.waitUntil(
     caches.open(SHELL_CACHE)
-      .then(cache => cache.addAll(SHELL_ASSETS))
+      .then(cache => Promise.all(
+        SHELL_ASSETS.map(url =>
+          fetch(new Request(url, { cache: 'reload' }))
+            .then(res => { if (res.ok) return cache.put(url, res); })
+        )
+      ))
       .then(() => self.skipWaiting())
   );
 });
