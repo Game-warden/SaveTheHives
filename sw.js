@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.9'; // Remaining low items: 1d nulls the cached Turnstile token after any sign-in submit; 3d delta-sync uses .gte (was .gt) to avoid a millisecond-boundary skip; 4b wraps submitHive's insert in try/catch/finally so a network exception can't strand the Saving… button; 4c adds a global unhandledrejection listener as a last-resort toast+log.
+const CACHE_VERSION = 'v2.10.0'; // Fix: Share This Hive / Share App to Messages arrived as a completely blank message (WebKit bug — separate text+url fields not reliably combined); fixed by folding the URL into the text field. Also added real hive deep links: #<id> shown in the popup and Records list, shareHive() links now carry ?hive=<id>, and flyToHive() opens that exact pin's popup on load.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

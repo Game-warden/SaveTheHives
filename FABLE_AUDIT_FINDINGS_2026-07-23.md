@@ -217,6 +217,16 @@ where notes ~ '\d{3}[-.\s]?\d{3}[-.\s]?\d{4}'
 
 ---
 
+## Closure (2026-07-23, Sonnet implementation session)
+
+Every finding in this doc is now either shipped in code (through v2.9.9) or confirmed clean via dashboard check:
+- Dashboard checklist: Redirect URL wildcards added ✅, `hives` UPDATE policy tightened + `submit_checkin` converted to `SECURITY DEFINER` ✅ (see 2b addendum), Turnstile confirmed as the Captcha provider ✅ (screenshot, not hCaptcha), on-ramp overlay confirmed correct on a true first-visit incognito load ✅ (5b), PII scope query returned `count=4` — low enough to leave as-is, not actioned.
+- Only remaining 💡 suggestions (not bugs, not actioned): 5c `fb:app_id` meta (cosmetic), 5d Turnstile sub-label copy, 5e first-name+initial rendering for observer names.
+
+Ronnie's stated gate for sending the backlog of ~188 Facebook friend invites was "until sign-in is trusted and the site is safe for outside traffic" — both conditions are now met as of this closure.
+
+---
+
 ## Suggested fix order for the Sonnet session
 
 1. **2a stored XSS** (add `escapeHtml`, apply to popup + records list; add `maxlength` to the form) — before the invite send.

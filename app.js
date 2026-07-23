@@ -278,6 +278,16 @@ async function init() {
   await loadHivesFromSupabase();
   visibleHives = [...allHives];
   updateCounts();
+
+  // ?hive=<id> deep link — opens a specific hive's popup directly, so a
+  // shared link (shareHive(), below) actually lands on that pin instead of
+  // just the app's default view. Needs allHives/markers populated, hence
+  // placed here rather than in the earlier deepLinkTab() IIFE, which fires
+  // before hive data exists. Runs after deepLinkTab() too, so if a link
+  // somehow carries both ?tab= and ?hive=, this correctly wins and forces
+  // the map tab (popups only live there).
+  const hiveParam = new URLSearchParams(location.search).get('hive');
+  if (hiveParam) flyToHive(Number(hiveParam));
 }
 
 // ═══════════════════════════════════════
@@ -518,7 +528,7 @@ function addMarker(hive) {
         ${icon} ${hive.type}
       </div>
       <div class="popup-name">${safeName}</div>
-      ${hive.date ? `<div style="font-size:0.7rem;color:var(--text-muted);opacity:0.8;margin-bottom:6px;">🗓 Logged ${formatDate(hive.date)}</div>` : ''}
+      <div style="font-size:0.7rem;color:var(--text-muted);opacity:0.8;margin-bottom:6px;">#${hive.id}${hive.date ? ' · 🗓 Logged ' + formatDate(hive.date) : ''}</div>
       ${hive.status && hive.status !== 'unverified' ? `<div style="font-size:0.72rem;font-weight:600;margin-bottom:2px;color:${hive.status==='active'?'#4caf50':hive.status==='gone'?'#e57373':'#f5a623'}">● ${hive.status.charAt(0).toUpperCase()+hive.status.slice(1)}</div>` : ''}
       ${hive.last_verified_at ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;">Verified ${new Date(hive.last_verified_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div>` : ''}
       <div id="ci-note-${hive.id}" style="font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-bottom:6px;"></div>
@@ -915,7 +925,7 @@ function openRecords() {
           <span style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">${icon} ${h.type}</span>
           ${h.userAdded ? '<span style="font-size:0.7rem;background:rgba(245,166,35,0.2);color:var(--honey);padding:2px 6px;border-radius:4px;">New</span>' : ''}
         </div>
-        <div style="font-weight:bold;color:var(--honey);margin-bottom:4px;">${safeName}</div>
+        <div style="font-weight:bold;color:var(--honey);margin-bottom:4px;">${safeName} <span style="font-weight:normal;color:var(--text-muted);font-size:0.75rem;">#${h.id}</span></div>
         <div style="font-size:0.8rem;color:var(--text-muted);">📍 ${loc || 'Location unknown'} ${h.date ? '· 🗓 ' + formatDate(h.date) : ''}</div>
         ${rawDesc ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;line-height:1.4;">${safeDescExcerpt}${rawDesc.length > 100 ? '…' : ''}</div>` : ''}
       </div>
@@ -989,6 +999,23 @@ function flyTo(lat, lng) {
   document.getElementById('list-modal').classList.remove('open');
   map.setView([lat, lng], 15);
   setTab('map');
+}
+
+// Deep-link target for shareHive()'s ?hive=<id> URLs (and reusable anywhere
+// else a specific hive needs to be surfaced, e.g. from search results).
+// Goes through the cluster group's zoomToShowLayer rather than a plain
+// map.setView + marker.openPopup(), because a marker that's currently
+// absorbed into a cluster bubble isn't actually on the map yet —
+// openPopup() on it would silently no-op. zoomToShowLayer zooms/pans until
+// the marker is its own pin, then fires the callback.
+function flyToHive(id) {
+  const hive = allHives.find(h => h.id === id);
+  if (!hive || !hive._marker) {
+    showToast('⚠ Hive not found — the link may be out of date');
+    return;
+  }
+  setTab('map');
+  clusterGroup.zoomToShowLayer(hive._marker, () => hive._marker.openPopup());
 }
 
 // ═══════════════════════════════════════
@@ -1346,16 +1373,26 @@ init();
 })();
 
 // ═══════════════════════════════════════
-// SHARE (v2.9.2) — Web Share API where supported, clipboard-copy fallback
-// otherwise. Two entry points: shareApp() for the app itself (About modal),
-// shareHive(id) for a single hive (popup). Neither deep-links to a specific
-// pin — the app has no URL-based hive routing yet — so shareHive() shares
-// the app URL plus hive-specific text rather than promising a link that
-// wouldn't actually open to that pin.
+// SHARE (v2.9.2, hive deep links added 2026-07-23) — Web Share API where
+// supported, clipboard-copy fallback otherwise. Two entry points:
+// shareApp() for the app itself (About modal), shareHive(id) for a single
+// hive (popup). shareHive() links carry ?hive=<id>, which flyToHive()
+// (see near flyTo(), above) reads on load to fly to and open that exact
+// pin's popup — see init()'s tail.
 // ═══════════════════════════════════════
 async function doShare(shareData) {
   if (navigator.share) {
-    try { await navigator.share(shareData); } catch (e) { /* user cancelled the native share sheet — no-op */ }
+    // Known WebKit/macOS bug (filed against WebKit): passing `text` and
+    // `url` as separate fields can make Messages' compose window come up
+    // completely blank — Messages doesn't reliably combine both fields
+    // into the message body on some macOS versions. Confirmed live on
+    // Ronnie's Mac (2026-07-23): Share This Hive → Messages arrived empty.
+    // Folding the URL into `text` and dropping the separate `url` key
+    // guarantees visible content everywhere, at the cost of losing the
+    // auto-generated link-preview card some targets build from a bare
+    // `url` field.
+    const combined = { title: shareData.title, text: `${shareData.text} ${shareData.url}` };
+    try { await navigator.share(combined); } catch (e) { /* user cancelled the native share sheet — no-op */ }
     return;
   }
   try {
@@ -1379,8 +1416,8 @@ function shareHive(id) {
   const loc = hive && hive.city ? ` near ${hive.city}${hive.state ? ', ' + hive.state : ''}` : '';
   doShare({
     title: 'SaveTheHives',
-    text: `Found on SaveTheHives: a ${hive ? hive.type.toLowerCase() : 'wild'} hive${loc}. Help map feral honeybee colonies near you too.`,
-    url: window.location.origin + window.location.pathname,
+    text: `Found on SaveTheHives: a ${hive ? hive.type.toLowerCase() : 'wild'} hive${loc} (#${id}). Help map feral honeybee colonies near you too.`,
+    url: window.location.origin + window.location.pathname + '?hive=' + id,
   });
 }
 
