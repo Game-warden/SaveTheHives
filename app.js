@@ -683,6 +683,15 @@ function updateCounts() {
       el.textContent = allHives.filter(h => h.type === t).length.toLocaleString();
     }
   });
+
+  // Live hive count in the header tagline (2026-07-23, Ronnie request).
+  // Reuses this function's existing call sites (initial load, delta sync,
+  // new submissions, check-ins) rather than adding a separate update path
+  // — updates within the session too, not just on refresh.
+  const tagline = document.getElementById('header-tagline');
+  if (tagline && allHives.length) {
+    tagline.textContent = `Feral Honeybee Mapping Network · ${allHives.length.toLocaleString()} hives logged`;
+  }
 }
 
 // ═══════════════════════════════════════
