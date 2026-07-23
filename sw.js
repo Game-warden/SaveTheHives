@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.6'; // Sign-in fixes (Fable audit 1b/1c): emailRedirectTo now strips query/hash to avoid colliding with ?tab= deep links; submitSignIn() has a re-entrancy guard against double Enter/click.
+const CACHE_VERSION = 'v2.9.7'; // 1a: pinned supabase-js to @2.106.1 (was floating @2); added a BroadcastChannel multi-tab warning toast shown when opening the sign-in modal if another tab is open.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

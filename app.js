@@ -10,6 +10,34 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════
+// MULTI-TAB DETECTION (Fable audit 1a)
+// ═══════════════════════════════════════
+// supabase-js's default cross-tab Web Lock means a stale tab sitting on an
+// expired session can block a fresh sign-in attempt in another tab (silent
+// hang, no client-side error). We can't remove the lock without trading it
+// for a different race (see audit notes), so instead: warn the user right
+// when they go to sign in if another tab of this app is currently open —
+// that's the exact moment this failure mode bites.
+let _tabChannel = null;
+if ('BroadcastChannel' in window) {
+  _tabChannel = new BroadcastChannel('savethehives-tabs');
+  _tabChannel.onmessage = (e) => {
+    if (e.data === 'ping') _tabChannel.postMessage('pong');
+  };
+}
+function checkForOtherTabs(callback) {
+  if (!_tabChannel) { callback(false); return; }
+  let heard = false;
+  const onMsg = (e) => { if (e.data === 'pong') heard = true; };
+  _tabChannel.addEventListener('message', onMsg);
+  _tabChannel.postMessage('ping');
+  setTimeout(() => {
+    _tabChannel.removeEventListener('message', onMsg);
+    callback(heard);
+  }, 200);
+}
+
+// ═══════════════════════════════════════
 // XSS ESCAPING — v2.9.5, see FABLE_AUDIT_FINDINGS_2026-07-23.md 2a
 // ═══════════════════════════════════════
 // Escapes untrusted strings before they're interpolated into innerHTML/
@@ -1359,6 +1387,11 @@ function handleAuth() {
   _turnstileToken = null;
   document.getElementById('signin-modal').classList.add('open');
   setTimeout(() => document.getElementById('signin-email').focus(), 250);
+  checkForOtherTabs(otherTabOpen => {
+    if (otherTabOpen) {
+      showToast('⚠ SaveTheHives is open in another tab — close it if sign-in isn\'t working.');
+    }
+  });
 }
 
 function getTurnstileToken() {
