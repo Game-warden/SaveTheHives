@@ -1411,7 +1411,16 @@ function showSignInError(msg) {
   showToast('⚠ ' + msg);
 }
 
+// Re-entrancy guard (Fable audit 1c) — submitSignIn() has two entry points
+// (button onclick + Enter keydown on the email field), and getTurnstileToken()
+// can take up to 15s. Without this, a double Enter/click can fire two
+// signInWithOtp() calls back to back and burn Supabase's ~60s resend
+// cooldown, making the second attempt silently no-op.
+let _signInInFlight = false;
+
 async function submitSignIn() {
+  if (_signInInFlight) return;
+  _signInInFlight = true;
   try {
     const email = document.getElementById('signin-email').value.trim();
     if (!email) { document.getElementById('signin-email').focus(); return; }
@@ -1429,7 +1438,10 @@ async function submitSignIn() {
       showSignInError('Security check failed to load — check your connection (or try disabling any ad-blocker/VPN) and tap Send Link again.');
       return;
     }
-    const otpOptions = { emailRedirectTo: window.location.href, captchaToken };
+    // emailRedirectTo strips query/hash (Fable audit 1b) — window.location.href
+    // would carry deep-link params like ?tab=learn, which Supabase's Redirect
+    // URL allowlist (exact-match entries) can reject or silently downgrade.
+    const otpOptions = { emailRedirectTo: window.location.origin + window.location.pathname, captchaToken };
 
     const { error } = await db.auth.signInWithOtp({ email, options: otpOptions });
     btn.disabled = false; btn.textContent = 'Send Link';
@@ -1441,6 +1453,8 @@ async function submitSignIn() {
     const btn = document.getElementById('signin-submit-btn');
     if (btn) { btn.disabled = false; btn.textContent = 'Send Link'; }
     showSignInError('Sign-in failed: ' + e.message);
+  } finally {
+    _signInInFlight = false;
   }
 }
 
