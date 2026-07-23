@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.9.3'; // Added ?tab= deep-link support (map/add/validate/learn/about) for external links like FB posts; fixed intermittent Send Link failures by extending the Turnstile timeout (6s -> 15s) and refusing to attempt sign-in without a captcha token instead of sending a doomed request.
+const CACHE_VERSION = 'v2.9.4'; // Added Open Graph + Twitter Card meta tags (og:image, og:title, og:description, twitter:card) using facebook_cover_photo.jpg, plus a page <title>/meta description that were previously missing entirely.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

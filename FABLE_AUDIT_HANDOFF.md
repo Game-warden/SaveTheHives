@@ -13,6 +13,8 @@ SaveTheHives is a zero-budget, volunteer-run citizen-science PWA at **savethehiv
 
 The project just shipped a Facebook page and is about to send ~188 friend invites, so it's getting real outside traffic for the first time. This is the context for why sign-in reliability specifically matters right now — a broken auth flow in front of new visitors is a bad first impression, and Ronnie is holding off on the invite send until it's trusted.
 
+**Current version: v2.9.4** (check `sw.js`'s `CACHE_VERSION` to confirm you're looking at the latest before reporting anything as missing). v2.9.4 just added Open Graph + Twitter Card meta tags to `index.html` (previously there were none at all, and no page `<title>`/meta description either) — don't re-flag "missing OG tags" as a new finding, it's done. What IS still a real gap, worth keeping in mind for priority 3/4: this is one static, site-wide share card only — there's no server-side rendering or edge function, so if a per-hive share link (`?hiveId=...`) ever gets built, it can't get its own dynamic preview without adding a rendering layer that doesn't exist today. Not asking you to build that — just don't be surprised by it if you go looking for per-hive OG support.
+
 ---
 
 ## 2. Your assignment — four areas, in priority order
@@ -27,6 +29,12 @@ Read `SAVETHEHIVES_SPEC.md` §11's first entry in full ("UNRESOLVED — recurrin
 
 Also check: is there any client-side double-submit possible (rapid double-click on "Send Link") that could trigger Supabase's OTP rate-limit/cooldown behavior in a way that looks like silent failure rather than a visible error?
 
+**New lead, Jul 23 2026, likely the real cause:** Ronnie had multiple old/stale browser tabs open to savethehives.org. Closing them made sign-in start working again. This points strongly at cross-tab interference rather than anything network- or Resend-related, and it fits the "no error shown, no email arrived" symptom exactly. Investigate:
+- Supabase's JS client (GoTrue) manages its session via `localStorage` and uses a cross-tab lock/coordination mechanism (historically `navigator.locks` or a `BroadcastChannel`/storage-event-based lock, depending on SDK version) to avoid concurrent token refresh races across tabs of the same origin. If a stale tab is sitting on an expired/invalid session, it may be silently retrying token refresh in the background, holding that lock, or otherwise interfering with a fresh `signInWithOtp()` call from a different tab.
+- Check whether repeated background refresh attempts from stale tabs could be consuming Supabase's OTP/email rate-limit allowance for that account — this would produce exactly the observed symptom: the active tab's request "succeeds" (no client-side error) but no email actually goes out, because a stale tab already used up the request budget moments earlier, invisibly.
+- Check the Supabase client init in `app.js` for any config around `persistSession`, `autoRefreshToken`, `multiTab`, or storage key — and whether `sw.js`'s service worker (registered per-tab but shared per-origin) plays any role in keeping stale tabs "alive" enough to matter.
+- If this is confirmed as the mechanism, think about whether a fix belongs in the app (e.g., detecting/warning about multiple open tabs, or being more deliberate about `autoRefreshToken`/session handling) versus this just being expected behavior users need to be aware of (closing old tabs). Report your assessment either way — this is exactly the kind of thing worth a recommendation even if the "fix" is just documentation/UX (e.g., a toast warning if another tab is detected).
+
 ### Priority 2: Security review
 
 Known/documented security posture is in spec §9 (Privacy & Security Considerations) and §10 (RLS policies, Turnstile config). Go beyond what's already written down:
@@ -35,6 +43,7 @@ Known/documented security posture is in spec §9 (Privacy & Security Considerati
 - Look for any exposed secrets, API keys, or credentials that shouldn't be client-visible (the Supabase anon key being public is expected/normal — that's how Supabase works with RLS; but check nothing else leaked in).
 - Turnstile/Attack Protection config correctness — spec §10 flags a known historical gotcha (Supabase's captcha provider dropdown defaults to hCaptcha and must be manually switched to Turnstile, or tokens are always rejected) — verify this is still set correctly.
 - `submitted_by` / `user_id` FK integrity — spec mentions a past bug where these landed null; confirm it stays fixed.
+- **Already found, needs your verification/scoping, not rediscovery: likely stored XSS.** `app.js` builds hive popups (`marker.bindPopup(...)`, ~line 426) and the records list (`list.innerHTML = ...`, ~line 802) by interpolating user-submitted `hive.name`, `hive.description`, and check-in notes directly into HTML template literals. Grepped the whole file for `DOMPurify`/`escapeHtml`/`sanitize` — none exist anywhere. Since Add Hive requires only sign-in (an email magic link, no identity verification), any signed-in user could submit a `name` or `description` containing an executable payload (e.g. an `<img onerror=...>` tag — `<script>` tags don't execute via `innerHTML`, but event-handler attributes do) that would run in every other visitor's browser who views that hive. The sensitive thing at risk isn't the Supabase anon key (that's meant to be public) — it's each visitor's session token sitting in `localStorage`. Please confirm this reproduces, scope how many render paths are affected (popup, records list, anywhere else `hive.name`/`description`/`notes` gets rendered), and recommend the fix (likely: switch to `textContent` where no HTML is actually needed, or run user-submitted fields through an escaping function before interpolation).
 
 ### Priority 3: Scalability
 
