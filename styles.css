@@ -1609,6 +1609,13 @@
     color: var(--honey);
   }
   .lv-card-icon svg { width: 22px; height: 22px; }
+  /* Validate action card (2026-07-23) — green tint distinguishes the
+     one-tap "do this now" card from the three honey-colored reading
+     tracks below it. */
+  .lv-card-icon.action {
+    background: color-mix(in srgb, var(--green) 16%, transparent);
+    color: var(--green);
+  }
   .lv-card-body { flex: 1; min-width: 0; }
   .lv-card-title { font-weight: 700; font-size: 0.96rem; color: var(--text); display: flex; align-items: center; gap: 7px; }
   .lv-card-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }

@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.2'; // Header polish: displayed version badge/footer bumped to v2.10 (was stuck on v2.9 — that's a hand-maintained milestone label, separate from this granular cache-busting counter, and had gone stale). Header tagline now also shows the live hive count ("... · N,NNN hives logged"), updated via updateCounts()'s existing call sites.
+const CACHE_VERSION = 'v2.10.3'; // Elevate Validate as a primary on-ramp (CONTENT_LIBRARY_IDEAS.md item #15, scoped Jul 17, built now that FB traffic made the gap concrete): Learn hub hero + a new "Confirm a hive" action card (green, rendered first) now offer Validate alongside the three beelining tracks, which previously were the only path out of Learn. On-ramp overlay copy/button relabeled to match ("How can I help?" instead of "How it works").
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

@@ -2170,6 +2170,7 @@ function lvIconSVG(name) {
     compass: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polygon points="12,7 14.5,12 12,17 9.5,12" fill="currentColor" stroke="none"/></svg>',
     tools: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.1 2.1-2-2z"/></svg>',
     chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>',
   };
   return icons[name] || '';
 }
@@ -2227,13 +2228,32 @@ function renderLearnHub() {
     hero.innerHTML = `
       <div class="diagram" style="margin-bottom:16px;">${lvDiagramSVG('hero')}</div>
       <h1 class="lv-hero-title">Could there be a wild bee colony within a mile of you right now?</h1>
-      <p class="lv-hero-sub">The bees know where. Learn beelining — the 300-year-old craft of making them show you.</p>
+      <p class="lv-hero-sub">Confirm one we already know about — takes under a minute — or learn beelining, the 300-year-old craft of finding a brand-new one.</p>
     `;
   }
 
+  // Validate card (2026-07-23, CONTENT_LIBRARY_IDEAS.md item #15 "Elevate
+  // Validate as the Primary On-Ramp," scoped Jul 17 but never built until
+  // the Facebook launch made the gap concrete: every path out of Learn —
+  // hero copy, all three tracks, every track-end screen — pointed at
+  // beelining/Add and never once mentioned Validate, despite it being the
+  // lower-effort, Tarpy-endorsed priority action). Deliberately NOT a
+  // TRACKS entry: it's a single action (jump straight to Validate), not a
+  // reading sequence, so it's hand-built here rather than routed through
+  // learnStartTrack(). Rendered first, ahead of the three reading tracks,
+  // per Ronnie's explicit ask to lead with Validate over Add.
   const cards = document.getElementById('lv-path-cards');
   if (cards) {
-    cards.innerHTML = Object.keys(TRACKS).map(key => {
+    const validateCard = `
+      <div class="lv-card" onclick="setTab('validate')">
+        <div class="lv-card-icon action">${lvIconSVG('check')}</div>
+        <div class="lv-card-body">
+          <div class="lv-card-title">Confirm a hive<span class="lv-card-badge">Fastest way to help</span></div>
+          <div class="lv-card-desc">Already found — check in under a minute, no experience needed</div>
+        </div>
+        <div class="lv-card-chevron">${lvIconSVG('chevron')}</div>
+      </div>`;
+    const trackCards = Object.keys(TRACKS).map(key => {
       const meta = TRACK_META[key];
       return `
         <div class="lv-card" onclick="learnStartTrack('${key}')">
@@ -2245,6 +2265,7 @@ function renderLearnHub() {
           <div class="lv-card-chevron">${lvIconSVG('chevron')}</div>
         </div>`;
     }).join('');
+    cards.innerHTML = validateCard + trackCards;
   }
 
   const sub = document.getElementById('lv-checklist-sub');
