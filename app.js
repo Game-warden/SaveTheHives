@@ -10,6 +10,24 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════
+// XSS ESCAPING — v2.9.5, see FABLE_AUDIT_FINDINGS_2026-07-23.md 2a
+// ═══════════════════════════════════════
+// Escapes untrusted strings before they're interpolated into innerHTML/
+// bindPopup template strings. Covers hive name/description/city/state
+// (rendered in addMarker + openRecords) and idea title/description
+// (renderIdeas). NOT a general sanitizer — do not use for values that
+// need to contain real HTML.
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ═══════════════════════════════════════
 // SUPABASE CONFIG
 // ═══════════════════════════════════════
 const SUPABASE_URL = 'https://nsujmizdawyoictpawxt.supabase.co';
@@ -419,9 +437,10 @@ function addMarker(hive) {
   const color = TYPE_COLORS[hive.type] || '#f5a623';
   const icon = TYPE_ICONS[hive.type] || '🐝';
   const _locParts = v => v && v.trim() && v.toLowerCase() !== 'unknown';
-  const loc = [hive.city, hive.state].filter(_locParts).join(', ') ||
-    (hive.lat && hive.lng ? `${hive.lat.toFixed(2)}°, ${hive.lng.toFixed(2)}°` : 'Location unknown');
-  const desc = hive.description || '';
+  const loc = escapeHtml([hive.city, hive.state].filter(_locParts).join(', ') ||
+    (hive.lat && hive.lng ? `${hive.lat.toFixed(2)}°, ${hive.lng.toFixed(2)}°` : 'Location unknown'));
+  const desc = escapeHtml(hive.description || '');
+  const safeName = escapeHtml(hive.name) || 'Anonymous Observer';
 
   marker.bindPopup(`
     <div class="hive-popup">
@@ -429,7 +448,7 @@ function addMarker(hive) {
         <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
         ${icon} ${hive.type}
       </div>
-      <div class="popup-name">${hive.name || 'Anonymous Observer'}</div>
+      <div class="popup-name">${safeName}</div>
       ${hive.date ? `<div style="font-size:0.7rem;color:var(--text-muted);opacity:0.8;margin-bottom:6px;">🗓 Logged ${formatDate(hive.date)}</div>` : ''}
       ${hive.status && hive.status !== 'unverified' ? `<div style="font-size:0.72rem;font-weight:600;margin-bottom:2px;color:${hive.status==='active'?'#4caf50':hive.status==='gone'?'#e57373':'#f5a623'}">● ${hive.status.charAt(0).toUpperCase()+hive.status.slice(1)}</div>` : ''}
       ${hive.last_verified_at ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;">Verified ${new Date(hive.last_verified_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div>` : ''}
@@ -803,8 +822,11 @@ function openRecords() {
     const color = TYPE_COLORS[h.type] || '#f5a623';
     const icon = TYPE_ICONS[h.type] || '🐝';
     const _lp = v => v && v.trim() && v.toLowerCase() !== 'unknown';
-    const loc = [h.city, h.state].filter(_lp).join(', ') ||
-      (h.lat && h.lng ? `${h.lat.toFixed(2)}°, ${h.lng.toFixed(2)}°` : '');
+    const loc = escapeHtml([h.city, h.state].filter(_lp).join(', ') ||
+      (h.lat && h.lng ? `${h.lat.toFixed(2)}°, ${h.lng.toFixed(2)}°` : ''));
+    const safeName = escapeHtml(h.name) || 'Anonymous';
+    const rawDesc = h.description || '';
+    const safeDescExcerpt = escapeHtml(rawDesc.substring(0, 100));
     return `
       <div style="background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:var(--radius-md);padding:14px;cursor:pointer;box-shadow:var(--shadow-sm);transition:transform 0.15s,box-shadow 0.15s;"
            onclick="flyTo(${h.lat},${h.lng})">
@@ -813,9 +835,9 @@ function openRecords() {
           <span style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">${icon} ${h.type}</span>
           ${h.userAdded ? '<span style="font-size:0.7rem;background:rgba(245,166,35,0.2);color:var(--honey);padding:2px 6px;border-radius:4px;">New</span>' : ''}
         </div>
-        <div style="font-weight:bold;color:var(--honey);margin-bottom:4px;">${h.name || 'Anonymous'}</div>
+        <div style="font-weight:bold;color:var(--honey);margin-bottom:4px;">${safeName}</div>
         <div style="font-size:0.8rem;color:var(--text-muted);">📍 ${loc || 'Location unknown'} ${h.date ? '· 🗓 ' + formatDate(h.date) : ''}</div>
-        ${h.description ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;line-height:1.4;">${h.description.substring(0,100)}${h.description.length > 100 ? '…' : ''}</div>` : ''}
+        ${rawDesc ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;line-height:1.4;">${safeDescExcerpt}${rawDesc.length > 100 ? '…' : ''}</div>` : ''}
       </div>
     `;
   }).join('');
@@ -866,8 +888,8 @@ function renderIdeas(ideas, myVotes) {
           <button ${disabled} onclick="voteIdea('${idea.id}',-1)" style="background:none;border:none;cursor:${currentUser?'pointer':'not-allowed'};color:${mine===-1?'var(--honey)':'var(--text-muted)'};font-size:1rem;line-height:1;padding:2px;">▼</button>
         </div>
         <div>
-          <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${idea.title}</div>
-          ${idea.description ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;line-height:1.4;">${idea.description}</div>` : ''}
+          <div style="font-size:0.85rem;font-weight:600;color:var(--text);">${escapeHtml(idea.title)}</div>
+          ${idea.description ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;line-height:1.4;">${escapeHtml(idea.description)}</div>` : ''}
         </div>
       </div>
     `;
