@@ -53,6 +53,25 @@ Spec has a dedicated "Mapping at Scale (around 5,000 hives)" section — read it
 
 Look for unhandled promise rejections, missing try/catch around Supabase calls, error states that fail silently instead of surfacing a toast, and any place a network failure would leave the UI in a stuck/ambiguous state (e.g., a button stuck on "Sending…" forever). The offline-queue gap is already known and logged (spec §11, "Shelved Jul 17 2026" section) — don't re-flag that one, just be aware of it as context for how the app currently behaves offline (badly, by design-deferral, not by accident).
 
+### Priority 5: Live UX walkthrough (Chrome-assisted)
+
+This part needs the Claude in Chrome browser tools, not just code review — go actually use the live app the way a first-time visitor would, and flag anything that feels broken, confusing, or worth improving. Code review catches bugs; it doesn't catch "this is technically working but a real person would get stuck here."
+
+**Before you start:** hard-refresh or close/reopen the tab at least twice. `CACHE_VERSION` was just bumped to v2.9.4 — the two-load gotcha (§3 ground rules) means a normal load will show you the *previous* cached version and everything you observe will be about stale code, not current.
+
+**Walk through, as a new visitor would:**
+- Land on the map cold — does anything feel slow, janky, or unclear in the first few seconds? Is the on-ramp overlay (first-visit card) clear about what the app does?
+- Open a few hive popups — check the popup content, the "Update / Check In" and "Share This Hive" buttons.
+- Try Add Hive and Validate — including triggering the sign-in modal (you don't need to actually complete a magic-link sign-in unless you want to test priority 1's flow — but do check the modal itself, the Turnstile widget loading, and what happens if you close it partway through).
+- Open the filter drawer, try the notes-keyword search, toggle the mating radius.
+- Check the Learn tab — hub screen, opening a module, the back button.
+- Check the About modal, including the install-nudge and dark mode toggle.
+- Resize/emulate a phone viewport if the tool supports it — this app is built mobile-first and most real usage will be on iPhone Safari specifically (a documented weak spot elsewhere in the spec).
+- **Check the browser console for errors** on each of the above — this directly feeds priority 4 (general error handling); a console error you catch here is worth more than one inferred from reading the code.
+- **Verify the new Open Graph tags actually work**: run `https://savethehives.org/` through Facebook's Sharing Debugger (developers.facebook.com/tools/debug/) and confirm the card shows the right title, description, and image now that v2.9.4 added them.
+
+Report UX friction and enhancement ideas alongside the bug findings, but keep them clearly labeled as suggestions (not bugs) so Ronnie can triage them separately when this comes back to Sonnet for implementation.
+
 ---
 
 ## 3. Ground rules
