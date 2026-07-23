@@ -10,6 +10,19 @@ if ('serviceWorker' in navigator) {
 }
 
 // ═══════════════════════════════════════
+// GLOBAL REJECTION SAFETY NET (Fable audit 4c)
+// ═══════════════════════════════════════
+// Several async functions await inner calls without a local .catch (e.g.
+// voteIdea, loadIdeas' inner calls) — a stray rejection there vanishes into
+// the console with no user-visible signal at all. This doesn't fix any one
+// of those call sites; it's a backstop so a rejection is at least logged
+// loudly and the user gets a generic heads-up instead of silence.
+window.addEventListener('unhandledrejection', event => {
+  console.error('Unhandled promise rejection:', event.reason);
+  showToast('⚠ Something went wrong — please try that again.');
+});
+
+// ═══════════════════════════════════════
 // MULTI-TAB DETECTION (Fable audit 1a)
 // ═══════════════════════════════════════
 // supabase-js's default cross-tab Web Lock means a stale tab sitting on an
@@ -378,8 +391,11 @@ async function loadHivesFromSupabase() {
     showToast(`🐝 ${cached.length.toLocaleString()} hives loaded`);
 
     // Then fetch only what changed since last sync and merge it in.
+    // 3d: .gte (not .gt) so a row written in the same millisecond as the
+    // cursor isn't skipped on the next sync. Re-fetching the boundary row
+    // itself is harmless — the merge below already dedupes/updates by id.
     const { data, error } = await db.from('hives').select(HIVE_COLUMNS)
-      .gt('updated_at', lastSync).order('updated_at');
+      .gte('updated_at', lastSync).order('updated_at');
     if (error) {
       console.warn('Delta sync fetch failed (showing cached data only):', error);
       return;
@@ -836,22 +852,33 @@ async function submitHive() {
   const submitBtn = document.querySelector('[onclick="submitHive()"]');
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving…'; }
 
+  // 4b: the insert previously relied only on Supabase's returned {error},
+  // which covers a normal API rejection but not a thrown network exception
+  // (e.g. going offline mid-submit) — that would leave the button stuck on
+  // "Saving…" forever. Wrapped in try/catch/finally so the button always
+  // recovers.
   const now = new Date();
-  const { data: saved, error } = await db.from('hives').insert({
-    name: document.getElementById('form-name').value || 'Field Observer',
-    latitude: lat, longitude: lng, hivetype: selectedType,
-    description: document.getElementById('form-desc').value,
-    city: document.getElementById('form-city').value,
-    state: document.getElementById('form-state').value,
-    zip: document.getElementById('form-zip').value,
-    photo_url: null, user_added: true,
-    submitted_by: currentUser?.id || null,
-    submitted_at: now.toISOString(),
-    year: parseInt(document.getElementById('form-year').value) || null,
-  }).select().single();
-
-  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '🐝 Submit Hive Record'; }
-  if (error) { showToast('⚠ ' + error.message); return; }
+  let saved, error;
+  try {
+    ({ data: saved, error } = await db.from('hives').insert({
+      name: document.getElementById('form-name').value || 'Field Observer',
+      latitude: lat, longitude: lng, hivetype: selectedType,
+      description: document.getElementById('form-desc').value,
+      city: document.getElementById('form-city').value,
+      state: document.getElementById('form-state').value,
+      zip: document.getElementById('form-zip').value,
+      photo_url: null, user_added: true,
+      submitted_by: currentUser?.id || null,
+      submitted_at: now.toISOString(),
+      year: parseInt(document.getElementById('form-year').value) || null,
+    }).select().single());
+  } catch (e) {
+    console.error('submitHive network error:', e);
+    error = e;
+  } finally {
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '🐝 Submit Hive Record'; }
+  }
+  if (error) { showToast('⚠ ' + (error.message || 'Submit failed — check your connection and try again.')); return; }
 
   const hive = dbRowToHive(saved);
   allHives.push(hive); visibleHives.push(hive);
@@ -1528,6 +1555,10 @@ async function submitSignIn() {
     const otpOptions = { emailRedirectTo: window.location.origin + window.location.pathname, captchaToken };
 
     const { error } = await db.auth.signInWithOtp({ email, options: otpOptions });
+    // 1d: Turnstile tokens are single-use — once sent in a request, this one
+    // is spent regardless of whether Supabase accepted it, so drop the cache
+    // rather than risk a stale-token reuse (rejected) on the next attempt.
+    _turnstileToken = null;
     btn.disabled = false; btn.textContent = 'Send Link';
     if (error) { showSignInError(error.message); return; }
     closeSignInModal();

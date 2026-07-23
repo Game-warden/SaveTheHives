@@ -61,6 +61,8 @@ Note this is a **different failure mode** than 1a: it breaks the *click-through*
 ### 1d. ⚪ Cached Turnstile token reuse ✅
 `app.js:1345` — `getTurnstileToken()` resolves an already-cached `_turnstileToken` immediately. Turnstile tokens are single-use and short-lived; a cached token from a prior modal open could be sent stale and rejected server-side (looks like a silent failure). The `expired-callback` nulls it, which mostly covers this, but a token used twice within its lifetime would still be rejected on the second use. Low frequency; worth a note. Consider always nulling `_turnstileToken` after a successful `signInWithOtp` submit.
 
+> **Implementation-session addendum (2026-07-23, Sonnet session):** Shipped in v2.9.9, in `submitSignIn()`. **Minor deviation:** nulled unconditionally right after the `signInWithOtp` call — not only on success. Reasoning: the token is spent the moment it's sent in a request, regardless of whether Supabase's response was an error (e.g. rate limit); caching it through an error branch would just guarantee the *next* attempt gets rejected for token reuse too. Nulling on both outcomes is strictly safer.
+
 ---
 
 ## Priority 2 — Security
@@ -122,6 +124,8 @@ Can't be checked from the client — the historical gotcha (Supabase's captcha d
 ### 3d. ⚪ Delta-sync cursor is strictly-greater — millisecond-boundary skip ✅
 `app.js:322` uses `.gt('updated_at', lastSync)` and `latestUpdatedAt` advances the cursor to the max seen. Two rows written in the *same* millisecond as the cursor boundary could be skipped on the next sync (one is `> cursor`, one is `== cursor`). Vanishingly rare at your write volume; note only. A defensive fix is `.gte` plus client-side dedupe by `id`.
 
+> **Implementation-session addendum (2026-07-23, Sonnet session):** Shipped in v2.9.9 — changed to `.gte`. No separate dedupe code needed: the delta-sync merge loop right below it already dedupes/updates by `id` (`findIndex(x => x.id === h.id)`), so re-fetching the boundary row is a harmless no-op update, not a duplicate marker.
+
 ### 3e. ⚪ Known items confirmed, not re-flagged
 Records list first-50 cap (`app.js:801`) and `honeybee-on-comb.jpg` still in the SW precache list while unreferenced (`sw.js:26`) — both already in spec §11. Confirmed present, not new.
 
@@ -139,8 +143,12 @@ Records list first-50 cap (`app.js:801`) and `honeybee-on-comb.jpg` still in the
 `app.js:758–794`: relies on the returned `{ error }`, which covers Supabase's normal error path, but a thrown network exception (offline mid-submit) isn't caught, so the button could stick on "Saving…". `submitCheckin` (`:1467`) and the search functions handle this better.
 **Recommendation:** wrap the insert in `try/catch/finally`, restoring the button in `finally`.
 
+> **Implementation-session addendum (2026-07-23, Sonnet session):** Shipped in v2.9.9 — insert wrapped in `try/catch/finally`, button re-enable moved into `finally` so it recovers on both a thrown exception and a normal `{error}` response. No deviation.
+
 ### 4c. ⚪ No global `unhandledrejection` handler ✅
 There's no `window.addEventListener('unhandledrejection', …)`. Given several `async` functions `await` without local `catch` (e.g. `voteIdea` at `:877`, `loadIdeas`' inner calls), a stray rejection vanishes into the console. Consider a global handler that at least logs, optionally toasts. Low priority.
+
+> **Implementation-session addendum (2026-07-23, Sonnet session):** Shipped in v2.9.9 — added near the top of `app.js`, alongside the service worker registration. Logs via `console.error` and shows a generic `showToast('⚠ Something went wrong — please try that again.')`. This is a backstop, not a fix for any specific call site (`voteIdea`, `loadIdeas`, etc. still have no local `.catch`) — flagging in case the generic toast proves too noisy in practice (e.g. if a benign/expected rejection somewhere starts surfacing it); if so, the fix is a local `.catch` at that call site, not removing this handler.
 
 ### 4d. ✅ Things that are actually fine
 `submitCheckin` restores its button in all branches; `doSmartSearch`/`doSearch` both have `.catch`; the IndexedDB wrappers all try/catch and degrade to full-fetch. The offline-write gap is known/shelved (spec §11) — not re-flagged, and I confirmed the app's offline behavior is "fail with a toast," by deferral, as documented.
