@@ -1323,13 +1323,13 @@ function updateDebugPanel(fields) {
 // TOAST
 // ═══════════════════════════════════════
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, duration = 2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.remove('toast-has-retry');
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  toastTimer = setTimeout(() => t.classList.remove('show'), duration);
 }
 
 // Error toast with a Retry button, for failures the user can actually
@@ -1613,7 +1613,10 @@ function closeSignInModal() {
 function showSignInError(msg) {
   const el = document.getElementById('signin-error');
   if (el) { el.textContent = '⚠ ' + msg; el.style.display = 'block'; }
-  showToast('⚠ ' + msg);
+  // v2.10.7 — sign-in failures (e.g. Supabase's "wait N seconds" rate-limit
+  // rejection) used to vanish in the default 2.5s toast window, too fast to
+  // read or screenshot on a phone. Give this specific case 8s to linger.
+  showToast('⚠ ' + msg, 8000);
 }
 
 // Re-entrancy guard (Fable audit 1c) — submitSignIn() has two entry points
