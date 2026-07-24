@@ -552,14 +552,14 @@ function addMarker(hive) {
       <div class="popup-name">${safeName}</div>
       <div style="font-size:0.7rem;color:var(--text-muted);opacity:0.8;margin-bottom:6px;">#${hive.id}${hive.date ? ' · 🗓 Logged ' + formatDate(hive.date) : ''}</div>
       ${hive.status && hive.status !== 'unverified' ? `<div style="font-size:0.72rem;font-weight:600;margin-bottom:2px;color:${hive.status==='active'?'#4caf50':hive.status==='gone'?'#e57373':'#f5a623'}">● ${hive.status.charAt(0).toUpperCase()+hive.status.slice(1)}</div>` : ''}
-      ${hive.last_verified_at ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;">Verified ${new Date(hive.last_verified_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div>` : ''}
+      ${hive.last_verified_at ? `<div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;">Checked in ${new Date(hive.last_verified_at).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}</div>` : ''}
       <div id="ci-note-${hive.id}" style="font-size:0.72rem;color:var(--text-muted);font-style:italic;margin-bottom:6px;"></div>
       ${hive.photo_url ? `<img src="${hive.photo_url}" style="width:100%;border-radius:8px;margin-bottom:8px;max-height:160px;object-fit:cover;" loading="lazy">` : ''}
       ${desc ? `<div class="popup-desc">${desc}</div>` : ''}
       <div class="popup-meta">📍 ${loc}</div>
       <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;font-family:monospace;">${hive.lat.toFixed(2)}, ${hive.lng.toFixed(2)}</div>
       <button class="popup-radius-btn" onclick="toggleSingleRadius(${hive.id},${hive.lat},${hive.lng})">◎ 3-Mile Mating Radius</button>
-      <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Update / Check In</button>
+      <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Check In</button>
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
     </div>
   `, {maxWidth: 300, minWidth: 200, autoPanPadding: [16, 70]});
@@ -1179,8 +1179,8 @@ function updateValidateBanner(total, stale) {
     // hive's popup, so the banner should say so explicitly rather than
     // still reading like the map is untouched.
     sub.textContent = stale > 0
-      ? `We opened the closest one below — tap Update / Check In, or tap any other pin (${stale} haven't been checked in 5+ years)`
-      : 'We opened the closest one below — tap Update / Check In, or tap any other pin';
+      ? `We opened the closest one below — tap Check In, or tap any other pin (${stale} haven't been checked in 5+ years)`
+      : 'We opened the closest one below — tap Check In, or tap any other pin';
   }
   banner.style.display = 'flex';
 }
@@ -2264,7 +2264,7 @@ function renderLearnHub() {
     hero.innerHTML = `
       <div class="diagram" style="margin-bottom:16px;">${lvDiagramSVG('hero')}</div>
       <h1 class="lv-hero-title">Could there be a wild bee colony within a mile of you right now?</h1>
-      <p class="lv-hero-sub">Confirm one we already know about — takes under a minute — or learn beelining, the 300-year-old craft of finding a brand-new one.</p>
+      <p class="lv-hero-sub">Check in on one we already know about — takes under a minute — or learn beelining, the 300-year-old craft of finding a brand-new one.</p>
     `;
   }
 
@@ -2284,7 +2284,7 @@ function renderLearnHub() {
       <div class="lv-card" onclick="setTab('validate')">
         <div class="lv-card-icon action">${lvIconSVG('check')}</div>
         <div class="lv-card-body">
-          <div class="lv-card-title">Confirm a hive<span class="lv-card-badge">Fastest way to help</span></div>
+          <div class="lv-card-title">Check in on a hive<span class="lv-card-badge">Fastest way to help</span></div>
           <div class="lv-card-desc">Already found — check in under a minute, no experience needed</div>
         </div>
         <div class="lv-card-chevron">${lvIconSVG('chevron')}</div>
