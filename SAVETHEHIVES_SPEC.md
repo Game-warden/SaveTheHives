@@ -26,7 +26,7 @@ The core scientific purpose is tracking **colony resilience**: feral hives that 
 |---|---|---|
 | App shell | Few-files HTML PWA (as of v2.6) | No build step, no bundler; `index.html` + `styles.css` + `app.js` + `pathfinder.js` + `sw.js`, plain `<script>`/`<link>` tags |
 | Map engine | Leaflet 1.9.4 | Handles 1,000+ markers smoothly |
-| Tile layer | CartoDB Positron → Voyager (zoom-adaptive) | Muted overview below zoom 15, more street-level reference detail (buildings, road color) above it. Two-tier CARTO family only — raw OSM Standard tiles were considered but skipped in production per tile.openstreetmap.org's heavy-traffic usage policy. |
+| Tile layer | CartoDB Positron → Stadia Outdoors (zoom-adaptive) | Muted overview below zoom 15 (CARTO, free/unmetered); richer trail/field/forest/POI detail above it (Stadia, metered — see §10) once someone's zoomed in to judge a specific hive. Raw OSM Standard tiles were considered but skipped per tile.openstreetmap.org's heavy-traffic usage policy; CARTO Voyager was used at high zoom until 2026-07-24, when Ronnie live-compared several tile styles and preferred Stadia Outdoors' added detail. |
 | Clustering | Leaflet.MarkerCluster 1.5.3 | Auto-clusters dense areas |
 | Geocoding | photon.komoot.io (primary) | CORS-safe, worldwide, no API key |
 | Geocoding fallback | Nominatim / OSM | Used if photon fails |
@@ -369,7 +369,7 @@ All five bugs previously tracked here (missing `hives.year` column, zip search r
 
 ## 10. Infrastructure — How It All Works Together
 
-SaveTheHives is a zero-server-cost stack. Four cloud services handle everything — no VPS, no backend code to maintain.
+SaveTheHives is a zero-server-cost stack. Five cloud services handle everything — no VPS, no backend code to maintain.
 
 ```
 User's Browser / iPhone
@@ -402,6 +402,11 @@ User's Browser / iPhone
 │   Resend            │  Transactional email
 │   (SMTP)            │  Magic-link sign-in emails
 └─────────────────────┘
+
+(Map tiles are a separate, direct browser request — not chained through
+ Supabase. Leaflet fetches low-zoom tiles from CARTO (free, unmetered) and
+ high-zoom tiles from Stadia Maps (metered, domain-authenticated) — see the
+ Stadia Maps entry below.)
 ```
 
 ---
@@ -526,6 +531,34 @@ Supabase Authentication → SMTP Settings points to Resend's SMTP server. When S
 | Cloudflare widget location | Account → Turnstile → SaveTheHives widget |
 
 **Privacy requirement:** Cloudflare requires referencing their [Turnstile Privacy Addendum](https://www.cloudflare.com/en-gb/turnstile-privacy-policy/) in your privacy policy. ✅ Done in `privacy.html`.
+
+---
+
+### Stadia Maps — High-Zoom Basemap Tiles
+
+**What it does:** Serves the richer "Stadia Outdoors" basemap style (trails, forest/field shading, POIs) once someone zooms in past level 15 — the moment they're judging a specific hive as a check-in candidate rather than browsing the overview map. Added 2026-07-24 after Ronnie live-compared several tile styles (CARTO Voyager, raw OSM Standard, Stadia Outdoors) and preferred Stadia's detail. Below zoom 15, the map still uses CARTO Positron, which is free and unmetered — see `basemapForZoom()` in `app.js`.
+
+**Why not raw OSM Standard tiles:** same reason as always — `tile.openstreetmap.org` asks heavy-traffic production sites not to hit it directly. Stadia serves the same underlying OpenStreetMap data, properly licensed for production use.
+
+**How it authenticates:** domain-based, not an API key. `savethehives.org` is registered in the Stadia client dashboard (Manage Properties → Authentication Configuration → Domain), and Stadia authenticates requests by checking the browser's `Origin`/`Referer` headers — no key is embedded anywhere in this codebase. Only the bare domain is registered (no separate `www` entry — the dashboard only exposed one domain slot); both `savethehives.org` and `www.savethehives.org` were confirmed working live on 2026-07-24.
+
+**Tile URL** (used directly in a Leaflet `L.tileLayer`, no SDK): `https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png`
+
+**Pricing, limits, and cost — Free plan (current, as of 2026-07-24):**
+
+The [Stadia Maps Pricing](https://stadiamaps.com/pricing/) free tier includes 200,000 credits per month at $0/month. It is strictly restricted to development, evaluation, academic, and non-commercial use. When the monthly limit is hit, requests hard-limit with a 429 error rather than charging extra. ([1](https://stadiamaps.com/pricing/), [2](https://docs.stadiamaps.com/limits/))
+
+- **Monthly credits:** 200,000 credits per calendar month. Standard raster basemap tiles (what this app uses) cost 1 credit/tile, so this is effectively 200,000 tile loads/month.
+- **Commercial use:** Not allowed on the free tier (requires a paid plan starting at $20/month). SaveTheHives is volunteer-run with no ads, sales, or monetization, so it should clearly qualify as non-commercial — flagged here as a term being relied on, not something to forget.
+- **Allowed APIs:** Basic APIs only; standard basemaps are included, but advanced features like satellite basemaps or static maps are reserved for higher tiers. This app only uses standard raster basemap tiles, well within scope.
+- **Overage policy:** Hard-limited by default (returns HTTP 429 Rate Limit Exceeded) once exhausted, so there's no risk of an unexpected bill — tiles simply stop loading at high zoom until the next monthly cycle if the cap is ever hit. ([1](https://docs.stadiamaps.com/guides/migrating-from-stamen-map-tiles/), [2](https://stadiamaps.com/pricing/), [3](https://docs.stadiamaps.com/limits/))
+
+**If usage ever outgrows the free tier:** next tier up is **Starter**, $20/month for 1,000,000 credits/month, commercial use allowed. (Compared against MapTiler, the other option evaluated: MapTiler's free tier is 100,000 requests/month, and its entry paid tier is $30/month for 500,000 — Stadia wins on both headroom and price at every tier for this app's usage pattern, which is why it was chosen.)
+
+**Setup steps (already done — for reference):**
+1. Create a free account at client.stadiamaps.com/signup (no credit card required)
+2. Manage Properties → Authentication Configuration → add domain `savethehives.org` (no subdomain)
+3. No API key needed — domain auth handles everything for browser-based requests
 
 ---
 
