@@ -228,24 +228,31 @@ async function init() {
   }
 
   // Zoom-adaptive basemap — muted overview at low zoom, more street-level
-  // reference detail (buildings, road color) once someone zooms into a
-  // neighborhood looking for a specific hive. Two tiers only in production:
-  // CartoDB Positron -> Voyager. (Raw OSM Standard tiles were used in the
-  // Raleigh demo but tile.openstreetmap.org's usage policy asks heavy-traffic
-  // sites not to hit it directly, so we stay inside the CARTO tile family here.)
-  const basemapAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  // reference detail (fields, trails, forest) once someone zooms into a
+  // neighborhood to judge whether a hive is a good check-in candidate.
+  // Low zoom: CartoDB Positron (clean, minimal, cheap). High zoom: Stadia
+  // Outdoors (2026-07-24 — swapped from CARTO Voyager after Ronnie compared
+  // styles live and preferred the added trail/field/forest detail; raw OSM
+  // Standard tiles were considered too, but tile.openstreetmap.org's usage
+  // policy asks heavy-traffic sites not to hit it directly, so Stadia is used
+  // instead — same underlying OSM data, served properly for production use).
+  // Stadia auth is domain-based (savethehives.org registered in the Stadia
+  // dashboard under Manage Properties -> Authentication Configuration) — no
+  // API key lives in this codebase at all.
+  const basemapAttrCarto = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  const basemapAttrStadia = '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>';
   const basemapLayers = {
     positron: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: basemapAttr, subdomains: 'abcd', maxZoom: 20
+      attribution: basemapAttrCarto, subdomains: 'abcd', maxZoom: 20
     }),
-    voyager: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: basemapAttr, subdomains: 'abcd', maxZoom: 20
+    outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
+      attribution: basemapAttrStadia, maxZoom: 20
     })
   };
   let activeBasemap = 'positron';
   basemapLayers.positron.addTo(map);
 
-  function basemapForZoom(z) { return z >= 15 ? 'voyager' : 'positron'; }
+  function basemapForZoom(z) { return z >= 15 ? 'outdoors' : 'positron'; }
   map.on('zoomend', () => {
     const key = basemapForZoom(map.getZoom());
     if (key !== activeBasemap) {

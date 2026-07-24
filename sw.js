@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.8'; // Standardized all "check on a hive" copy on one word — "Check In" — replacing the mix of Validate/Verify/Confirm/ground-truth scattered across the nav tab, popup button, About page, on-ramp overlay, and Learn hub. Also added real instructions to the check-in sheet (use the pin's coordinates, go in person, look up and around for bees) where previously there were none.
+const CACHE_VERSION = 'v2.10.9'; // Swapped the high-zoom basemap tier from CARTO Voyager to Stadia Outdoors — richer trail/field/forest detail for judging hive candidates up close, after Ronnie live-compared several tile styles. Stadia auth is domain-based (savethehives.org registered in their dashboard), no API key in this codebase.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
