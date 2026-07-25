@@ -90,6 +90,57 @@ Any of these three would be a reasonable first email for a European partnership/
 
 ---
 
+## University Research Program Contacts — LEAD (25, two batches, Jul 25 2026)
+
+Full list with titles, emails, US Region, research focus, and relevance notes
+lives in `University_Bee_Research_Contacts.xlsx` (repo root) — a standalone
+outreach tracker with a Status dropdown (Not Contacted / Emailed - Awaiting
+Reply / Replied / Call-Meeting Scheduled / Declined / No Longer Pursuing),
+plus Date Emailed / Follow-up Date / Notes columns, and a boilerplate outreach
+email template on its second tab. Update status there as outreach progresses;
+this section is a summary pointer, not the source of truth.
+
+Scope: US-only, faculty PI / program director / lead specialist level (no
+grad students or postdocs, per Ronnie's call). None of these 25 have been
+contacted yet — separate from Tarpy and Delaney above, who are already in
+motion.
+
+**Batch 1 (19, national spread):** Christina Grozinger (Penn State), Marla
+Spivak (U Minnesota, Emeritus), Elina Niño (UC Davis), Juliana Rangel (Texas
+A&M), Jamie Ellis (U Florida), Brandon Hopkins (WSU), Reed Johnson (Ohio
+State), Scott McArt (Cornell), Keith Delaplane (U Georgia), Geoff Williams
+(Auburn), Ramesh Sagili (Oregon State), Dennis vanEngelsdorp (U Maryland —
+runs the national Bee Informed Partnership colony-loss survey, closest
+methodological cousin to SaveTheHives on this list), Krispn Given (Purdue),
+Meghan Milbrath (Michigan State), Jeff Harris (Mississippi State), Adam
+Dolezal (U Illinois), Neelendra Joshi (U Arkansas), Judy Wu-Smart (U
+Nebraska), Margaret Couvillon (Virginia Tech).
+
+**Batch 2 (6, Southeast-focused):** Ben Powell (Clemson, SC), Jennifer
+Tsuruda (U Tennessee Knoxville, TN), Morgan Christman (LSU AgCenter, LA —
+brand-new pollinator ecology program actively building citizen-science
+partnerships), Yong-Lak Park (WVU, WV — wild/solitary bee geospatial
+ecology), Rahman Tashakkori (Appalachian State, NC — CS professor running
+AppMAIS, an NC-based honeybee hive monitoring/data-science project; the
+closest technical cousin to SaveTheHives on either list and worth a more
+tailored email than the standard boilerplate), Amy Vu (U Florida Extension —
+runs UF's Bee College/Master Beekeeper outreach, a second UF contact
+alongside Ellis).
+
+**Researched but no individual contact found (not added — worth a direct
+inquiry if Ronnie wants to chase further):** NC A&T State University, Tuskegee
+University, Florida A&M University, Fort Valley State University, Alcorn
+State University, Virginia State University, Southern University (Baton
+Rouge) — all 1890 land-grant/HBCU institutions with general ag extension
+programs, but no named apiculture/pollinator specialist surfaced in public
+search results.
+
+Next stage (not started): draft a short, personalized boilerplate email per
+contact — mission statement, ask to spread the word/get involved — before
+sending. (Template now exists on the spreadsheet's "Email Template" tab.)
+
+---
+
 ## Unconfirmed Leads (need more digging or direct inquiry)
 
 - **"Cradle of Forestry" pure non-managed honey bee population, Pisgah National Forest, NC** — David mentioned beekeepers there have found a supposedly pure first-generation honey bee population in a pristine valley. The Cradle of Forestry Heritage Site (Pink Beds valley, Pisgah NF) is a real, documented place, but no public source was found connecting it to a specific non-managed bee population claim. Needs either a direct follow-up question to David or contact with the Pisgah Ranger District.
