@@ -92,6 +92,30 @@ Any of these three would be a reasonable first email for a European partnership/
 
 ---
 
+## SAS Software personal-connection angle (added Jul 25 2026)
+
+Since Ronnie's career was at SAS Institute, the spreadsheet now has a "SAS
+Software Connection" column checking whether each contact's university has a
+public, citable SAS tie — a natural personal opener alongside the mission
+pitch. Three stand out:
+
+- **NC State (Tarpy)** — SAS Institute was literally founded there in 1966,
+  born out of an agricultural-data research project; SAS Hall (math/stats
+  building) is named for founders Jim Goodnight and John Sall; SAS still
+  actively partners with NC State's Plant Sciences Initiative.
+- **Clemson (Ben Powell)** — SAS gifted Clemson $3.3M in software licensing
+  in 2021 (renewed through 2026), including cloud-based SAS Viya, specifically
+  to power big-data/analytics research and teaching.
+- **Appalachian State (Tashakkori)** — one of the first five universities
+  worldwide to offer courses on the newest SAS Viya platform; runs a
+  SAS-integrated Business Analytics certificate.
+
+Most of the other 26 contacts have a "Confirmed" (standard campus SAS site
+license, cited) or "Not confirmed" (UC Davis, U Georgia, Michigan State — no
+public evidence found, don't assume) note in that column. Full detail with
+sources is in the spreadsheet; not duplicated here since it's per-contact and
+would bloat this file.
+
 ## University Research Program Contacts — LEAD (29, Jul 25 2026)
 
 **Added at the top of the spreadsheet, highlighted separately (Jul 25 2026):**
