@@ -6,6 +6,10 @@ Paste this as your opening message in a fresh Cowork session in the `SaveTheHive
 
 You're picking up implementation of a security/reliability audit that Claude Fable 5 completed on July 23, 2026. **This is an implementation session — you fix things, unlike the audit session which only documented them.**
 
+> **Already in progress — don't start from zero.** A prior Sonnet implementation session has already begun and left a **protocol addendum at the top of `FABLE_AUDIT_FINDINGS_2026-07-23.md`**. Read it before touching anything. The key thing it already found: `submit_checkin()` declared `p_hive_id uuid` in `v2_6_sync.sql`, but the live `hives.id` column is actually **`bigint`** — so **every check-in has been silently failing since v2.6**. Treat that as known; don't re-derive it. When in doubt about whether the checked-in SQL matches production, cross-check parameter types against the *live* schema and invoke the RPC end-to-end rather than trusting the migration file (that's the lesson the addendum records). If that earlier session is still available, continuing it is better than starting fresh; otherwise pick up from the addendum's state.
+>
+> **Also live now (done this session, not by the earlier Sonnet run):** a real `sitemap.xml` and `robots.txt` were added and deployed, and Cloudflare's managed robots.txt was disabled so the repo file is what serves. Those are done — no action needed.
+
 ## Read first, in this order
 1. **`FABLE_AUDIT_FINDINGS_2026-07-23.md`** — the audit. Every finding has a severity, file/line refs, and a recommended fix. This is your work order.
 2. **`CLAUDE.md`** — session reminders (the SW two-load rule; when to nudge me on friend invites).

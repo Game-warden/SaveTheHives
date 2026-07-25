@@ -3,6 +3,16 @@
 -- Same pattern as ideas_and_voting.sql: Claude has no direct DB credential
 -- access, so this must be run manually.
 --
+-- ⚠ HISTORICAL — submit_checkin() below is superseded.
+-- This file's submit_checkin(p_hive_id uuid, ...) has two bugs fixed in
+-- v2_9_checkin_security_fix.sql: (1) hives.id is bigint, not uuid, so this
+-- version never worked — every check-in call failed silently since v2.6;
+-- (2) it's SECURITY INVOKER with no owner guard, which broke once the
+-- hives UPDATE policy was tightened to owner-scoped. Kept here only as a
+-- historical record of what originally ran. For the current live
+-- definition, see v2_9_checkin_security_fix.sql — that file, not this
+-- section, is the source of truth for submit_checkin().
+--
 -- Two things:
 --   1. updated_at tracking on hives, so the app can fetch only rows changed
 --      since last sync instead of re-downloading the whole table every load.
