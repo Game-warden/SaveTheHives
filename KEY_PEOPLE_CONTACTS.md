@@ -39,7 +39,7 @@ needs verification before acting on it)
 
 ---
 
-### Dr. Debbie Delaney — LEAD (crucial future contact, not yet re-contacted)
+### Dr. Debbie Delaney — CONTACTED (emailed 2026-07-25, awaiting reply)
 **Title:** Charles P. Townsend Family Professor of Pollinator Science, Department of Entomology & Wildlife Ecology, University of Delaware
 **Email:** dadelane@udel.edu · **Phone:** 302-831-8883
 **Office:** 531 South College Ave., 252 Townsend Hall, Newark, DE 19716
@@ -58,7 +58,7 @@ One of her former graduate students, Katherine Darger, wrote a 2013 MS thesis un
 
 **Professional affiliations:** Entomological Society of America, International Union for the Study of Social Insects, Eastern Apiculture Society, North American Pollinator Protection Campaign, Mid-Atlantic Apiculture Research and Extension Consortium (MAAREC), Honey Bee Health Coalition.
 
-**Status / next step:** Not yet re-contacted since the project's relaunch. Given she still links to the old savethehives.com from her own university page, she's likely to respond warmly to an update. Worth a personal email once the Facebook page and current app have enough content to show her — similar approach to how the Tarpy outreach was framed (low-pressure, "wanted you to see what it's become").
+**Status / next step:** Emailed 2026-07-25 (see delaney-email.html) — reintroduction covering the app rebuild, Tarpy's return as advisor, and a soft ask for her read on the science framing plus a call/visit offer. Awaiting reply.
 
 ---
 
