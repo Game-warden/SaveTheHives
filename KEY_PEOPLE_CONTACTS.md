@@ -90,6 +90,22 @@ Any of these three would be a reasonable first email for a European partnership/
 
 ---
 
+## University Research Program Contacts — LEAD (28, Jul 25 2026)
+
+**Added at the top of the spreadsheet, highlighted separately (Jul 25 2026):**
+Dr. Thomas D. Seeley (Cornell — Horace White Professor Emeritus, Dept. of
+Neurobiology and Behavior, tds5@cornell.edu). His decades-long Arnot Forest
+study of feral colonies surviving Varroa untreated is the direct scientific
+precedent for the "Genetic Goldmine" framing — arguably the single most
+on-thesis name across the whole contact list. He's also a co-author with
+Tarpy and Delaney on Seeley, Tarpy, Griffin, Carcione, Delaney (2015,
+Apidologie) — already cited under Delaney above. Not yet contacted; flagged
+in the spreadsheet as worth a personally written email rather than the
+boilerplate. Dr. Tarpy and Dr. Delaney (both already detailed above under
+Scientific Advisors) were also added to the spreadsheet, so it reads as
+complete if shared with Tarpy — Tarpy's status there is "Confirmed -
+Advisor," Delaney's is "Emailed - Awaiting Reply" (2026-07-25).
+
 ## University Research Program Contacts — LEAD (25, two batches, Jul 25 2026)
 
 Full list with titles, emails, US Region, research focus, and relevance notes
