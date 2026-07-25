@@ -77,7 +77,7 @@ David agreed to reach out to his NC State Extension contacts and pass along a na
 ### NC 4-H / NC State Beekeepers Association — LEAD
 NC already has an active **4-H Educational Grant Program** run jointly by the NC State Beekeepers Association (NCSBA) and local county Cooperative Extension offices — chapters can be reimbursed up to $500 for gear/materials, and several counties (Franklin, Burke) already run 4-H beekeeping schools. This means David's instinct (every NC county has a 4-H office) lines up with existing infrastructure — the fastest path in may be through NCSBA's existing 4-H program rather than cold-contacting individual county offices. Future Farmers of America (FFA) angle not yet researched — separate follow-up.
 
-### Julia Mahood — LEAD (Atlanta, GA)
+### Julia Mahood — CONTACTED (emailed via mapmydca.com/contact-us/, 2026-07-25, awaiting reply)
 Master beekeeper, former president of the Metro Atlanta Beekeepers Association, 2018 Georgia Beekeeper of the Year. Founder of **mapmydca.com**, a citizen-science project mapping honey bee drone congregation areas (DCAs) using mechanical drones carrying queen-pheromone lures — a very close cousin to what SaveTheHives does for colony locations. She's been a guest on the Beekeeping Today podcast and OSU Extension's PolliNation podcast discussing this work. Strong candidate to compare notes with on citizen-science methodology and possibly cross-promote — SaveTheHives already has a "DCA Mapping" feature marked "coming soon" in the app, which makes her directly relevant.
 
 ### European non-managed/native honey bee conservation — LEAD
@@ -88,9 +88,11 @@ No individual contact yet, but real, active organizations exist that are close a
 
 Any of these three would be a reasonable first email for a European partnership/cross-promotion conversation.
 
+**Contact info (added to spreadsheet 2026-07-25):** No personal email published; reached via mapmydca.com/contact-us/. Site also lists general addresses info@mapmydca.com and admin@mapmydca.com.
+
 ---
 
-## University Research Program Contacts — LEAD (28, Jul 25 2026)
+## University Research Program Contacts — LEAD (29, Jul 25 2026)
 
 **Added at the top of the spreadsheet, highlighted separately (Jul 25 2026):**
 Dr. Thomas D. Seeley (Cornell — Horace White Professor Emeritus, Dept. of
@@ -101,10 +103,10 @@ on-thesis name across the whole contact list. He's also a co-author with
 Tarpy and Delaney on Seeley, Tarpy, Griffin, Carcione, Delaney (2015,
 Apidologie) — already cited under Delaney above. Not yet contacted; flagged
 in the spreadsheet as worth a personally written email rather than the
-boilerplate. Dr. Tarpy and Dr. Delaney (both already detailed above under
-Scientific Advisors) were also added to the spreadsheet, so it reads as
-complete if shared with Tarpy — Tarpy's status there is "Confirmed -
-Advisor," Delaney's is "Emailed - Awaiting Reply" (2026-07-25).
+boilerplate. Dr. Tarpy, Dr. Delaney, and Julia Mahood (all already detailed
+above) were also added to the spreadsheet, so it reads as complete if shared
+with Tarpy — Tarpy's status there is "Confirmed - Advisor," Delaney's and
+Mahood's are both "Emailed - Awaiting Reply" (2026-07-25).
 
 ## University Research Program Contacts — LEAD (25, two batches, Jul 25 2026)
 
