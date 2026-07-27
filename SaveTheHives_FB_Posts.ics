@@ -4,61 +4,10 @@ PRODID:-//SaveTheHives//Facebook Posting Schedule//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-SUMMARY:SaveTheHives FB Post #2 — Beelining
-DTSTART:20260722T150000Z
-DTEND:20260722T153000Z
-DTSTAMP:20260721T184000Z
-UID:savethehives-fbpost-2@savethehives.org
-CATEGORIES:SaveTheHives,Facebook
-COLOR:purple
-DESCRIPTION:POST 2 — What is beelining (recruiting angle)\n\nPost text:\
- nEver heard of beelining? It's a nearly 300-year-old trick: catch a foragi
- ng bee\, feed it sugar syrup\, and watch which direction it flies home. Fo
- llow that line\, repeat a few times\, and you can walk right up to a wild 
- colony's tree.\n\nIt's part orienteering\, part treasure hunt — and ever
- y colony you find is a real scientific data point. We've got a full field 
- guide to get you started: savethehives.org (Learn tab)\n\nImage: images/1.
-  Hero — "The Beeline" (Module 1 + hub landing).png — the illustrated b
- ee-line-to-a-tree artwork already used in the app's Learn tab\; literally 
- depicts the concept\n\nAlt text: "Illustration of a bee flying a straight 
- line from wildflowers to a hollow tree\, showing the beelining technique."
- \n\nLink: this points to the Learn tab specifically rather than the homepa
- ge — either say "link in bio" or leave the plain-text mention as written
- . Facebook can't deep-link to an in-app tab\, so don't expect an auto prev
- iew card here.\n\nSuggested timing: launch week\, day 3–4\n\nFull copy i
- n FACEBOOK_STARTER_PACK.md §3.
-LOCATION:facebook.com/savethehives
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:SaveTheHives FB Post #3 — Validate/Map screenshot
-DTSTART:20260726T150000Z
-DTEND:20260726T153000Z
-DTSTAMP:20260721T184000Z
-UID:savethehives-fbpost-3@savethehives.org
-CATEGORIES:SaveTheHives,Facebook
-COLOR:purple
-DESCRIPTION:POST 3 — How to help without leaving your couch\n\nPost text
- :\nNot ready to go bee hunting? You can still help. SaveTheHives has 1\,15
- 0+ historical hive records from 2008–2017 that nobody has checked on in 
- years. If one happens to be near you\, confirming whether it's still activ
- e takes under a minute — tap a pin\, tap Validate\, done.\n\nEvery confi
- rmation is real data for researchers. savethehives.org\n\nImage: SaveTheHi
- ves_map_screenshot_cropped.jpg (live screenshot of the map around Raleigh\
- , browser chrome cropped out — captured Jul 20 2026)\n\nAlt text: "Scree
- nshot of the SaveTheHives map showing hive pin locations around Raleigh\, 
- NC."\n\nLink: keep the trailing URL as-is — no preview card will generat
- e since a photo is attached. The plain text is the only way readers get th
- e link.\n\nSuggested timing: launch week\, day 6–7\n\nFull copy in FACEB
- OOK_STARTER_PACK.md §3.
-LOCATION:facebook.com/savethehives
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
 SUMMARY:SaveTheHives FB Post #4 — The bigger why (research framing)
 DTSTART:20260727T150000Z
 DTEND:20260727T153000Z
-DTSTAMP:20260721T184000Z
+DTSTAMP:20260726T220421Z
 UID:savethehives-fbpost-4@savethehives.org
 CATEGORIES:SaveTheHives,Facebook
 COLOR:purple
@@ -82,10 +31,40 @@ LOCATION:facebook.com/savethehives
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — Triangulation (first ongoing Wed post)
+DTSTART:20260729T150000Z
+DTEND:20260729T153000Z
+DTSTAMP:20260726T220421Z
+UID:savethehives-fbpost-ongoing-triangulation-20260729@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot\n"You
+  caught the line — now what?" (Triangulation)\n\nPost text:\nBeelining g
+ ets you a direction. Triangulation gets you the tree.\n\nOnce you've fed a
+  bee and watched which way she flies home\, walk a few hundred feet to the
+  side and feed another bee from the same patch. She'll fly a different lin
+ e back to the same colony. Follow both lines out\, and the point where the
+ y'd cross is roughly where the nest is — two data points beat one guess 
+ every time.\n\nIt's the same technique behind a lot of the historical reco
+ rds already on our map. Full walkthrough with diagrams is in the app's Lea
+ rn tab. savethehives.org/?tab=learn\n\nImage: images/learn-triangulation.j
+ pg (Learn tab Module 3 illustration — real asset in repo)\n\nAlt text: "
+ Diagram illustrating two bee flight lines crossing at a hollow tree\, show
+ ing the triangulation technique."\n\nLink: use savethehives.org/?tab=learn
+  as trailing plain text — a photo is attached so no Facebook link-previe
+ w card will generate regardless.\n\nSuggested timing: Wed Jul 29\, 11am–
+ 2pm ET\n\nNote: first ongoing-rotation Wednesday post (launch sequence's 5
+  posts are used up as of Post 5 / Aug 2). New content\, not in FACEBOOK_ST
+ ARTER_PACK.md — generated this run per §5 Wednesday practical/recruitin
+ g slot.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
 SUMMARY:SaveTheHives FB Post #5 — Call for founding contributors
 DTSTART:20260802T150000Z
 DTEND:20260802T153000Z
-DTSTAMP:20260721T184000Z
+DTSTAMP:20260726T220421Z
 UID:savethehives-fbpost-5@savethehives.org
 CATEGORIES:SaveTheHives,Facebook
 COLOR:purple
@@ -98,10 +77,111 @@ DESCRIPTION:POST 5 — Call for founding contributors\n\nPost text:\nSaveT
  the launch sequence on the brand mark itself\, appropriate for a "join us"
   post\n\nAlt text: "SaveTheHives logo."\n\nLink: keep the trailing URL as-
  is — no preview card will generate since a photo is attached.\n\nSuggest
- ed timing: week 2\, day 5–6\n\nAfter this\, ongoing weekly cadence begin
- s per FACEBOOK_STARTER_PACK.md §5 — Mon/Wed/Sun rotation\, delivered vi
- a the savethehives-fb-weekly-digest scheduled task each Sunday evening.\n\
- nFull copy in FACEBOOK_STARTER_PACK.md §3.
+ ed timing: week 2\, day 5–6\n\nFull copy in FACEBOOK_STARTER_PACK.md §3
+ .
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — Why do queens mate so much? (research hoo
+ k)
+DTSTART:20260803T150000Z
+DTEND:20260803T153000Z
+DTSTAMP:20260726T220421Z
+UID:savethehives-fbpost-ongoing-queenmating-20260803@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Monday science/mission slot\n"Why do quee
+ ns mate so much?" — RESERVED research hook\, pre-verified (do not resubs
+ titute a fresh search this week)\n\nExpert-authorship check: PASSED — al
+ l three authors (Tarpy\, Delaney\, Seeley) are in KEY_PEOPLE_CONTACTS.md. 
+ Dr. Tarpy is our confirmed scientific advisor\; Dr. Delaney was emailed 20
+ 26-07-25 (awaiting reply)\; Dr. Seeley is a lead in the University Researc
+ h Program Contacts list. Lean on this in the post copy.\n\nPost text:\nTur
+ ns out one of honey bees' strangest traits might be a survival trick. Quee
+ ns mate with 10–20+ drones each — far more than needed just for geneti
+ c diversity. A 2015 study by Dr. David Tarpy\, Dr. Debbie Delaney\, and Dr
+ . Thomas Seeley (our own scientific advisor among them) genotyped offsprin
+ g from feral colonies in NY's Arnot Forest and found their queens mate at 
+ the same high rate as managed-colony queens — no more\, no less. That po
+ ints to something interesting: this level of polyandry likely evolved over
+  deep evolutionary time\, not as a recent adaptation to survive Varroa. It
+ 's baked in. Every non-managed colony we map carries that same trait — o
+ ne more reason each one is worth finding. savethehives.org\n\nImage: no as
+ set fits yet — consider a fresh photo\, or fall back to images/honeybee-
+ on-comb.jpg (already used for Post 1 — some repeat risk)\n\nAlt text: se
+ t based on whichever image is used\n\nLink: keep the trailing URL as plain
+  text if a photo is attached — no preview card will generate\n\nSource (
+ verified Jul 22 2026\, primary source checked directly): Tarpy DR\, Delane
+ y DA\, Seeley TD (2015). "Mating Frequencies of Honey Bee Queens (Apis mel
+ lifera L.) in a Population of Feral Colonies in the Northeastern United St
+ ates." PLOS ONE 10(3). https://journals.plos.org/plosone/article?id=10.137
+ 1/journal.pone.0118734\n\nNote: a companion paper by the same three author
+ s (Seeley\, Tarpy\, Griffin\, Carcione\, Delaney 2015\, Apidologie 46:654-
+ 666) is a good follow-up a few weeks out — don't use back-to-back.\n\nSu
+ ggested timing: Mon Aug 3\, 11am–2pm ET\n\nFull copy in FACEBOOK_STARTER
+ _PACK.md §4.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — Not every nest is a honey bee colony (bee
+  ID)
+DTSTART:20260805T150000Z
+DTEND:20260805T153000Z
+DTSTAMP:20260726T220421Z
+UID:savethehives-fbpost-ongoing-beeid-20260805@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot\n"Not
+  every buzzing nest is a honey bee colony" (bee ID / logging accuracy)\n\n
+ Post text:\nNot every buzzing nest you find is a honey bee colony — and 
+ that's fine\, it happens to everyone.\n\nHoney bees build vertical wax com
+ b inside a cavity (a hollow tree\, wall void\, or bee box)\, and you'll us
+ ually see a steady stream of bees flying in and out\, even on cool days. B
+ umblebees and yellowjackets nest in small ground colonies or paper nests a
+ nd don't look anything like that. If you're not sure what you found\, log 
+ it anyway — a photo is enough for us to help sort it out\, and every sub
+ mission\, even a maybe\, helps keep the map honest.\n\nsavethehives.org\n\
+ nImage: images/learn-bee-box.jpg (Learn tab reference asset showing what a
+  colony/hive looks like)\n\nAlt text: "Illustration of a honey bee hive bo
+ x used as a reference for identifying wild colonies."\n\nLink: keep the tr
+ ailing URL as plain text — a photo is attached so no preview card will g
+ enerate.\n\nSuggested timing: Wed Aug 5\, 11am–2pm ET\n\nNote: second on
+ going-rotation Wednesday post. New content\, not in FACEBOOK_STARTER_PACK.
+ md — generated this run per §5 Wednesday practical/recruiting slot (bee
+  ID / safety angle called out explicitly in §5).
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — How this started (origin story)
+DTSTART:20260809T150000Z
+DTEND:20260809T153000Z
+DTSTAMP:20260726T220421Z
+UID:savethehives-fbpost-howthisstarted-20260809@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Sunday community/reflective slot\n"How th
+ is started" (ready post from FACEBOOK_STARTER_PACK.md §4\, added Jul 22 2
+ 026)\n\nPost text:\nBefore this was an app\, it was a friendship. SaveTheH
+ ives actually started in 2008 — Ronnie was an active beekeeper and met D
+ r. David Tarpy at an NC State beekeepers meeting. One thing led to another
+ \, and the two started "The Feral Bee Project": researchers needed known l
+ ocations of wild honey bee colonies for genetic sampling tied to Colony Co
+ llapse Disorder research\, so we built a simple web map for anyone to log 
+ what they found. By 2012 there was even an iPhone app (Honey Bee Mapper). 
+ The project got cited in outside bee research and grew entries from around
+  the world before the original site went dark around 2015.\n\nThose origin
+ al 1\,000+ records never disappeared — they're the backbone of the map y
+ ou see today\, and Dr. Tarpy is back on board as scientific advisor. Same 
+ mission\, 18 years later. savethehives.org\n\nImage: no asset fits yet —
+  consider a fresh photo\, or SaveTheHives_map_screenshot_cropped.jpg if no
+ thing else is available (repeat risk: already used for Post 3)\n\nAlt text
+ : set based on whichever image is used\n\nLink: keep the trailing URL as p
+ lain text if a photo is attached — no preview card will generate\n\nSour
+ ce: full origin story in PROJECT_HISTORY.md (Era 0)\n\nSuggested timing: S
+ un Aug 9\, 11am–2pm ET\n\nFull copy in FACEBOOK_STARTER_PACK.md §4.
 LOCATION:facebook.com/savethehives
 STATUS:CONFIRMED
 END:VEVENT
