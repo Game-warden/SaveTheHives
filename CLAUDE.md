@@ -52,12 +52,13 @@ app, so there's exactly one copy of each, not two.
 regardless of who links it) but `start_url` and `scope` now both point at
 `/app/` — installed users open straight to the map, never the landing page.
 
-**Outstanding cleanup, not yet done:** the pre-move `app.js`, `pathfinder.js`,
-and `sw.js` still physically exist at repo root as orphaned duplicates —
-Claude can create/edit files in the connected workspace folder but cannot
-delete them, so this needs a manual `git rm app.js pathfinder.js sw.js` in
-Terminal before the first commit of this restructure. See the git/rollback
-section below for the exact commands.
+**Cleanup done:** the pre-move `app.js` and `pathfinder.js` orphans at repo
+root were removed via `git rm` before the restructure shipped. Root `sw.js`
+still exists, but it's not an orphan anymore — it's now an intentional
+"killer" script (see the Orphaned Service Worker entry in
+`SAVETHEHIVES_SPEC.md` §7) that unregisters any pre-v2.11 service worker
+still lurking at scope `/` and clears its caches. Leave it in place
+permanently; it's doing a real job, not leftover cruft.
 
 **Fallback if something goes wrong after this ships:** this whole
 restructure was built and should be committed on its own branch first
@@ -86,6 +87,50 @@ Google Search Console (needs Ronnie's Google account, can't be done from
 here); backlinks from the university outreach and Facebook effort, which
 will move discoverability more than any on-page change at this traffic
 stage.
+
+## About panel is a full view now, not a modal — and shares patterns with Learn
+
+As of v2.11.3-2.11.4 (2026-07-28), the About tab (`#about-view` in
+`app/index.html`) was converted from a `.modal-overlay` bottom sheet into a
+full view — same architecture as `#learn-view`, toggled the same way in
+`setTab()` (`app/app.js`). This was a deliberate fix for a real
+inconsistency Ronnie spotted: the persistent `#app-header` and the floating
+`#bottom-tabs` pill were both dimming/blurring behind About's old modal
+backdrop but not behind Map or Learn. If you're touching About again:
+
+- The hub menu rows reuse Learn's `.lv-card` / `.lv-card-icon` /
+  `.lv-card-body` / `.lv-card-chevron` classes directly — don't recreate a
+  parallel `.about-menu-row` style, add new rows as `.lv-card`s grouped
+  under an `.about-card-group` with an `.about-group-label` header, same as
+  the existing App / Map reference / Community / About the project groups.
+- Sub-panels use a `.about-panel-header` "← About" back row (destination-
+  labeled, matching Learn's "← Learn") plus a separate `.about-panel-name`
+  heading — not the old `.about-panel-title` combined into the back row.
+- **Width cap gotcha:** `#about-view` needed to be added explicitly to
+  `#learn-view`'s `max-width:560px; margin:0 auto` CSS rule
+  (`#learn-view, #about-view { ... }` in `styles.css`) — it did NOT inherit
+  this just from using the same `.learn-screen` child class, since the cap
+  is written as an id-scoped rule on the parent. See the CSS id-scoping
+  entry in `SAVETHEHIVES_SPEC.md` §7 if this pattern gets reused again
+  (e.g. converting another modal into a full view later).
+- Add and Sign In are staying as `.modal-overlay` bottom sheets on
+  purpose — this is a considered choice (see chat 2026-07-28), not an
+  inconsistency to "fix" later. Add is a quick task-focused form tied to
+  the map crosshair behind it; About/Learn/Map are browsable destinations.
+  Don't convert Add to a full view without Ronnie explicitly asking again.
+
+## Landing page ↔ app connection: `?onboard=` params + nav callout bubbles
+
+Each "way to help" card on the root landing page links to `/app/` with
+`?onboard=validate|add|learn`. On arrival, `maybeShowOnboardCallout()` in
+`app/app.js` reads that param and shows a one-time floating speech-bubble
+callout (`.onboard-callout` CSS, `.nav-highlight` ring) pointing at the
+matching bottom-nav button (`#nav-btn-validate`/`#nav-btn-add`/
+`#nav-btn-learn`), instead of the generic first-visit onramp overlay
+(`maybeShowOnramp()` skips itself when `?onboard=` is present). Auto-
+dismisses after 4s or on next click. If new landing-page cards get added
+that should route somewhere specific in the app, follow this same param
+pattern rather than inventing a new one-off mechanism.
 
 ## Remind Ronnie when it's time to send friend invites / ask for follows
 
