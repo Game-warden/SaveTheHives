@@ -171,23 +171,7 @@
     position: relative; overflow: hidden; flex-shrink: 0;
     border: 1px solid #ecdfc0;
   }
-  .teaser-scene svg { position: absolute; top: 0; left: 0; }
-  @keyframes bee-fly {
-    0% { transform: translate(2px,4px) scale(1); opacity:1; }
-    40% { transform: translate(22px,16px) scale(0.9); opacity:1; }
-    55% { transform: translate(32px,25px) scale(0.5); opacity:1; }
-    65% { transform: translate(35px,28px) scale(0.1); opacity:0; }
-    79% { transform: translate(35px,28px) scale(0.1); opacity:0; }
-    80% { transform: translate(32px,25px) scale(0.5); opacity:1; }
-    95% { transform: translate(8px,6px) scale(0.9); opacity:1; }
-    100% { transform: translate(2px,4px) scale(1); opacity:1; }
-  }
-  .bee {
-    position: absolute; top: 5px; left: 2px; width: 8px; height: 5px;
-    border-radius: 50%;
-    background: repeating-linear-gradient(90deg,#2b2107 0,#2b2107 2px,#f5a623 2px,#f5a623 4px);
-    animation: bee-fly 4.5s ease-in-out infinite;
-  }
+  .teaser-scene video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
   .teaser-text .title { font-size: 0.84rem; color: #3a2a12; margin-bottom: 2px; }
   .teaser-text .sub { font-size: 0.74rem; color: #8a7a55; }
 
@@ -294,11 +278,7 @@
 
 <a class="teaser" href="#why-it-matters">
   <div class="teaser-scene">
-    <svg width="48" height="48" viewBox="0 0 48 48">
-      <rect x="25" y="7" width="14" height="38" rx="6" fill="#c8a874"></rect>
-      <ellipse cx="35" cy="29" rx="5" ry="7" fill="#3a2a12"></ellipse>
-    </svg>
-    <div class="bee"></div>
+    <video src="/images/teaser-bee.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
   </div>
   <div class="teaser-text">
     <div class="title">Why do untreated colonies matter?</div>
