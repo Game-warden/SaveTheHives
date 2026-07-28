@@ -1617,7 +1617,13 @@
      [data-theme="dark"] — here it's translated to this app's real
      body.dark-mode convention.
      ═══════════════════════════════════════ */
-  #learn-view {
+  /* #about-view shares this rule (v2.11.7) — it's the same full-view
+     pattern as #learn-view (see the ABOUT VIEW comment in app/index.html),
+     but being a separate id it didn't inherit this width cap automatically.
+     Ronnie caught that About's cards were stretching edge-to-edge on
+     desktop while Learn stayed in a narrow centered column — same bug this
+     rule originally fixed for Learn, just not yet applied to About. */
+  #learn-view, #about-view {
     flex: 1;
     display: flex;
     flex-direction: column;
