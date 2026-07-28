@@ -1,13 +1,23 @@
 <!DOCTYPE html>
 <!--
   index.html — SaveTheHives landing page (root).
-  Added v2.11, 2026-07-28. Plain static HTML, no build step, self-contained
-  styles (same convention as privacy.html) — deliberately NOT sharing the
-  app's styles.css so this page stays small and fast to crawl. The actual
-  PWA (map, Validate, Add, Learn) now lives at /app/ — see /app/index.html
-  for its own changelog. This file is outside the service worker's scope
+  Added v2.11, 2026-07-28. Redesigned same day (v2.11.1) into a floating
+  glass panel over a full-page meadow photo background, per Ronnie's
+  direction. Plain static HTML, no build step, self-contained styles (same
+  convention as privacy.html) — deliberately NOT sharing the app's
+  styles.css so this page stays small and fast to crawl. The actual PWA
+  (map, Validate, Add, Learn) now lives at /app/ — see /app/index.html for
+  its own changelog. This file is outside the service worker's scope
   entirely (sw.js is registered from /app/sw.js, so its default scope is
   /app/* and never touches this page) — see CLAUDE.md for the reasoning.
+
+  Background photo technique: a single position:fixed, z-index:-1 layer
+  behind everything (.bg-photo), NOT the CSS `background-attachment: fixed`
+  property. background-attachment:fixed is unreliable on iOS Safari (it
+  silently falls back to scroll behavior on many versions) and this project
+  is mobile-first — a fixed-position element sized to the viewport avoids
+  that bug entirely, loads the image once, and needs no JS. The photo never
+  moves; all page content (the .panel) scrolls independently on top of it.
 
   Content note: the "why it matters" section below is a condensed version
   of GENETIC_GOLDMINE_EXPLAINER.md (Tarpy-approved language, Jul 21 2026).
@@ -19,7 +29,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0f0d07">
+<meta name="theme-color" content="#f5a623">
 <title>SaveTheHives — Help find North America's longest-surviving wild honey bee colonies</title>
 <meta name="description" content="Somewhere near you there's likely a colony of honey bees living wild, with no treatment and no help. SaveTheHives is a citizen-science map to find them, confirm they're still alive, and help researchers understand how they survive.">
 
@@ -45,79 +55,106 @@
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
   body {
     font-family: 'Outfit', system-ui, sans-serif;
-    background: #0f0d07;
-    color: #f0e8d0;
+    background: #cfe6c0;
+    color: #3a2a12;
     line-height: 1.6;
+    min-height: 100vh;
   }
-  .container { max-width: 640px; margin: 0 auto; padding: 0 20px; }
   a { color: inherit; }
+
+  .bg-photo {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: url('/images/meadow-hero.jpg') center 40%/cover no-repeat;
+  }
+  .bg-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(20,20,5,0.08), rgba(20,20,5,0.18));
+  }
+
+  .shell { padding: 28px 16px 40px; display: flex; justify-content: center; }
+
+  .panel {
+    width: 100%;
+    max-width: 560px;
+    background: rgba(253,246,227,0.94);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    box-shadow: 0 16px 40px rgba(20,15,5,0.28);
+    overflow: hidden;
+  }
 
   header {
     display: flex; align-items: center; gap: 10px;
-    padding: 18px 20px;
-    border-bottom: 1px solid rgba(90,80,45,0.35);
+    padding: 22px 26px 4px;
   }
   header img { width: 26px; height: 26px; border-radius: 8px; }
-  header .wordmark { font-weight: 600; font-size: 1rem; }
-  header .tagline { font-size: 0.7rem; color: #9a8d6a; }
+  header .wordmark { font-weight: 600; font-size: 1rem; color: #3a2a12; }
+  header .tagline { font-size: 0.7rem; color: #8a7a55; }
 
-  .hero { text-align: center; padding: 48px 20px 36px; }
+  .hero { text-align: center; padding: 22px 26px 8px; }
   .hero h1 {
-    font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 600;
-    line-height: 1.35; margin-bottom: 16px;
+    font-size: clamp(1.35rem, 5vw, 1.7rem); font-weight: 600;
+    line-height: 1.35; margin-bottom: 14px; color: #3a2a12;
   }
   .hero p {
-    color: #9a8d6a; font-size: 0.98rem; max-width: 480px;
-    margin: 0 auto 26px;
+    color: #6b5c38; font-size: 0.94rem; max-width: 420px;
+    margin: 0 auto 22px;
   }
   .btn {
     display: inline-block; text-decoration: none;
-    font-family: inherit; font-weight: 500; font-size: 0.98rem;
-    border-radius: 999px; padding: 14px 30px; border: none; cursor: pointer;
+    font-family: inherit; font-weight: 500; font-size: 0.96rem;
+    border-radius: 999px; padding: 13px 28px; border: none; cursor: pointer;
   }
   .btn-primary { background: #f5a623; color: #412402; }
-  .btn-outline { background: transparent; color: #f0e8d0; border: 1px solid rgba(90,80,45,0.35); }
+  .btn-outline { background: transparent; color: #3a2a12; border: 1px solid #d9c69a; }
 
   .section-label {
-    font-size: 0.72rem; font-weight: 600; color: #9a8d6a;
+    font-size: 0.7rem; font-weight: 600; color: #8a6a2a;
     text-transform: uppercase; letter-spacing: 0.06em;
-    margin: 0 0 14px;
+    margin: 0 0 12px;
   }
 
-  .ways { padding: 8px 20px 12px; }
+  .ways { padding: 10px 26px 6px; }
   .way-card {
     display: flex; gap: 14px; align-items: flex-start;
-    background: #1e1c12; border: 1px solid rgba(90,80,45,0.35);
-    border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    background: #fffaf0; border: 1px solid #ecdfc0;
+    border-radius: 14px; padding: 15px 16px; margin-bottom: 10px;
     text-decoration: none;
   }
   .way-card .icon {
     width: 22px; height: 22px; flex-shrink: 0; margin-top: 2px;
-    color: #f5a623; font-size: 1.15rem; line-height: 1;
+    font-size: 1.1rem; line-height: 1;
   }
-  .way-card .title { font-weight: 500; font-size: 0.95rem; color: #f0e8d0; margin-bottom: 4px; }
-  .way-card .desc { font-size: 0.84rem; color: #9a8d6a; }
+  .way-card .title { font-weight: 500; font-size: 0.93rem; color: #3a2a12; margin-bottom: 3px; }
+  .way-card .desc { font-size: 0.82rem; color: #8a7a55; }
 
   .teaser {
-    margin: 8px 20px 32px; padding: 14px 16px; border-radius: 12px;
-    background: rgba(245,166,35,0.1); border: 1px solid rgba(90,80,45,0.35);
+    margin: 6px 26px 8px; padding: 14px 16px; border-radius: 12px;
+    background: rgba(245,166,35,0.14); border: 1px solid #ecdfc0;
     display: flex; align-items: center; gap: 14px; text-decoration: none;
   }
   .teaser-scene {
-    width: 52px; height: 52px; border-radius: 10px; background: #171509;
+    width: 48px; height: 48px; border-radius: 10px; background: #fdf6e3;
     position: relative; overflow: hidden; flex-shrink: 0;
+    border: 1px solid #ecdfc0;
   }
   .teaser-scene svg { position: absolute; top: 0; left: 0; }
   @keyframes bee-fly {
     0% { transform: translate(2px,4px) scale(1); opacity:1; }
-    40% { transform: translate(24px,18px) scale(0.9); opacity:1; }
-    55% { transform: translate(35px,27px) scale(0.5); opacity:1; }
-    65% { transform: translate(38px,30px) scale(0.1); opacity:0; }
-    79% { transform: translate(38px,30px) scale(0.1); opacity:0; }
-    80% { transform: translate(35px,27px) scale(0.5); opacity:1; }
-    95% { transform: translate(9px,7px) scale(0.9); opacity:1; }
+    40% { transform: translate(22px,16px) scale(0.9); opacity:1; }
+    55% { transform: translate(32px,25px) scale(0.5); opacity:1; }
+    65% { transform: translate(35px,28px) scale(0.1); opacity:0; }
+    79% { transform: translate(35px,28px) scale(0.1); opacity:0; }
+    80% { transform: translate(32px,25px) scale(0.5); opacity:1; }
+    95% { transform: translate(8px,6px) scale(0.9); opacity:1; }
     100% { transform: translate(2px,4px) scale(1); opacity:1; }
   }
   .bee {
@@ -126,38 +163,50 @@
     background: repeating-linear-gradient(90deg,#2b2107 0,#2b2107 2px,#f5a623 2px,#f5a623 4px);
     animation: bee-fly 4.5s ease-in-out infinite;
   }
-  .teaser-text .title { font-size: 0.86rem; color: #f0e8d0; margin-bottom: 2px; }
-  .teaser-text .sub { font-size: 0.76rem; color: #9a8d6a; }
+  .teaser-text .title { font-size: 0.84rem; color: #3a2a12; margin-bottom: 2px; }
+  .teaser-text .sub { font-size: 0.74rem; color: #8a7a55; }
 
-  #why-it-matters { padding: 8px 20px 40px; border-top: 1px solid rgba(90,80,45,0.35); }
-  #why-it-matters h2 { font-size: 1.15rem; font-weight: 600; margin: 28px 0 14px; }
-  #why-it-matters p { font-size: 0.92rem; color: #d8cfae; margin-bottom: 14px; max-width: 560px; }
+  #why-it-matters { padding: 8px 26px 6px; border-top: 1px solid #ecdfc0; margin-top: 8px; }
+  #why-it-matters h2 { font-size: 1.1rem; font-weight: 600; margin: 22px 0 12px; color: #3a2a12; }
+  #why-it-matters p { font-size: 0.9rem; color: #4a3d24; margin-bottom: 13px; }
   #why-it-matters .quote {
-    font-size: 0.95rem; color: #f0e8d0; font-style: italic;
-    border-left: 2px solid #f5a623; padding-left: 14px; margin: 20px 0;
+    font-size: 0.92rem; color: #3a2a12; font-style: italic;
+    border-left: 2px solid #f5a623; padding-left: 14px; margin: 18px 0;
   }
 
   .map-preview {
-    margin: 0 20px 8px; border-radius: 14px; overflow: hidden;
-    border: 1px solid rgba(90,80,45,0.35); position: relative; height: 130px;
-    background: #1e1c12;
+    margin: 4px 26px 6px; border-radius: 14px; overflow: hidden;
+    border: 1px dashed #d9c07a; position: relative; height: 120px;
+    background: #fdf6e3;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
   }
-  .map-preview svg { display: block; }
-  .map-preview .label {
-    position: absolute; bottom: 8px; left: 12px; font-size: 0.68rem;
-    color: #9a8d6a; background: rgba(15,13,7,0.7); padding: 3px 8px; border-radius: 999px;
+  .map-preview .placeholder-note {
+    font-size: 0.72rem; color: #a1916a; padding: 0 20px;
   }
 
-  .final-cta { text-align: center; padding: 20px 20px 48px; }
+  .final-cta { text-align: center; padding: 18px 26px 26px; }
 
   footer {
-    text-align: center; padding: 20px; font-size: 0.75rem; color: #9a8d6a;
-    border-top: 1px solid rgba(90,80,45,0.35);
+    text-align: center; padding: 18px 26px 24px; font-size: 0.74rem; color: #8a7a55;
+    border-top: 1px solid #ecdfc0;
   }
   footer a { text-decoration: underline; }
+
+  @media (max-width: 420px) {
+    .shell { padding: 18px 10px 28px; }
+    .panel { border-radius: 20px; }
+    header, .hero, .ways, #why-it-matters, .final-cta, footer { padding-left: 18px; padding-right: 18px; }
+    .teaser, .map-preview { margin-left: 18px; margin-right: 18px; }
+  }
 </style>
 </head>
 <body>
+
+<div class="bg-photo"></div>
+
+<div class="shell">
+<div class="panel">
 
 <header>
   <img src="/logo.jpg" alt="">
@@ -167,13 +216,13 @@
   </div>
 </header>
 
-<div class="hero container">
+<div class="hero">
   <h1>Could there be a wild bee colony within a mile of you?</h1>
   <p>1,150+ feral hives logged since 2008 by citizen scientists. Every colony helps researchers understand how bees survive without treatment.</p>
   <a class="btn btn-primary" href="/app/">Explore the map</a>
 </div>
 
-<div class="ways container">
+<div class="ways">
   <div class="section-label">Three ways to help</div>
 
   <a class="way-card" href="/app/">
@@ -201,11 +250,11 @@
   </a>
 </div>
 
-<a class="teaser container" href="#why-it-matters">
+<a class="teaser" href="#why-it-matters">
   <div class="teaser-scene">
-    <svg width="52" height="52" viewBox="0 0 52 52">
-      <rect x="28" y="8" width="15" height="42" rx="6" fill="#3a2a12"></rect>
-      <ellipse cx="38" cy="32" rx="5.5" ry="7.5" fill="#0f0d07"></ellipse>
+    <svg width="48" height="48" viewBox="0 0 48 48">
+      <rect x="25" y="7" width="14" height="38" rx="6" fill="#c8a874"></rect>
+      <ellipse cx="35" cy="29" rx="5" ry="7" fill="#3a2a12"></ellipse>
     </svg>
     <div class="bee"></div>
   </div>
@@ -215,21 +264,11 @@
   </div>
 </a>
 
-<div class="map-preview container">
-  <svg width="100%" height="130" viewBox="0 0 600 130" preserveAspectRatio="xMidYMid slice">
-    <rect width="600" height="130" fill="#171509"></rect>
-    <path d="M0 95 Q150 60 300 90 T600 75" stroke="#252316" stroke-width="16" fill="none"></path>
-    <circle cx="90" cy="60" r="6" fill="#f5a623"></circle>
-    <circle cx="200" cy="88" r="6" fill="#f5a623"></circle>
-    <circle cx="310" cy="50" r="6" fill="#f5a623"></circle>
-    <circle cx="420" cy="78" r="6" fill="#f5a623"></circle>
-    <circle cx="510" cy="45" r="6" fill="#f5a623"></circle>
-    <circle cx="150" cy="40" r="6" fill="#f5a623"></circle>
-  </svg>
-  <div class="label">map preview</div>
+<div class="map-preview">
+  <div class="placeholder-note">map preview placeholder — swap for a real map screenshot</div>
 </div>
 
-<section id="why-it-matters" class="container">
+<section id="why-it-matters">
   <h2>Why non-managed colonies matter</h2>
   <p>Somewhere near you, there's almost certainly a colony of honey bees living wild &mdash; no beekeeper, no treatments, no help. It's been there for years. And it might be one of the most valuable bees in America.</p>
   <p>Since the mid-2000s, U.S. beekeepers have lost roughly 30&ndash;50% of their managed colonies every single year &mdash; to mites, the viruses they spread, pesticides, and habitat loss. Most surviving colonies only make it because beekeepers treat them constantly. Take the treatments away, and most managed bees die within a couple of winters.</p>
@@ -238,13 +277,16 @@
   <p>Nobody currently tracks where these survivor colonies are. Most are found by accident &mdash; by a hiker, a beekeeper chasing a swarm &mdash; and then forgotten. SaveTheHives exists to fix that.</p>
 </section>
 
-<div class="final-cta container">
+<div class="final-cta">
   <a class="btn btn-outline" href="/app/">Explore the map &rarr;</a>
 </div>
 
 <footer>
   SaveTheHives &middot; <a href="/privacy.html" target="_blank">Privacy Policy</a> &middot; <a href="mailto:hello@savethehives.org">Contact</a>
 </footer>
+
+</div>
+</div>
 
 </body>
 </html>
