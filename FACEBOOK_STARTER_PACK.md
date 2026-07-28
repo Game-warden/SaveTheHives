@@ -146,6 +146,17 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   - **Source (verified Jul 22 2026, primary source checked directly — see PLOS's own citation line):** Tarpy DR, Delaney DA, Seeley TD (2015). "Mating Frequencies of Honey Bee Queens (Apis mellifera L.) in a Population of Feral Colonies in the Northeastern United States." PLOS ONE 10(3). https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0118734
   - **Note:** a companion paper by the same three authors — Seeley, Tarpy, Griffin, Carcione, Delaney (2015), *Apidologie* 46:654–666, "A survivor population of wild colonies of European honeybees..." — is already referenced in `KEY_PEOPLE_CONTACTS.md`. Good candidate for a follow-up post a few weeks after this one; don't use both back-to-back.
 
+- **Ready post — "The whole toolkit fits in a box" (added Jul 28 2026):**
+  - **Post text:**
+    > This little wooden box is the entire toolkit for beelining. Two compartments, a scrap of honeycomb, and a lid. Catch a foraging bee, let her fill up on syrup inside, then open the lid and watch which way she flies home — dead straight, every time.
+    >
+    > That's it. No expensive gear, no bees to own. Just patience and a compass. Full how-to in the Learn tab: savethehives.org/?tab=learn 🐝
+  - **Image:** a real photo of a bee-lining box in a wildflower field (Ronnie has this saved locally — not stored in the repo, unlike other post images, since it isn't used anywhere in the app itself)
+  - **Alt text:** "A wooden bee-lining box with glass viewing panels and an engraved honey bee, sitting on a wooden fence post in a wildflower field."
+  - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
+  - **Suggested slot:** Wednesday (practical/recruiting) — next open Wednesday slot per `FACEBOOK_POST_LOG.md` is Aug 12 2026
+  - **Note:** deliberately a real photo rather than the app's watercolor illustration set (`images/learn-bee-box.jpg`, already used/reserved for the Aug 5 "Not every nest is a honey bee colony" post) — a tangible, real-world object works well for this specific "here's the actual gear" angle, and keeps the two bee-box posts visually distinct from each other.
+
 - **Meet our scientific advisor** (new, added Jul 21 2026) — once Dr. Tarpy sends his bio synopsis (see `KEY_PEOPLE_CONTACTS.md`), a post introducing him lends real credibility and is a natural press-adjacent piece. Hold until the synopsis arrives — don't publish one written on his behalf.
 
 **Strategic note (Jul 21 2026):** Dr. Tarpy's read at the first advisor meeting was that Validate should be the project's central focus over recruiting new hive submissions — re-verifying the 1,150+ legacy records is more scientifically valuable right now than growing the map further. This reinforces `CONTENT_LIBRARY_IDEAS.md` item #15 ("Elevate Validate as the Primary On-Ramp"), which was already scoped but unbuilt. Worth weighting future post content (and eventually the on-ramp UI itself) more toward Validate messaging than the launch sequence currently does — Post 3 already covers it, but ongoing content should lean this direction too.
