@@ -1285,7 +1285,7 @@ function setTab(tab) {
   const idx = tabs.indexOf(tab);
   if (idx >= 0) document.querySelectorAll('.tab-btn')[idx]?.classList.add('active');
 
-  if (tab === 'pathfinder' || tab === 'learn') hideSearchUI();
+  if (tab === 'pathfinder' || tab === 'learn' || tab === 'about') hideSearchUI();
   else showSearchUI();
 
   // Bottom nav floats over the map now (v2.8), which means it would
@@ -1295,18 +1295,31 @@ function setTab(tab) {
   const bottomTabs = document.getElementById('bottom-tabs');
   if (bottomTabs) bottomTabs.style.display = (tab === 'pathfinder') ? 'none' : '';
 
-  // Learn is a full-screen replacement for the map (not an overlay like
-  // Pathfinder), so hide/show #map-container alongside it. Validate
-  // stays on the map itself, same as the 'map' tab.
+  // Learn and About are both full-screen replacements for the map (not
+  // overlays like Pathfinder), so hide/show #map-container alongside
+  // whichever one is active. Validate stays on the map itself, same as
+  // the 'map' tab. (v2.11.6: About converted from a .modal-overlay sheet
+  // to a full view, same pattern as Learn — see #about-view in
+  // app/index.html. This is what keeps the persistent header and floating
+  // bottom-nav pill crisp/undimmed for About, matching Map and Learn —
+  // both used to sit under the modal backdrop's z-index/blur.)
   const mapEl = document.getElementById('map-container');
   const learnEl = document.getElementById('learn-view');
+  const aboutEl = document.getElementById('about-view');
   if (tab === 'learn') {
     if (mapEl) mapEl.style.display = 'none';
     if (learnEl) learnEl.style.display = 'flex';
+    if (aboutEl) aboutEl.style.display = 'none';
     openLearnHub();
+  } else if (tab === 'about') {
+    if (mapEl) mapEl.style.display = 'none';
+    if (learnEl) learnEl.style.display = 'none';
+    if (aboutEl) aboutEl.style.display = 'flex';
+    showAboutPanel('hub'); loadIdeas(); updateInstallUI();
   } else {
     if (mapEl) mapEl.style.display = '';
     if (learnEl) learnEl.style.display = 'none';
+    if (aboutEl) aboutEl.style.display = 'none';
     if ((tab === 'map' || tab === 'validate') && map) setTimeout(() => map.invalidateSize(), 50);
   }
 
@@ -1314,16 +1327,17 @@ function setTab(tab) {
   else if (tab === 'validate') openValidate();
   else if (tab === 'pathfinder') openPathfinder();
   else if (tab === 'list') openRecords();
-  else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); showAboutPanel('hub'); loadIdeas(); updateInstallUI(); }
 }
 
 // ═══════════════════════════════════════
-// ABOUT HUB — grouped menu + sub-panels (v2.11.4). Swaps visibility
-// between #about-hub and one #about-panel-<name> at a time inside the same
-// modal sheet — no separate modals, just a lightweight in-place nav so the
-// hub's scroll position/state doesn't get lost. Always resets to 'hub' when
-// the About modal opens (see setTab() above) so closing mid-panel and
-// reopening doesn't strand the visitor on a sub-panel with no context.
+// ABOUT HUB — grouped menu + sub-panels (v2.11.4, converted to a full view
+// in v2.11.6 — see #about-view in app/index.html). Swaps visibility between
+// #about-hub and one #about-panel-<name> at a time inside the same
+// .learn-screen scroll container — no separate modals/views, just a
+// lightweight in-place nav so the hub's scroll position/state doesn't get
+// lost. Always resets to 'hub' when the About tab opens (see setTab()
+// above) so leaving mid-panel and coming back doesn't strand the visitor on
+// a sub-panel with no context.
 // ═══════════════════════════════════════
 function showAboutPanel(name) {
   const hub = document.getElementById('about-hub');
@@ -1336,7 +1350,7 @@ function showAboutPanel(name) {
     const target = document.getElementById('about-panel-' + name);
     if (target) target.style.display = '';
   }
-  const sheet = document.querySelector('#about-modal .modal-sheet');
+  const sheet = document.querySelector('#about-view .learn-screen');
   if (sheet) sheet.scrollTop = 0;
 }
 
@@ -1371,10 +1385,10 @@ function initDarkMode() {
   toggleDarkMode(on);
 }
 
+// About is a full view now (v2.11.6), not a modal — "closing" it just
+// means switching back to the Map tab, same as leaving Learn.
 function closeAboutModal() {
-  document.getElementById('about-modal').classList.remove('open');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+  setTab('map');
 }
 
 // ═══════════════════════════════════════
