@@ -165,7 +165,68 @@ function maybeShowOnramp() {
   // for) would otherwise get this generic overlay sitting on top of the
   // map, burying the specific pin's popup that flyToHive() just opened.
   if (new URLSearchParams(location.search).has('hive')) return;
+  // Skip for a ?onboard=<intent> arrival (v2.11.5) — this visitor already
+  // saw the same "could there be a wild bee colony..." hook on the landing
+  // page a moment ago and picked a specific card; repeating it here would
+  // just be the same pitch twice. maybeShowOnboardCallout() (below) handles
+  // this arrival instead, with something more useful: pointing at the exact
+  // nav tab that card promised.
+  if (new URLSearchParams(location.search).has('onboard')) return;
   overlay.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════
+// ONBOARD CALLOUT (v2.11.5) — arriving from a landing-page "way" card
+// (?onboard=validate|add|learn). The landing page's persuasive card titles
+// ("Validate a colony") don't match the app's short bottom-nav labels
+// ("Check In"), and there was previously no connection at all between the
+// promise on the landing page and where to actually click once you land on
+// the map. This points a small callout at the exact tab, briefly rings it,
+// and gets out of the way — see index.html's v2.11.5 comment and
+// maybeShowOnramp() above for why the generic overlay is skipped instead.
+// ═══════════════════════════════════════
+const ONBOARD_NAV = {
+  validate: { id: 'nav-btn-validate', text: 'Tap <strong>Check In</strong> to validate an existing hive' },
+  add:      { id: 'nav-btn-add',      text: 'Tap <strong>Add</strong> to report a new hive' },
+  learn:    { id: 'nav-btn-learn',    text: 'Tap <strong>Learn</strong> to pick up beelining' },
+};
+
+function maybeShowOnboardCallout() {
+  const onboard = new URLSearchParams(location.search).get('onboard');
+  const target = ONBOARD_NAV[onboard];
+  if (!target) return;
+
+  const btn = document.getElementById(target.id);
+  if (!btn) return;
+
+  btn.classList.add('nav-highlight');
+  setTimeout(() => btn.classList.remove('nav-highlight'), 4000);
+
+  const bubble = document.createElement('div');
+  bubble.className = 'onboard-callout';
+  bubble.innerHTML = target.text;
+  document.body.appendChild(bubble);
+
+  const position = () => {
+    const rect = btn.getBoundingClientRect();
+    bubble.style.left = (rect.left + rect.width / 2) + 'px';
+    bubble.style.top = (rect.top - 12) + 'px';
+  };
+  position();
+  window.addEventListener('resize', position);
+
+  let dismissed = false;
+  const dismiss = () => {
+    if (dismissed) return;
+    dismissed = true;
+    bubble.remove();
+    window.removeEventListener('resize', position);
+  };
+  setTimeout(dismiss, 4000);
+  // Any tap anywhere dismisses early, so it never lingers in the way of
+  // whatever the visitor actually wants to do next. Delayed slightly so
+  // the tap that landed here (if any) doesn't instantly dismiss it.
+  setTimeout(() => document.addEventListener('click', dismiss, { once: true }), 300);
 }
 function dismissOnramp() {
   localStorage.setItem(ONRAMP_SEEN_KEY, '1');
@@ -202,6 +263,7 @@ function toggleMapSearch(open) {
 async function init() {
   initDarkMode();
   maybeShowOnramp();
+  maybeShowOnboardCallout();
 
   // Init map — start at US overview, then fly to user location
   map = L.map('map', {
@@ -1252,7 +1314,30 @@ function setTab(tab) {
   else if (tab === 'validate') openValidate();
   else if (tab === 'pathfinder') openPathfinder();
   else if (tab === 'list') openRecords();
-  else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); loadIdeas(); updateInstallUI(); }
+  else if (tab === 'about') { document.getElementById('about-modal').classList.add('open'); showAboutPanel('hub'); loadIdeas(); updateInstallUI(); }
+}
+
+// ═══════════════════════════════════════
+// ABOUT HUB — grouped menu + sub-panels (v2.11.4). Swaps visibility
+// between #about-hub and one #about-panel-<name> at a time inside the same
+// modal sheet — no separate modals, just a lightweight in-place nav so the
+// hub's scroll position/state doesn't get lost. Always resets to 'hub' when
+// the About modal opens (see setTab() above) so closing mid-panel and
+// reopening doesn't strand the visitor on a sub-panel with no context.
+// ═══════════════════════════════════════
+function showAboutPanel(name) {
+  const hub = document.getElementById('about-hub');
+  if (!hub) return;
+  document.querySelectorAll('.about-subpanel').forEach(p => { p.style.display = 'none'; });
+  if (name === 'hub') {
+    hub.style.display = '';
+  } else {
+    hub.style.display = 'none';
+    const target = document.getElementById('about-panel-' + name);
+    if (target) target.style.display = '';
+  }
+  const sheet = document.querySelector('#about-modal .modal-sheet');
+  if (sheet) sheet.scrollTop = 0;
 }
 
 function closeModal(e, id) {
@@ -1515,10 +1600,20 @@ function isIOS() {
 
 function updateInstallUI() {
   const box = document.getElementById('install-box');
+  const hubRow = document.getElementById('about-install-row');
   if (!box) return;
   if (isStandalone()) {
+    // Already installed — nothing left to do here, so the hub menu row
+    // itself is hidden rather than left pointing at a panel that just says
+    // "you already did this." If someone somehow reaches the panel anyway
+    // (e.g. mid-transition), it still shows a clear message rather than
+    // being blank.
+    if (hubRow) hubRow.style.display = 'none';
     box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);">✓ Installed — you\'re using the installed app.</div>';
-  } else if (deferredInstallPrompt) {
+    return;
+  }
+  if (hubRow) hubRow.style.display = '';
+  if (deferredInstallPrompt) {
     box.innerHTML = '<button class="btn btn-outline" style="width:100%;" onclick="promptInstall()">📲 Install SaveTheHives</button>';
   } else if (isIOS()) {
     box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">📲 <strong style="color:var(--text);">Install for offline field use:</strong> tap the Share icon in Safari\'s toolbar, then "Add to Home Screen."</div>';

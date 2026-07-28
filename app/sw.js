@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.11.1'; // Bumped for the app-header/footer version badge text update (v2.10 -> v2.11, matching the app-move restructure this file's scope comment already describes). App moved off root to /app/ — this file now lives at /app/sw.js so its default scope is /app/*, meaning it never controls the new root landing page at all. SHELL_ASSETS below updated to match the new /app/ paths; shared root-level assets (styles.css, manifest.json, icons, logo.jpg) are unchanged since those files did not move.
+const CACHE_VERSION = 'v2.11.2'; // Bumped for the About panel reorg (grouped hub + sub-panels) and the ?onboard= nav-pointer callout — touches app/index.html, app.js, and styles.css. Previous bump (v2.11.1) was the app-header/footer version badge text update (v2.10 -> v2.11). App moved off root to /app/ — this file now lives at /app/sw.js so its default scope is /app/*, meaning it never controls the root landing page at all. SHELL_ASSETS below updated to match the new /app/ paths; shared root-level assets (styles.css, manifest.json, icons, logo.jpg) are unchanged since those files did not move.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

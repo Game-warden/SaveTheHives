@@ -583,7 +583,7 @@
     </svg>
     Map
   </button>
-  <button class="tab-btn" onclick="setTab('add')">
+  <button class="tab-btn" id="nav-btn-add" onclick="setTab('add')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
     </svg>
@@ -592,7 +592,7 @@
   <!-- Validate (v2.9) — reframes participation around confirming an
        existing hive instead of only logging a new one; see
        openValidate() in app.js. -->
-  <button class="tab-btn" onclick="setTab('validate')">
+  <button class="tab-btn" id="nav-btn-validate" onclick="setTab('validate')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
     </svg>
@@ -610,7 +610,7 @@
   <!-- Learn: reuses the hidden Records nav slot (Records not in active use;
        this keeps Pathfinder's ?pf=1 field-test wiring untouched). Records
        stays reachable via setTab('list') if needed later. -->
-  <button class="tab-btn" onclick="setTab('learn')">
+  <button class="tab-btn" id="nav-btn-learn" onclick="setTab('learn')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="9"/><polygon points="12,7 14.5,12 12,17 9.5,12" fill="currentColor" stroke="none"/>
     </svg>
@@ -740,86 +740,139 @@
   </div>
 </div>
 
-<!-- ABOUT MODAL -->
+<!-- ABOUT MODAL — reorganized v2.11.4 (2026-07-28) into a hub + sub-panel
+     structure at Ronnie's request. Was one long scroll mixing account
+     settings, mission copy, a promo banner, share/install actions, a
+     reference legend, a roadmap teaser, the ideas/voting widget, contribute
+     instructions, and research/legal info — genuinely unrelated content
+     competing for the same scroll. Now: account status + the "New: Learn
+     to beeline" promo stay pinned at the top of the hub (both short, both
+     wanted on every open); everything else is a grouped menu row that
+     opens its own #about-panel-* sub-panel via showAboutPanel() (app.js).
+     Existing element IDs (install-box, ideas-list, ideas-signin-hint,
+     legend classes) are unchanged — only their container moved — so no
+     other JS needed to change. -->
 <div class="modal-overlay" id="about-modal" onclick="closeModal(event,'about-modal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title"><img src="/logo.jpg" alt="" style="width:22px;height:22px;border-radius:var(--radius-sm);vertical-align:-4px;margin-right:6px;">About SaveTheHives</div>
-    <div id="about-auth-row" style="margin:0 0 4px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-      <span id="about-auth-label" style="color:var(--text-muted);">Not signed in</span>
-      <button id="about-auth-btn" class="btn btn-outline" style="padding:6px 14px;font-size:0.82rem;" onclick="handleAuth();closeAboutModal();">Sign In</button>
-    </div>
-    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px;">Needed to log a hive, check in on one, or vote on ideas — a one-time email link, no password.</div>
 
-    <!-- Dark/Light mode toggle -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);margin-bottom:16px;">
-      <div>
-        <div id="dark-mode-label" style="font-weight:600;font-size:0.9rem;color:var(--text);">🌙 Dark Mode</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Switch between light and dark theme</div>
+    <!-- ═══ HUB (default view) ═══ -->
+    <div id="about-hub">
+      <div class="modal-title"><img src="/logo.jpg" alt="" style="width:22px;height:22px;border-radius:var(--radius-sm);vertical-align:-4px;margin-right:6px;">About SaveTheHives</div>
+
+      <div id="about-auth-row" style="margin:0 0 4px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);font-size:0.88rem;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <span id="about-auth-label" style="color:var(--text-muted);">Not signed in</span>
+        <button id="about-auth-btn" class="btn btn-outline" style="padding:6px 14px;font-size:0.82rem;" onclick="handleAuth();closeAboutModal();">Sign In</button>
       </div>
-      <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
-        <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)"
-          style="opacity:0;width:0;height:0;position:absolute;">
-        <span id="dark-mode-track" style="
-          position:absolute;inset:0;border-radius:999px;
-          background:#c8b89a;transition:background 0.2s;
-        "></span>
-        <span id="dark-mode-thumb" style="
-          position:absolute;top:3px;left:3px;width:20px;height:20px;
-          border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);
-          transition:transform 0.2s, background 0.2s;
-        "></span>
-      </label>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:16px;">Needed to log a hive, check in on one, or vote on ideas — a one-time email link, no password.</div>
+
+      <!-- Cross-link to the Learn tab (brief §1) -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(245,166,35,0.12);border:1px solid var(--border);margin-bottom:20px;cursor:pointer;"
+        onclick="closeAboutModal();setTab('learn');">
+        <span style="font-size:0.86rem;font-weight:600;color:var(--text);">🧭 New: Learn to beeline</span>
+        <span style="color:var(--honey);font-weight:700;font-size:0.9rem;">→</span>
+      </div>
+
+      <div class="about-group-label">App</div>
+      <div class="about-menu">
+        <div class="about-menu-row" onclick="showAboutPanel('settings')"><span>⚙️ Settings</span><span class="about-chevron">›</span></div>
+        <div class="about-menu-row" onclick="showAboutPanel('share')"><span>↗ Share SaveTheHives</span><span class="about-chevron">›</span></div>
+        <div class="about-menu-row" id="about-install-row" onclick="showAboutPanel('install')"><span>📲 Install app</span><span class="about-chevron">›</span></div>
+      </div>
+
+      <div class="about-group-label">Map reference</div>
+      <div class="about-menu">
+        <div class="about-menu-row" onclick="showAboutPanel('legend')"><span>📍 Pin legend</span><span class="about-chevron">›</span></div>
+      </div>
+
+      <div class="about-group-label">Community</div>
+      <div class="about-menu">
+        <div class="about-menu-row" onclick="showAboutPanel('ideas')"><span>💡 Ideas &amp; voting</span><span class="about-chevron">›</span></div>
+        <div class="about-menu-row" onclick="showAboutPanel('contribute')"><span>🐝 How to contribute</span><span class="about-chevron">›</span></div>
+      </div>
+
+      <div class="about-group-label">About the project</div>
+      <div class="about-menu">
+        <div class="about-menu-row" onclick="showAboutPanel('project')"><span>ℹ️ Mission &amp; research</span><span class="about-chevron">›</span></div>
+      </div>
+
+      <div style="margin:20px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
+        SaveTheHives v2.11 · <a href="/privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
+      </div>
     </div>
 
-    <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:16px;">
-      SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America —
-      <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing.
-      Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors; feral bees
-      that survive 3+ winters without treatment are what this project calls <strong style="color:var(--honey)">Genetic Goldmines</strong> —
-      valuable breeding stock for disease-resistant bee populations. Check-ins are how survival gets tracked today; automatic badges are coming soon.
-    </p>
-
-    <!-- Cross-link to the new Learn tab (brief §1) -->
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(245,166,35,0.12);border:1px solid var(--border);margin-bottom:16px;cursor:pointer;"
-      onclick="closeAboutModal();setTab('learn');">
-      <span style="font-size:0.86rem;font-weight:600;color:var(--text);">🧭 New: Learn to beeline</span>
-      <span style="color:var(--honey);font-weight:700;font-size:0.9rem;">→</span>
+    <!-- ═══ SETTINGS ═══ -->
+    <div id="about-panel-settings" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Settings</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;">
+        <div>
+          <div id="dark-mode-label" style="font-weight:600;font-size:0.9rem;color:var(--text);">🌙 Dark Mode</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">Switch between light and dark theme</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
+          <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode(this.checked)"
+            style="opacity:0;width:0;height:0;position:absolute;">
+          <span id="dark-mode-track" style="
+            position:absolute;inset:0;border-radius:999px;
+            background:#c8b89a;transition:background 0.2s;
+          "></span>
+          <span id="dark-mode-thumb" style="
+            position:absolute;top:3px;left:3px;width:20px;height:20px;
+            border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);
+            transition:transform 0.2s, background 0.2s;
+          "></span>
+        </label>
+      </div>
     </div>
 
-    <!-- Share (v2.9.2) — Web Share API with clipboard fallback, see shareApp() in app.js -->
-    <button class="btn btn-outline" style="width:100%;margin-bottom:16px;" onclick="shareApp()">
-      ↗ Share SaveTheHives
-    </button>
-
-    <!-- Install nudge (v2.9.2) — platform-aware, populated by updateInstallUI()
-         in app.js when this modal opens. In-modal rather than a new floating
-         overlay on the map, deliberately — see the comment above
-         updateInstallUI() for why. -->
-    <div id="install-box" style="padding:12px 14px;border-radius:var(--radius-sm);background:var(--surface2);border:1px solid var(--border);margin-bottom:16px;"></div>
-
-    <div class="legend-box">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Pin Legend</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-dead)"></div> Dead Tree — Colony in snag or fallen timber</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-beehive)"></div> Beehive — Managed langstroth/top-bar box</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Structure — Colony in a wall, building, or other structure</div>
-      <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
+    <!-- ═══ SHARE ═══ -->
+    <div id="about-panel-share" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Share SaveTheHives</span></div>
+      <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">Invite someone to the whole project — sends a link to the app with a short pitch about what SaveTheHives does.</p>
+      <!-- v2.9.2 — Web Share API with clipboard fallback, see shareApp() in app.js -->
+      <button class="btn btn-outline" style="width:100%;margin-bottom:20px;" onclick="shareApp()">
+        ↗ Share SaveTheHives
+      </button>
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <div style="font-size:0.78rem;font-weight:700;color:var(--honey);margin-bottom:6px;">Looking to share one hive instead?</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">That's a separate button — open any pin on the map and tap <strong style="color:var(--text);">Share This Hive</strong>. It sends a link straight to that exact pin instead of the general app.</div>
+      </div>
     </div>
-    <p style="color:var(--text-muted);font-size:0.75rem;margin-top:16px;text-align:center;">
-      Coming soon: Genetic Goldmine badges · DCA Mapping · Resilience Heatmaps · Guardian Network
-    </p>
 
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">💡 Ideas &amp; Voting</div>
+    <!-- ═══ INSTALL ═══ -->
+    <div id="about-panel-install" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Install app</span></div>
+      <!-- Platform-aware, populated by updateInstallUI() in app.js. The
+           #about-install-row in the hub above is hidden entirely once
+           already installed (see updateInstallUI()) — no reason to keep
+           a menu row pointing at "you already did this." -->
+      <div id="install-box"></div>
+    </div>
+
+    <!-- ═══ PIN LEGEND ═══ -->
+    <div id="about-panel-legend" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Pin legend</span></div>
+      <div class="legend-box" style="border:none;padding:0;background:none;">
+        <div class="legend-row"><div class="legend-dot" style="background:var(--pin-live)"></div> Live Tree — Active feral colony in living wood</div>
+        <div class="legend-row"><div class="legend-dot" style="background:var(--pin-dead)"></div> Dead Tree — Colony in snag or fallen timber</div>
+        <div class="legend-row"><div class="legend-dot" style="background:var(--pin-beehive)"></div> Beehive — Managed langstroth/top-bar box</div>
+        <div class="legend-row"><div class="legend-dot" style="background:var(--pin-building)"></div> Structure — Colony in a wall, building, or other structure</div>
+        <div class="legend-row"><div class="legend-dot" style="background:var(--pin-ground)"></div> Ground — Subterranean or ground-level nest</div>
+      </div>
+    </div>
+
+    <!-- ═══ IDEAS & VOTING ═══ -->
+    <div id="about-panel-ideas" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Ideas &amp; voting</span></div>
       <div id="ideas-list" style="display:flex;flex-direction:column;gap:8px;">
         <div style="font-size:0.82rem;color:var(--text-muted);">Loading ideas…</div>
       </div>
       <div id="ideas-signin-hint" style="display:none;font-size:0.78rem;color:var(--text-muted);margin-top:8px;">Sign in to vote.</div>
     </div>
 
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">How to Contribute</div>
+    <!-- ═══ HOW TO CONTRIBUTE ═══ -->
+    <div id="about-panel-contribute" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">How to contribute</span></div>
       <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
         <p style="margin-bottom:8px;">🐝 <strong>Log a hive</strong> — Tap <em>Add</em>, center the map crosshair on the hive, fill in what you know, and submit. Sign-in required to prevent spam.</p>
         <p style="margin-bottom:8px;">✅ <strong>Check in on existing hives</strong> — Tap any pin, then tap <em>Share This Hive</em> to send yourself the coordinates for directions. Once you're there, look up and around for bees, then tap <em>Check In</em> to report whether it's still active, gone, or uncertain. Every check-in helps track colony survival over time. Tap <em>Check In</em> in the bottom menu to jump straight to hives near you that need it.</p>
@@ -827,21 +880,31 @@
       </div>
     </div>
 
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:16px;">
-      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Data & Research</div>
-      <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
-        <p style="margin-bottom:8px;">Data is crowdsourced, and accuracy improves the more a hive gets checked in on. Legacy records span 2008–2017; accuracy varies. New submissions are timestamped and linked to the observer's account.</p>
-        <p style="margin-bottom:8px;">Researchers interested in data access or collaboration: <a href="mailto:hello@savethehives.org" style="color:var(--honey);">hello@savethehives.org</a></p>
-        <p style="font-style:italic;color:var(--text-muted);">Scientific framing reviewed and approved by Dr. David Tarpy, NC State University Scholar Professor &amp; Extension Apiculturist.</p>
+    <!-- ═══ MISSION & RESEARCH ═══ -->
+    <div id="about-panel-project" class="about-subpanel" style="display:none;">
+      <div class="about-panel-header" onclick="showAboutPanel('hub')"><span class="about-back-arrow">←</span> <span class="about-panel-title">Mission &amp; research</span></div>
+      <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:16px;">
+        SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America —
+        <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing.
+        Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors; feral bees
+        that survive 3+ winters without treatment are what this project calls <strong style="color:var(--honey)">Genetic Goldmines</strong> —
+        valuable breeding stock for disease-resistant bee populations. Check-ins are how survival gets tracked today; automatic badges are coming soon.
+      </p>
+      <p style="color:var(--text-muted);font-size:0.75rem;margin-bottom:16px;">
+        Coming soon: Genetic Goldmine badges · DCA Mapping · Resilience Heatmaps · Guardian Network
+      </p>
+      <div style="border-top:1px solid var(--border);padding-top:16px;margin-bottom:16px;">
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Data &amp; Research</div>
+        <div style="font-size:0.88rem;color:var(--text);line-height:1.6;">
+          <p style="margin-bottom:8px;">Data is crowdsourced, and accuracy improves the more a hive gets checked in on. Legacy records span 2008–2017; accuracy varies. New submissions are timestamped and linked to the observer's account.</p>
+          <p style="margin-bottom:8px;">Researchers interested in data access or collaboration: <a href="mailto:hello@savethehives.org" style="color:var(--honey);">hello@savethehives.org</a></p>
+          <p style="font-style:italic;color:var(--text-muted);">Scientific framing reviewed and approved by Dr. David Tarpy, NC State University Scholar Professor &amp; Extension Apiculturist.</p>
+        </div>
       </div>
+      <a href="/#why-it-matters" style="display:block;text-align:center;font-size:0.85rem;font-weight:600;color:var(--honey);text-decoration:none;border-top:1px solid var(--border);padding-top:16px;">Read the full story →</a>
     </div>
 
-    <div style="margin:16px 0 0;border-top:1px solid var(--border);padding-top:14px;font-size:0.78rem;color:var(--text-muted);text-align:center;">
-      SaveTheHives v2.11 · <a href="/privacy.html" target="_blank" style="color:var(--text-muted);text-decoration:underline;">Privacy Policy</a> · <a href="mailto:hello@savethehives.org" style="color:var(--text-muted);text-decoration:underline;">Contact</a>
-    </div>
-
-    <!-- Sticky footer (v2.8.4) — always reachable without scrolling all
-         the way down through Mission/Contribute/Data/Ideas. -->
+    <!-- Sticky footer (v2.8.4) — always reachable without scrolling. -->
     <div class="modal-sticky-footer">
       <button class="btn" style="width:100%;padding:12px;font-size:1rem;" onclick="closeAboutModal()">
         ← Back to Map

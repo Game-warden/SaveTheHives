@@ -34,6 +34,16 @@
   colonies" on its first prose use and "researcher" in the closing quote
   (was "lab" — swapped to match the researcher-facing framing, not just a
   formatting change).
+
+  v2.11.5 (2026-07-28, same day): each "Three ways to help" card now shows
+  a small pill naming the exact app nav tab it maps to ("Check In tab" /
+  "Add tab" / "Learn tab") — the app's bottom nav uses short single-word
+  labels that don't match this page's more persuasive card titles, and
+  there was no way to know which tab a card would land you on. Card hrefs
+  also now carry ?onboard=validate|add|learn — read by app.js on load to
+  skip the app's own generic first-visit overlay (which duplicated this
+  page's hook) and instead show a small callout pointing at the matching
+  nav tab. See app/app.js for the onboard-param handling.
 -->
 <html lang="en">
 <head>
@@ -145,6 +155,11 @@
   }
   .way-card .title { font-weight: 500; font-size: 0.93rem; color: #3a2a12; margin-bottom: 3px; }
   .way-card .desc { font-size: 0.82rem; color: #8a7a55; }
+  .way-tag {
+    display: inline-block; margin-left: 6px; font-size: 0.65rem; font-weight: 500;
+    color: #8a6a2a; background: rgba(245,166,35,0.16); border-radius: 999px;
+    padding: 2px 8px; vertical-align: middle;
+  }
 
   .teaser {
     margin: 6px 26px 8px; padding: 14px 16px; border-radius: 12px;
@@ -248,26 +263,26 @@
 <div class="ways">
   <div class="section-label">Three ways to help</div>
 
-  <a class="way-card" href="/app/">
+  <a class="way-card" href="/app/?onboard=validate">
     <span class="icon">&#9989;</span>
     <div>
-      <div class="title">Validate a colony</div>
+      <div class="title">Validate a colony <span class="way-tag">Check In tab</span></div>
       <div class="desc">Confirm one we already know about. Takes under a minute.</div>
     </div>
   </a>
 
-  <a class="way-card" href="/app/">
+  <a class="way-card" href="/app/?onboard=add">
     <span class="icon">&#128205;</span>
     <div>
-      <div class="title">Report a new colony</div>
+      <div class="title">Report a new colony <span class="way-tag">Add tab</span></div>
       <div class="desc">Found a wild hive? Log it in a few taps.</div>
     </div>
   </a>
 
-  <a class="way-card" href="/app/">
+  <a class="way-card" href="/app/?onboard=learn">
     <span class="icon">&#129517;</span>
     <div>
-      <div class="title">Learn to find one</div>
+      <div class="title">Learn to find one <span class="way-tag">Learn tab</span></div>
       <div class="desc">No experience needed. Learn beelining, the 300-year-old way to track bees home.</div>
     </div>
   </a>

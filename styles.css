@@ -478,6 +478,39 @@
   .tab-btn:hover { color: var(--honey); background: none; }
   .tab-btn:active { transform: scale(0.93); }
 
+  /* ── ONBOARD CALLOUT (v2.11.5) — points at a bottom-nav tab when arriving
+     from a landing-page card via ?onboard=. See maybeShowOnboardCallout()
+     in app.js. ── */
+  .nav-highlight {
+    border-radius: 999px;
+    box-shadow: 0 0 0 3px var(--honey);
+    transition: box-shadow 0.3s;
+  }
+  .onboard-callout {
+    position: fixed;
+    transform: translate(-50%, -100%);
+    background: var(--text);
+    color: var(--bg);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    max-width: 200px;
+    text-align: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    z-index: 3000;
+    pointer-events: none;
+  }
+  .onboard-callout::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 12px; height: 12px;
+    background: var(--text);
+  }
+
   /* ── MODAL / PANEL — glassmorphism sheet ── */
   .modal-overlay {
     position: fixed;
@@ -545,6 +578,46 @@
     font-weight: 700;
     letter-spacing: -0.2px;
   }
+
+  /* ── ABOUT HUB — grouped menu (v2.11.4) ── */
+  .about-group-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 8px;
+  }
+  .about-menu {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .about-menu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 14px;
+    min-height: 44px;
+    background: var(--surface2);
+    font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .about-menu-row + .about-menu-row { border-top: 1px solid var(--border); }
+  .about-menu-row:active { background: rgba(245,166,35,0.1); }
+  .about-chevron { color: var(--text-muted); font-size: 1.1rem; }
+  .about-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+  .about-back-arrow { color: var(--text-muted); font-weight: 400; }
+  .about-panel-title { font-weight: 700; color: var(--text); }
 
   /* ── FORM ── */
   .form-group {
