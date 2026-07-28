@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
+    navigator.serviceWorker.register('/app/sw.js').catch(err => {
       console.warn('Service worker registration failed (app still works fully online):', err);
     });
   });
@@ -2235,24 +2235,24 @@ function lvMiniBee(x, y, rotate) {
 
 function lvDiagramSVG(id) {
   if (id === 'hero') {
-    return `<img src="images/learn-hero.jpg" alt="A honeybee flying a dead-straight line from a wildflower meadow to a distant oak with a wild colony inside." loading="lazy">`;
+    return `<img src="/images/learn-hero.jpg" alt="A honeybee flying a dead-straight line from a wildflower meadow to a distant oak with a wild colony inside." loading="lazy">`;
   }
   if (id === 'triangulation') {
-    return `<img src="images/learn-triangulation.jpg" alt="Two observer stations, A and B, each sighting a straight bearing line; the lines cross at the same wild-colony tree." loading="lazy">`;
+    return `<img src="/images/learn-triangulation.jpg" alt="Two observer stations, A and B, each sighting a straight bearing line; the lines cross at the same wild-colony tree." loading="lazy">`;
   }
   if (id === 'terrain-chooser') {
     return `<div class="lv-terrain-grid">
-      <div class="lv-terrain-cell"><img src="images/learn-terrain-a.jpg" alt="Open hayfield, method A: follow and leapfrog." loading="lazy"></div>
-      <div class="lv-terrain-cell"><img src="images/learn-terrain-b.jpg" alt="Blocked by a winding river, method B: two-station triangulation." loading="lazy"></div>
-      <div class="lv-terrain-cell"><img src="images/learn-terrain-c.jpg" alt="Single vantage hilltop, method C: timed distance and direction." loading="lazy"></div>
-      <div class="lv-terrain-cell"><img src="images/learn-terrain-woods.jpg" alt="Dense woods, combine methods B then A." loading="lazy"></div>
+      <div class="lv-terrain-cell"><img src="/images/learn-terrain-a.jpg" alt="Open hayfield, method A: follow and leapfrog." loading="lazy"></div>
+      <div class="lv-terrain-cell"><img src="/images/learn-terrain-b.jpg" alt="Blocked by a winding river, method B: two-station triangulation." loading="lazy"></div>
+      <div class="lv-terrain-cell"><img src="/images/learn-terrain-c.jpg" alt="Single vantage hilltop, method C: timed distance and direction." loading="lazy"></div>
+      <div class="lv-terrain-cell"><img src="/images/learn-terrain-woods.jpg" alt="Dense woods, combine methods B then A." loading="lazy"></div>
     </div>`;
   }
   if (id === 'bee-box') {
-    return `<img src="images/learn-bee-box.jpg" alt="An open two-compartment wooden bee box with catch and feed chambers, next to a compass, marking pen, syrup jar, and stopwatch." loading="lazy">`;
+    return `<img src="/images/learn-bee-box.jpg" alt="An open two-compartment wooden bee box with catch and feed chambers, next to a compass, marking pen, syrup jar, and stopwatch." loading="lazy">`;
   }
   if (id === 'waggle-decoder') {
-    return `<img src="images/learn-waggle-decoder.jpg" alt="A honeybee mid-waggle-dance on the comb inside the hive, with the sun's angle and the dance run's angle shown as matching lines." loading="lazy">`;
+    return `<img src="/images/learn-waggle-decoder.jpg" alt="A honeybee mid-waggle-dance on the comb inside the hive, with the sun's angle and the dance run's angle shown as matching lines." loading="lazy">`;
   }
   // Fallback for any future/unreferenced diagram id (e.g. the optional
   // round-trip strip, or the Tier-B Waggle Compass) — small and honest

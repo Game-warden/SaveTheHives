@@ -20,6 +20,73 @@ For full context on this and other gotchas (Turnstile/hCaptcha dropdown,
 localhost-vs-LAN-IP secure-context quirks, etc.), see
 `SAVETHEHIVES_SPEC.md` §7.
 
+## Site structure (as of v2.11, 2026-07-28): root is now a landing page, the app moved to /app/
+
+Root `/` used to BE the PWA. As of this restructure, `/` is a new static
+landing page (`index.html` at repo root — plain HTML, self-contained
+`<style>` block, no build step, same convention as `privacy.html`) aimed
+at first-time visitors: mission hook, three ways to help (Validate listed
+first, per Dr. Tarpy's own "Validate over Add" advice — see
+`MEETING_NOTES_2026-07-21_Tarpy.md`), an animated-bee teaser linking to an
+on-page "why non-managed colonies matter" section, then "Explore the map."
+
+**The actual app (map, Validate, Add, Learn) now lives entirely under
+`/app/`** — `index.html`, `app.js`, `pathfinder.js`, `sw.js` all moved
+there. If you're editing map/Validate/Learn/Pathfinder behavior, edit the
+files under `app/`, not the root `index.html` — root is the landing page
+now, a completely different file with its own tiny inline stylesheet.
+
+**Why `sw.js` moved too, not just the app files:** its `fetch` handler
+cache-firsts any same-origin request it sees by default. Left at `/sw.js`,
+it would have silently swept the new landing page into the same
+stale-cache risk the app already has (documented in the "reload twice"
+section above). Moving it to `/app/sw.js` gives it a default scope of
+`/app/*`, so it never controls the root landing page at all — solved by
+placement, no new exclusion logic needed. `SHELL_ASSETS` inside it points
+at the new `/app/...` paths; shared root-level assets (`styles.css`,
+`manifest.json`, icons, `logo.jpg`) didn't move and are referenced by
+root-absolute path (`/styles.css` etc.) from both the landing page and the
+app, so there's exactly one copy of each, not two.
+
+`manifest.json` stayed at root (icons resolve relative to its own location
+regardless of who links it) but `start_url` and `scope` now both point at
+`/app/` — installed users open straight to the map, never the landing page.
+
+**Outstanding cleanup, not yet done:** the pre-move `app.js`, `pathfinder.js`,
+and `sw.js` still physically exist at repo root as orphaned duplicates —
+Claude can create/edit files in the connected workspace folder but cannot
+delete them, so this needs a manual `git rm app.js pathfinder.js sw.js` in
+Terminal before the first commit of this restructure. See the git/rollback
+section below for the exact commands.
+
+**Fallback if something goes wrong after this ships:** this whole
+restructure was built and should be committed on its own branch first
+(not directly to `main`) — Cloudflare Pages is Git-connected with
+automatic deployments, which by default also builds a preview URL for any
+non-production branch/PR, so the whole flow (landing page, `/app/`, install
+behavior) can be tested live with zero risk to `savethehives.org` before
+merging. If something's still wrong *after* merging to `main`: `git revert`
+the merge commit and push (redeploys the previous good state in the same
+~10-30s window as any other push), or use Cloudflare Pages' own dashboard
+— Deployments tab → pick the last known-good deployment → "Rollback to
+this deployment," which needs no git operations at all and is the fastest
+option if you're not near a terminal. The old manual zip-upload path also
+still works as a last resort (see `SAVETHEHIVES_SPEC.md` §Cloudflare).
+
+**SEO status:** `sitemap.xml` now lists `/` and `/app/`; `robots.txt`
+already allowed everything (`Allow: /`), no change needed there. The
+landing page ships with real static text in the light DOM (not hidden
+behind a modal like the old About panel), which is the main structural
+SEO gain from this move. **Not done yet, explicitly next steps:** a
+dedicated "Why Non-Managed Colonies Matter" page (currently just a
+same-page section, `#why-it-matters`, condensed from
+`GENETIC_GOLDMINE_EXPLAINER.md` — could graduate to its own URL later
+without breaking the anchor link); submitting the updated sitemap to
+Google Search Console (needs Ronnie's Google account, can't be done from
+here); backlinks from the university outreach and Facebook effort, which
+will move discoverability more than any on-page change at this traffic
+stage.
+
 ## Remind Ronnie when it's time to send friend invites / ask for follows
 
 Ronnie has a backlog of friend invites (188 as of Jul 2026) and wants

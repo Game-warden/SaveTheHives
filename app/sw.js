@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.10.9'; // Swapped the high-zoom basemap tier from CARTO Voyager to Stadia Outdoors — richer trail/field/forest detail for judging hive candidates up close, after Ronnie live-compared several tile styles. Stadia auth is domain-based (savethehives.org registered in their dashboard), no API key in this codebase.
+const CACHE_VERSION = 'v2.11.0'; // App moved off root to /app/ — this file now lives at /app/sw.js so its default scope is /app/*, meaning it never controls the new root landing page at all. SHELL_ASSETS below updated to match the new /app/ paths; shared root-level assets (styles.css, manifest.json, icons, logo.jpg) are unchanged since those files did not move.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
@@ -14,11 +14,11 @@ const TILE_CACHE_MAX_ENTRIES = 200;
 // reliable (no risk of one flaky cross-origin request failing the whole
 // install).
 const SHELL_ASSETS = [
-  '/',
-  '/index.html',
+  '/app/',
+  '/app/index.html',
   '/styles.css',
-  '/app.js',
-  '/pathfinder.js',
+  '/app/app.js',
+  '/app/pathfinder.js',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',

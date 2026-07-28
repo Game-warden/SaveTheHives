@@ -314,7 +314,7 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 - **Supabase Attack Protection provider dropdown defaults to hCaptcha** — must manually switch to "Turnstile by Cloudflare" or Turnstile tokens will always be rejected with `invalid-input-response`
 - **Turnstile widget domains** — `localhost` must be in the allowed hostnames list on the SaveTheHives Auth widget in Cloudflare for local testing to work
 - **Toast z-index** — sign-in modal is z-index 9100; toast must be ≥ 9100 to be visible while modal is open (currently 9999)
-- **Service worker (`sw.js`) precaches shell files by `CACHE_VERSION`** — any commit that changes `app.js`, `styles.css`, `pathfinder.js`, `index.html`, `manifest.json`, or any precached image MUST bump `CACHE_VERSION` in the same commit, or returning visitors keep getting the old cached file indefinitely (a Cloudflare cache purge does not fix this — it's client-side Cache Storage, a separate layer). Symptom if missed: "the fix works on savethehives.pages.dev but not on savethehives.org." Current value: `v2.6.11`. Full manual recovery steps if this happens anyway: DevTools → Application → Service Workers → Unregister, then Storage → Clear site data, close the tab, reopen fresh, hard reload.
+- **Service worker (`sw.js`) precaches shell files by `CACHE_VERSION`** — any commit that changes `app.js`, `styles.css`, `pathfinder.js`, `index.html`, `manifest.json`, or any precached image MUST bump `CACHE_VERSION` in the same commit, or returning visitors keep getting the old cached file indefinitely (a Cloudflare cache purge does not fix this — it's client-side Cache Storage, a separate layer). Symptom if missed: "the fix works on savethehives.pages.dev but not on savethehives.org." (This doc's "current value" note tends to drift out of sync with the real file — check the `CACHE_VERSION` line in `app/sw.js` directly rather than trusting a version number written here.) **As of v2.11 (2026-07-28), `sw.js` itself moved to `app/sw.js`** — its default scope is now `/app/*`, so it no longer controls the root landing page at all; see `CLAUDE.md` for why that was a deliberate fix, not an oversight. Full manual recovery steps if this happens anyway: DevTools → Application → Service Workers → Unregister, then Storage → Clear site data, close the tab, reopen fresh, hard reload.
 - **Service worker two-load update behavior** — even with `CACHE_VERSION` bumped correctly (and `skipWaiting`/`clients.claim` enabled), the FIRST visit after a deploy still runs the previous version: the old SW serves the cached shell instantly while the new SW installs and precaches in the background; the SECOND load gets the new code. Symptom: "I pushed, but my phone doesn't show the new feature" (burned a Pathfinder field test on Jul 6 2026). Before field testing a fresh deploy: open the site, close the tab, reopen (or reload twice). Verification tokens beat assumptions — check for a UI string known to be new in the build under test.
 - **Photon (`photon.komoot.io`) mis-geocodes bare numeric queries internationally** — the same digits can match a real place in an entirely different country with no way to disambiguate without country context. Concrete example surfaced from an earlier iteration of this project's search bar: a Raleigh, NC ZIP code (27613) resolved to a location in the Middle East. Current fix, live since the Jul 6 2026 bug-fix round: `doSmartSearch()` declines any bare-numeric query before it reaches Photon and shows a toast pointing to city/landmark search instead — this sidesteps the bug rather than fixing Photon's geocoding, so don't remove that guard without a real replacement.
 - **Service workers only register in a "secure context"** — HTTPS, or the one carved-out exception: `http://localhost` (or `127.0.0.1`) on the same machine. A plain-HTTP request to a LAN IP address (e.g. testing from a phone at `http://192.168.1.x:8000` against a Mac running `python3 -m http.server`) does NOT qualify, so the service worker never registers there at all. Practical effect: **local-network phone testing never exercises the SW or its cache** — every request goes straight to the network, always fresh — while `localhost` testing on the host machine does register a SW and IS subject to the two-load gotcha above. This produced a real false-positive on Jul 8 2026: images looked broken/cropped on Mac `localhost` (stale cached CSS from an old SW) but looked fine on iPhone over LAN IP (no SW ever ran, so nothing was ever stale). Fix when this happens: DevTools → Application → Service Workers → Unregister, then Application → Clear storage → "Clear site data," then hard-reload. Takeaway: a clean result from LAN-IP phone testing does not confirm the caching/SW layer is correct — only `localhost` or the real deployed HTTPS origin exercises that code path.
@@ -415,8 +415,12 @@ User's Browser / iPhone
 
 **What it does:** Owns the `savethehives.org` domain, manages all DNS records, and hosts the app via Cloudflare Pages (free static file hosting with global CDN).
 
-**How the app is deployed (as of v2.6):**
-1. Edit `index.html` (or `styles.css`/`app.js`/`pathfinder.js` post-Phase-2) locally
+**How the app is deployed (as of v2.11):**
+1. Edit the app files under `app/` (`app/index.html`, `app/app.js`, `app/pathfinder.js`,
+   `app/sw.js`) for map/Validate/Add/Learn changes, or root `index.html` for the landing
+   page itself — they're separate files since the v2.11 restructure moved the app off
+   root to `/app/` (see `CLAUDE.md` for the full reasoning: sw.js scope, manifest
+   start_url, why root-absolute asset paths matter now that two HTML entry points exist).
 2. `git add -A && git commit -m "..." && git push`
 3. Cloudflare Pages is Git-connected to `Game-warden/SaveTheHives` (production branch `main`,
    automatic deployments enabled) — the push alone triggers a new build and deploy, live within
@@ -572,10 +576,13 @@ The [Stadia Maps Pricing](https://stadiamaps.com/pricing/) free tier includes 20
 
 ---
 
-### Deploying an Update (as of v2.6)
+### Deploying an Update (as of v2.11)
 
-1. Edit `~/claude/SaveTheHives-pwa-claude/index.html` (or the split-out `styles.css`/`app.js`/
-   `pathfinder.js` once Phase 2 lands)
+1. Edit `~/claude/SaveTheHives-pwa-claude/app/index.html`, `app/app.js`, or
+   `app/pathfinder.js` for the map/tool itself (`styles.css` stayed at repo root, shared by
+   both entry points, so it's just `~/claude/SaveTheHives-pwa-claude/styles.css`), or root
+   `index.html` for the landing page — as of v2.11 the app lives at `/app/`, not root.
+   See `CLAUDE.md` for why (sw.js scope, manifest start_url/scope, root-absolute asset paths).
 2. In Terminal: `git add -A && git commit -m "..." && git push`
 3. Cloudflare Pages (Git-connected to `Game-warden/SaveTheHives`, production branch `main`,
    automatic deployments enabled) builds and deploys automatically on push
