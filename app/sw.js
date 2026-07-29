@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.12.0'; // Follow-up to v2.11.9's install-instructions fix: Ronnie tried the new desktop-fallback copy live on Mac Chrome and found it still too generic/cryptic, not differentiated by actual browser. Added desktopBrowser() (UA-sniffs Chrome/Edge/Safari/Firefox/other, checking the more specific tokens first since Edge and Chrome UAs both contain "Chrome/" and "Safari/") and branched the fallback copy per browser — including that Safari doesn't even use the word "install" (it's "Add to Dock" under the File menu, Safari 17+ only) and that Firefox desktop doesn't support this at all. Touches app.js only.
+const CACHE_VERSION = 'v2.13.0'; // Draft UI for the "let others contact me about this hive" opt-in checkbox on the Add form (app/index.html), placed after the ZIP field. UI-only review step — not yet wired into submitHive()'s insert, no `allow_contact` column exists yet. Once Ronnie approves the copy/placement, next step is a DB column plus a relay Edge Function that looks up the submitter's email from auth.users by submitted_by at send time — never stored on the hive row, never shown to the person checking in. See chat 2026-07-29.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

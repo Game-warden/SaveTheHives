@@ -712,6 +712,22 @@
       <input type="text" id="form-zip" placeholder="00000" maxlength="10">
     </div>
 
+    <!-- Contact opt-in (v2.13, UI-only draft for review — not yet wired to
+         submitHive()'s insert; no `allow_contact` column exists yet. Once
+         Ronnie approves the copy/placement, next step is a DB column +
+         a relay Edge Function that looks up the email from auth.users by
+         submitted_by at send time — never stored on the hive row, never
+         shown to the person checking in. See chat 2026-07-29. -->
+    <div class="form-group">
+      <label style="display:flex;align-items:flex-start;gap:10px;background:rgba(245,166,35,0.10);border:1.5px solid var(--honey);border-radius:10px;padding:12px 14px;cursor:pointer;">
+        <input type="checkbox" id="form-contact-optin" style="margin-top:3px;flex-shrink:0;width:18px;height:18px;accent-color:var(--honey);cursor:pointer;">
+        <span style="font-size:0.83rem;line-height:1.5;color:var(--text);">
+          <strong>📬 Let others contact me about this hive</strong><br>
+          <span style="color:var(--text-muted);">If someone checks in on this hive later, they can send you a message through the app. Your email is never shown to anyone — messages are relayed privately.</span>
+        </span>
+      </label>
+    </div>
+
     <!-- 📷 Photos deferred to v3 -->
 
     <p style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin:10px 0 6px;line-height:1.5;">
