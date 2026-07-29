@@ -262,6 +262,7 @@ function toggleMapSearch(open) {
 // ═══════════════════════════════════════
 async function init() {
   initDarkMode();
+  initHeaderHomeLink();
   maybeShowOnramp();
   maybeShowOnboardCallout();
 
@@ -1610,6 +1611,26 @@ function isStandalone() {
 }
 function isIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+// Makes the persistent header a shortcut back to the root landing page —
+// but only for browser-tab visitors. Installed/standalone users have
+// /app/ as their entire world (manifest start_url + scope are both
+// /app/), so sending them out to the marketing page would strand them
+// with no browser chrome to get back with. Added 2026-07-28 per Ronnie:
+// first-time visitors arriving from a landing-page card had no easy way
+// back to the "why non-managed colonies matter" story once inside the
+// app — the only existing path was About > Mission & Research > "Read
+// the full story," several taps deep.
+function initHeaderHomeLink() {
+  const header = document.getElementById('app-header');
+  if (!header || isStandalone()) return;
+  header.classList.add('header-home-link');
+  header.title = 'Back to savethehives.org';
+  header.addEventListener('click', (e) => {
+    if (e.target.closest('button')) return; // don't hijack the (production-hidden) debug toggle
+    window.location.href = '/';
+  });
 }
 
 function updateInstallUI() {

@@ -101,7 +101,15 @@
     flex-shrink: 0;
     z-index: 1000;
     position: relative;
+    transition: background-color 0.15s ease;
   }
+  /* Only added when NOT running standalone (see initHeaderHomeLink() in
+     app.js) — installed/home-screen users keep a plain, non-interactive
+     header, since /app/ is their whole world (manifest start_url + scope)
+     and sending them out to the marketing landing page would strand them
+     with no browser chrome to get back. */
+  #app-header.header-home-link { cursor: pointer; }
+  #app-header.header-home-link:hover { background: var(--surface2); }
   #app-header img.logo {
     height: 40px;
     width: 40px;
