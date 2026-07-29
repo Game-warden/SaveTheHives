@@ -1429,6 +1429,22 @@ function updateDebugPanel(fields) {
 // ═══════════════════════════════════════
 // TOAST
 // ═══════════════════════════════════════
+// EMAIL-SENT CALLOUT — see the #email-sent-callout comment in
+// app/index.html for why this exists instead of just a toast.
+let emailCalloutTimer;
+function showEmailSentCallout() {
+  const el = document.getElementById('email-sent-callout');
+  if (!el) return;
+  el.style.display = 'flex';
+  clearTimeout(emailCalloutTimer);
+  emailCalloutTimer = setTimeout(hideEmailSentCallout, 12000);
+}
+function hideEmailSentCallout() {
+  const el = document.getElementById('email-sent-callout');
+  if (el) el.style.display = 'none';
+  clearTimeout(emailCalloutTimer);
+}
+
 let toastTimer;
 function showToast(msg, duration = 2500) {
   const t = document.getElementById('toast');
@@ -1612,6 +1628,13 @@ function isStandalone() {
 function isIOS() {
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
 }
+// Chrome on iOS is still a Safari WebView under the hood — never fires
+// beforeinstallprompt, and matches isIOS() above — but its Share-icon menu
+// differs slightly from Safari's own, so it gets its own copy below rather
+// than incorrectly being told to look in "Safari's toolbar."
+function isIOSChrome() {
+  return isIOS() && /CriOS/i.test(navigator.userAgent);
+}
 
 // Makes the persistent header a shortcut back to the root landing page —
 // but only for browser-tab visitors. Installed/standalone users have
@@ -1658,10 +1681,20 @@ function updateInstallUI() {
   if (hubRow) hubRow.style.display = '';
   if (deferredInstallPrompt) {
     box.innerHTML = '<button class="btn btn-outline" style="width:100%;" onclick="promptInstall()">📲 Install SaveTheHives</button>';
+  } else if (isIOSChrome()) {
+    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">📲 <strong style="color:var(--text);">Install for offline field use:</strong> tap the Share icon (square with an arrow, top-right of the address bar), scroll down, then tap "Add to Home Screen."</div>';
   } else if (isIOS()) {
     box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">📲 <strong style="color:var(--text);">Install for offline field use:</strong> tap the Share icon in Safari\'s toolbar, then "Add to Home Screen."</div>';
   } else {
-    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);">📲 Install for offline field use from your browser\'s menu (usually "Add to Home Screen" or "Install App").</div>';
+    // No auto-prompt fired — either Android Chrome/Edge that hasn't met the
+    // engagement heuristic yet, desktop Chrome/Edge, or a browser that
+    // dismissed one already (which suppresses it for a cooldown period).
+    // A vague "usually Add to Home Screen or Install App" line was reported
+    // confusing by a field tester who couldn't find either — spelling out
+    // both the desktop and mobile Chrome/Edge paths explicitly instead.
+    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">📲 <strong style="color:var(--text);">Install for offline field use:</strong><br>' +
+      '<strong style="color:var(--text);">On a computer:</strong> look for an install icon (⊕ or a small monitor) at the right end of the address bar — or open the ⋮ menu and choose "Install SaveTheHives…"<br>' +
+      '<strong style="color:var(--text);">On a phone:</strong> open the ⋮ menu (top-right) and tap "Add to Home screen" or "Install app."</div>';
   }
 }
 
@@ -1804,7 +1837,7 @@ async function submitSignIn() {
     btn.disabled = false; btn.textContent = 'Send Link';
     if (error) { showSignInError(error.message); return; }
     closeSignInModal();
-    showToast('📧 Check your email for a sign-in link!');
+    showEmailSentCallout();
   } catch (e) {
     console.error('submitSignIn error:', e);
     const btn = document.getElementById('signin-submit-btn');

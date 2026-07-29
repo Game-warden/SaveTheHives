@@ -969,6 +969,20 @@
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- EMAIL-SENT CALLOUT (v2.11.9) — replaces a 2.5s toast for the
+     magic-link "check your email" message. A field tester reported
+     landing in Spam with no idea he needed to act on the email at all —
+     a toast this important shouldn't be that easy to miss. See
+     showEmailSentCallout()/hideEmailSentCallout() in app.js. -->
+<div id="email-sent-callout" class="email-sent-callout" style="display:none;">
+  <div class="esc-icon">📧</div>
+  <div class="esc-text">
+    <div class="esc-title">Check your email</div>
+    <div class="esc-sub">Look in your Inbox — or Spam folder — and tap the sign-in link to continue.</div>
+  </div>
+  <button class="esc-dismiss" onclick="hideEmailSentCallout()" aria-label="Dismiss">✕</button>
+</div>
+
 <script src="app.js"></script>
 <script src="pathfinder.js"></script>
 <!-- ── SIGN-IN MODAL ── -->
