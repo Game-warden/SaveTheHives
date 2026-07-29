@@ -75,8 +75,9 @@ const SUPABASE_URL = 'https://nsujmizdawyoictpawxt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zdWptaXpkYXd5b2ljdHBhd3h0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3NDEyNDgsImV4cCI6MjA5ODMxNzI0OH0.VOXEk4uyFq1jH0mvRW83LPPW8ZJp3MbylY6KiPKixTc';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let currentUser = null;
-let pendingAction = null; // resumes after sign-in: 'add' | 'validate' | 'checkin'
+let pendingAction = null; // resumes after sign-in: 'add' | 'validate' | 'checkin' | 'contact'
 let pendingCheckinHiveId = null; // only set when pendingAction === 'checkin'
+let pendingContactHiveId = null; // only set when pendingAction === 'contact'
 db.auth.getSession().then(({ data: { session } }) => {
   if (session) { currentUser = session.user; updateAuthUI(); }
 });
@@ -97,6 +98,12 @@ db.auth.onAuthStateChange((_event, session) => {
     pendingCheckinHiveId = null;
     closeSignInModal();
     setTimeout(() => openCheckin(hiveId), 300);
+  } else if (_event === 'SIGNED_IN' && pendingAction === 'contact') {
+    pendingAction = null;
+    const hiveId = pendingContactHiveId;
+    pendingContactHiveId = null;
+    closeSignInModal();
+    setTimeout(() => openContactSubmitter(hiveId), 300);
   }
   // Bug fix: once a session is parsed out of the URL's #access_token=...
   // hash, strip that hash from the address bar. Otherwise it lingers, and
@@ -479,7 +486,7 @@ function latestUpdatedAt(rows, fallback) {
 // 'year' was briefly excluded here after a live 400 ("column hives.year
 // does not exist") broke every hive load — the column has since been
 // added for real via add_year_column.sql, so it's back in this list.
-const HIVE_COLUMNS = 'id, legacy_id, name, latitude, longitude, hivetype, description, city, state, zip, notes, submitted_at, created_at, photo_url, status, last_verified_at, user_added, year, updated_at';
+const HIVE_COLUMNS = 'id, legacy_id, name, latitude, longitude, hivetype, description, city, state, zip, notes, submitted_at, created_at, photo_url, status, last_verified_at, user_added, year, updated_at, allow_contact, submitted_by';
 
 async function loadHivesFromSupabase() {
   const cached = await idbGetAllHives();
@@ -571,6 +578,8 @@ function dbRowToHive(row) {
     last_verified_at: row.last_verified_at || null,
     userAdded: row.user_added || false,
     year: row.year || null,
+    allowContact: row.allow_contact || false,
+    submittedBy: row.submitted_by || null,
   };
 }
 
@@ -631,6 +640,7 @@ function addMarker(hive) {
       <button class="popup-radius-btn" onclick="toggleSingleRadius(${hive.id},${hive.lat},${hive.lng})">◎ 3-Mile Mating Radius</button>
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Check In</button>
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
+      ${hive.allowContact && hive.submittedBy && hive.submittedBy !== currentUser?.id ? `<button class="popup-radius-btn" style="margin-top:6px;background:rgba(245,166,35,0.15);color:var(--honey);border-color:rgba(245,166,35,0.3);" onclick="openContactSubmitter(${hive.id})">📬 Contact Submitter</button>` : ''}
     </div>
   `, {maxWidth: 300, minWidth: 200, autoPanPadding: [16, 70]});
 
@@ -982,6 +992,7 @@ async function submitHive() {
       submitted_by: currentUser?.id || null,
       submitted_at: now.toISOString(),
       year: parseInt(document.getElementById('form-year').value) || null,
+      allow_contact: document.getElementById('form-contact-optin')?.checked || false,
     }).select().single());
   } catch (e) {
     console.error('submitHive network error:', e);
@@ -1956,6 +1967,60 @@ async function submitCheckin() {
   closeCheckinModal();
   const msgs = { active:'🐝 Active — thank you!', gone:'👻 Gone — noted', uncertain:'🤔 Uncertain — recorded' };
   showToast(msgs[status]);
+}
+
+// ═══════════════════════════════════════
+// CONTACT SUBMITTER (v2.13) — relay only, never exposes the submitter's
+// email to the client. Sends { hive_id, message } to the contact-submitter
+// Edge Function, which looks up the email from auth.users server-side (via
+// the hive's submitted_by) using the service role key, and sends the
+// message through Resend with reply-to set to the sender's own email so
+// the submitter can just hit reply. See SAVETHEHIVES_SPEC.md for the
+// function's deployed source.
+let _contactHiveId = null;
+
+function openContactSubmitter(hiveId) {
+  if (!currentUser) {
+    pendingAction = 'contact';
+    pendingContactHiveId = hiveId;
+    showToast('Sign in to contact this hive\'s submitter 🐝');
+    handleAuth();
+    return;
+  }
+  _contactHiveId = hiveId;
+  document.getElementById('contact-message').value = '';
+  document.getElementById('contact-modal').classList.add('open');
+  map.closePopup();
+}
+
+function closeContactModal() {
+  document.getElementById('contact-modal').classList.remove('open');
+  _contactHiveId = null;
+}
+
+async function submitContactMessage() {
+  const message = document.getElementById('contact-message').value.trim();
+  if (!message || !_contactHiveId) return;
+  const hiveId = _contactHiveId;
+
+  const btn = document.getElementById('contact-send-btn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+
+  try {
+    const { data, error } = await db.functions.invoke('contact-submitter', {
+      body: { hive_id: hiveId, message },
+    });
+    if (error || data?.error) {
+      throw new Error(data?.error || error?.message || 'Send failed');
+    }
+    closeContactModal();
+    showToast('📬 Message sent!');
+  } catch (e) {
+    console.error('contact-submitter failed:', e);
+    showToast('⚠ ' + (e.message || 'Could not send — try again.'));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Send Message';
+  }
 }
 
 

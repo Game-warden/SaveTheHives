@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.1'; // Wording tweak on the contact opt-in checkbox (v2.13.0) — title now reads as an instruction ("Check this box to let others contact me about this hive") per Ronnie's review on the preview deploy. Still UI-only; no `allow_contact` column or relay Edge Function yet.
+const CACHE_VERSION = 'v2.13.2'; // Contact-submitter feature wired end to end: submitHive() now sends allow_contact on insert, HIVE_COLUMNS/dbRowToHive() read it + submitted_by back, addMarker() shows a "📬 Contact Submitter" popup button (hidden for your own hives), and a new #contact-modal collects the message and calls the contact-submitter Edge Function (supabase/functions/contact-submitter/index.ts, deployed separately via the Supabase dashboard — not part of this SW cache). privacy.html updated to disclose the opt-in relay. Requires the allow_contact column to exist on `hives` before this build is merged to main — see chat 2026-07-29 for the ALTER TABLE statement.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

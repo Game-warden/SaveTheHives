@@ -1042,6 +1042,33 @@
   </div>
 </div>
 
+<!-- ── CONTACT SUBMITTER MODAL (v2.13) ── reuses .modal-overlay/.modal-sheet,
+     same reusable classes as #add-modal and #list-modal (not id-scoped —
+     see the CSS id-scoping gotcha in SAVETHEHIVES_SPEC.md §7). Message is
+     relayed by the contact-submitter Edge Function; the submitter's email
+     is never sent to or handled by this page. -->
+<div class="modal-overlay" id="contact-modal" onclick="closeModal(event,'contact-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📬 Contact Submitter</div>
+    <p style="font-size:0.83rem;color:var(--text-muted);text-align:center;margin:0 0 14px;line-height:1.5;">
+      Your message is relayed privately — the submitter's email is never shown to you, and yours is never shown to them beyond a reply-to address.
+    </p>
+    <div class="form-group">
+      <textarea id="contact-message" rows="5" maxlength="2000"
+        placeholder="e.g. I checked in on this hive and noticed..."></textarea>
+    </div>
+    <div class="modal-sticky-footer">
+      <button class="btn" id="contact-send-btn" style="width:100%;padding:12px;font-size:1rem;" onclick="submitContactMessage()">
+        Send Message
+      </button>
+      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:1rem;" onclick="closeContactModal()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
+
 
 <!-- ── FILTER DRAWER (v2.3) ── -->
 <div id="filter-drawer" onclick="if(event.target===this)closeFilterDrawer()">

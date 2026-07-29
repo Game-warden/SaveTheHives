@@ -82,7 +82,9 @@
 
   <h2>2. What We Collect and Why</h2>
 
-  <p><strong>Email address</strong> — Collected when you sign in using our magic link authentication. Used solely to send you a one-time sign-in link. We do not use your email for marketing, and we do not share it with third parties except as described below.</p>
+  <p><strong>Email address</strong> — Collected when you sign in using our magic link authentication. Used to send you a one-time sign-in link, and — only if you opt in when submitting a hive — to relay messages from other users about that hive (see below). We do not use your email for marketing, and we do not share it with third parties except as described below.</p>
+
+  <p><strong>Contact opt-in (optional)</strong> — When logging a hive, you can check "Let others contact me about this hive." If checked, other signed-in users can send you a message about that hive through the app. Your email address is never shown to them — messages are relayed by our server, which looks up your email only at the moment a message is sent and never stores a copy of it on the hive record. Any reply you send goes directly to the sender's own email, not through SaveTheHives.</p>
 
   <p><strong>Hive records you submit</strong> — When you log a hive, we store the coordinates (latitude/longitude), hive type, description, approximate location (city/state/zip if provided), observer name (optional), and year first observed (optional). <strong>This data is published publicly on the SaveTheHives map</strong> — do not submit coordinates for hives where public disclosure could cause harm.</p>
 
@@ -94,13 +96,13 @@
 
   <h2>3. How We Store Your Data</h2>
   <p>All hive and account data is stored in <strong>Supabase</strong> (a PostgreSQL database hosted on AWS infrastructure in the United States). Supabase is our data processor and operates under its own <a href="https://supabase.com/privacy" target="_blank">Privacy Policy</a>.</p>
-  <p>Authentication emails (magic links) are delivered by <strong>Resend</strong>, which processes your email address to send the sign-in link. Resend operates under its own <a href="https://resend.com/legal/privacy-policy" target="_blank">Privacy Policy</a>.</p>
+  <p>Authentication emails (magic links) and, if you opt in, relayed contact messages about a hive you submitted, are delivered by <strong>Resend</strong>, which processes your email address to send them. Resend operates under its own <a href="https://resend.com/legal/privacy-policy" target="_blank">Privacy Policy</a>.</p>
   <p>The SaveTheHives website is served through <strong>Cloudflare Pages</strong>. Cloudflare may process connection-level data as part of delivering the site. Cloudflare operates under its own <a href="https://www.cloudflare.com/en-gb/privacypolicy/" target="_blank">Privacy Policy</a>.</p>
 
   <h2>4. Who Can See Your Data</h2>
   <ul>
     <li><strong>Hive records</strong> — publicly visible to all visitors of savethehives.org</li>
-    <li><strong>Your email address</strong> — visible only to project administrators; never published</li>
+    <li><strong>Your email address</strong> — visible only to project administrators; never published or shown to other users, including if they contact you through the optional "Let others contact me" feature described above</li>
     <li><strong>Your name</strong> — if provided when submitting a hive, it is shown on that hive's public record</li>
   </ul>
   <p>We do not sell, rent, or trade any personal data.</p>

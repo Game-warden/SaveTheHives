@@ -519,6 +519,28 @@ Supabase Authentication → SMTP Settings points to Resend's SMTP server. When S
 
 ---
 
+### Contact Submitter — Relay Edge Function (v2.13, 2026-07-29)
+
+**What it does:** Lets a signed-in map visitor send a message to whoever
+submitted a hive, if that submitter checked "Let others contact me about
+this hive" when they logged it. The submitter's email is never sent to or
+stored by the client — it's looked up server-side, at send time only.
+
+**Pieces:**
+| Piece | Location |
+|---|---|
+| `allow_contact` column | `hives` table — boolean, default `false`, set from the Add form's opt-in checkbox |
+| Opt-in checkbox | `#form-contact-optin` in `app/index.html`, read in `submitHive()` (`app/app.js`) |
+| Popup button | `📬 Contact Submitter` in `addMarker()`'s popup template — only rendered when `hive.allowContact` is true, the hive has a `submitted_by`, and it isn't your own hive |
+| Compose UI | `#contact-modal` in `app/index.html`; `openContactSubmitter()` / `submitContactMessage()` in `app/app.js` |
+| Relay function | `supabase/functions/contact-submitter/index.ts` — Deno Edge Function, deployed separately from the site (not part of the service worker's cached shell) |
+
+**How the relay works:** the client calls `db.functions.invoke('contact-submitter', { body: { hive_id, message } })`, which forwards the signed-in user's JWT automatically. The function verifies the sender via that JWT, then uses the **service role key** (available to Edge Functions only, never sent to any client) to look up the hive's `submitted_by` and the corresponding email via `auth.admin.getUserById()`. It sends the message through Resend with `reply_to` set to the sender's own email, so the submitter can just hit reply — no thread, no stored copy of either party's email anywhere but Resend's own delivery logs.
+
+**Deploying/updating the function:** paste `supabase/functions/contact-submitter/index.ts`'s contents into Supabase dashboard → Edge Functions → (create/select) `contact-submitter`, or use the CLI (`supabase functions deploy contact-submitter`). Requires one manual secret, **`RESEND_API_KEY`** — reuse the same key already used as the SMTP password in Authentication → SMTP Settings. `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` don't need to be set manually; Supabase injects those into every Edge Function automatically.
+
+---
+
 ### Cloudflare Turnstile — Bot Protection
 
 **What it does:** Invisible CAPTCHA that runs silently when the sign-in modal opens. Blocks bot-driven OTP abuse on the auth endpoint without user friction.
