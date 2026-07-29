@@ -1622,15 +1622,23 @@ function isIOS() {
 // back to the "why non-managed colonies matter" story once inside the
 // app — the only existing path was About > Mission & Research > "Read
 // the full story," several taps deep.
+// v2.11.8: switched from a click listener on the bare #app-header div to
+// a real, absolutely-positioned <a> overlaying it. A JS 'click' listener
+// on a non-interactive element is reported flaky on iOS Safari in a way
+// desktop testing won't catch; a genuine anchor sidesteps that entirely —
+// the browser's native link-following handles the tap, no JS event
+// dispatch required. Matches how the landing page's own .teaser link
+// (which has never had this problem) is built.
 function initHeaderHomeLink() {
   const header = document.getElementById('app-header');
   if (!header || isStandalone()) return;
   header.classList.add('header-home-link');
   header.title = 'Back to savethehives.org';
-  header.addEventListener('click', (e) => {
-    if (e.target.closest('button')) return; // don't hijack the (production-hidden) debug toggle
-    window.location.href = '/';
-  });
+  const link = document.createElement('a');
+  link.href = '/';
+  link.className = 'header-home-link-overlay';
+  link.setAttribute('aria-label', 'Back to savethehives.org');
+  header.appendChild(link);
 }
 
 function updateInstallUI() {

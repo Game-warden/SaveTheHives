@@ -110,6 +110,13 @@
      with no browser chrome to get back. */
   #app-header.header-home-link { cursor: pointer; }
   #app-header.header-home-link:hover { background: var(--surface2); }
+  /* Real <a>, absolutely positioned over the whole header — see
+     initHeaderHomeLink() (app.js) for why this replaced a plain click
+     listener on the div: more reliable tap-handling on iOS Safari. */
+  .header-home-link-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    text-indent: -9999px; overflow: hidden;
+  }
   #app-header img.logo {
     height: 40px;
     width: 40px;
