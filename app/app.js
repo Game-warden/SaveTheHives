@@ -1635,6 +1635,18 @@ function isIOS() {
 function isIOSChrome() {
   return isIOS() && /CriOS/i.test(navigator.userAgent);
 }
+// Desktop browser detection for the install-instructions fallback below.
+// Order matters: Edge's UA contains "Chrome/", and Chrome's UA contains
+// "Safari/", so the more specific tokens must be checked first.
+function desktopBrowser() {
+  const ua = navigator.userAgent;
+  if (/Edg\//.test(ua)) return 'edge';
+  if (/OPR\//.test(ua)) return 'opera';
+  if (/Chrome\//.test(ua)) return 'chrome';
+  if (/Firefox\//.test(ua)) return 'firefox';
+  if (/Safari\//.test(ua)) return 'safari';
+  return 'other';
+}
 
 // Makes the persistent header a shortcut back to the root landing page —
 // but only for browser-tab visitors. Installed/standalone users have
@@ -1686,15 +1698,30 @@ function updateInstallUI() {
   } else if (isIOS()) {
     box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;">📲 <strong style="color:var(--text);">Install for offline field use:</strong> tap the Share icon in Safari\'s toolbar, then "Add to Home Screen."</div>';
   } else {
-    // No auto-prompt fired — either Android Chrome/Edge that hasn't met the
-    // engagement heuristic yet, desktop Chrome/Edge, or a browser that
-    // dismissed one already (which suppresses it for a cooldown period).
-    // A vague "usually Add to Home Screen or Install App" line was reported
-    // confusing by a field tester who couldn't find either — spelling out
-    // both the desktop and mobile Chrome/Edge paths explicitly instead.
-    box.innerHTML = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">📲 <strong style="color:var(--text);">Install for offline field use:</strong><br>' +
-      '<strong style="color:var(--text);">On a computer:</strong> look for an install icon (⊕ or a small monitor) at the right end of the address bar — or open the ⋮ menu and choose "Install SaveTheHives…"<br>' +
-      '<strong style="color:var(--text);">On a phone:</strong> open the ⋮ menu (top-right) and tap "Add to Home screen" or "Install app."</div>';
+    // No auto-prompt fired — either the engagement heuristic hasn't been
+    // met yet, or (for Safari/Firefox) it never will, since only Chromium
+    // browsers support beforeinstallprompt at all. A single generic "look
+    // for an install icon" line was reported cryptic by a field tester on
+    // desktop Chrome — he had no icon showing and no idea a ⋮-menu path
+    // even existed. Branching per actual detected browser instead, since
+    // the real location genuinely differs (Safari doesn't even use the
+    // word "install" — it's "Add to Dock" under the File menu).
+    const b = desktopBrowser();
+    const head = '<div style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">📲 <strong style="color:var(--text);">Install for offline field use:</strong><br>';
+    const bold = s => '<strong style="color:var(--text);">' + s + '</strong>';
+    let body;
+    if (b === 'chrome') {
+      body = 'Click the ' + bold('install icon') + ' (a small monitor with a down arrow) at the right end of the address bar. Don\'t see it? Open the ' + bold('⋮ menu') + ' (top-right) and choose ' + bold('"Install SaveTheHives…"') + ' — on some Chrome versions it\'s a submenu under "Cast, Save, and Share."';
+    } else if (b === 'edge') {
+      body = 'Click the ' + bold('app icon') + ' at the right end of the address bar. Don\'t see it? Open the ' + bold('••• menu') + ' (top-right) → ' + bold('Apps') + ' → ' + bold('"Install this site as an app."');
+    } else if (b === 'safari') {
+      body = 'On a Mac (Safari 17 or newer): open the ' + bold('File menu') + ' → ' + bold('"Add to Dock…"') + '. On an iPhone/iPad: tap the Share icon in the toolbar, then "Add to Home Screen."<br><span style="font-size:0.76rem;">Older Safari versions on Mac don\'t support installing web apps — Chrome or Edge will work instead.</span>';
+    } else if (b === 'firefox') {
+      body = 'Firefox on desktop doesn\'t currently support installing this as an app. On Android, open the ' + bold('⋮ menu') + ' and tap ' + bold('"Install"') + ' or ' + bold('"Add to Home screen."') + ' On desktop, Chrome, Edge, or Safari will work instead.';
+    } else {
+      body = 'Look for an install icon in your address bar, or check your browser\'s ⋮ / ••• menu for "Install app" or "Add to Home Screen."';
+    }
+    box.innerHTML = head + body + '</div>';
   }
 }
 
