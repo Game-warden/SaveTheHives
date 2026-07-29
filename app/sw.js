@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.0'; // Draft UI for the "let others contact me about this hive" opt-in checkbox on the Add form (app/index.html), placed after the ZIP field. UI-only review step — not yet wired into submitHive()'s insert, no `allow_contact` column exists yet. Once Ronnie approves the copy/placement, next step is a DB column plus a relay Edge Function that looks up the submitter's email from auth.users by submitted_by at send time — never stored on the hive row, never shown to the person checking in. See chat 2026-07-29.
+const CACHE_VERSION = 'v2.13.1'; // Wording tweak on the contact opt-in checkbox (v2.13.0) — title now reads as an instruction ("Check this box to let others contact me about this hive") per Ronnie's review on the preview deploy. Still UI-only; no `allow_contact` column or relay Edge Function yet.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
