@@ -451,6 +451,49 @@ User's Browser / iPhone
 
 ---
 
+### Visit Counter — State/City Breakdown via Pages Functions (v2.14, 2026-07-29)
+
+**Why it exists:** Cloudflare's free-tier dashboard only shows country-level
+geo data for visitors — no state or city breakdown. Rather than adding a
+third-party analytics script (Plausible, Umami, etc.), which would
+contradict `privacy.html`'s existing "no tracking pixels" promise and
+reintroduce the exact tracker-blocked experience documented in
+`WHY_TRACKER_BLOCKED.md`, this uses Cloudflare's own edge — no script ever
+runs in the visitor's browser.
+
+**What it does:** `functions/_middleware.js` runs on every request to the
+whole Pages project (root landing page and `/app/*` both). On real page
+loads only (detected via the `sec-fetch-dest: document` header, so the
+dozens of image/CSS/JS/map-tile sub-requests per visit aren't
+double-counted), it reads `request.cf.regionCode` (US state) and
+`request.cf.city` from Cloudflare's built-in geolocation data and
+increments a plain counter in Cloudflare KV — one key per state, one per
+city, one per non-US country. No cookies, no IP address stored, no
+per-visit log, no per-visitor identifier of any kind — just running
+tallies like `state:NC` → `412`.
+
+**One-time setup (KV namespace + binding):**
+1. Cloudflare dashboard → Workers & Pages → **KV** → Create a namespace,
+   name it e.g. `savethehives-visits`
+2. Go to the SaveTheHives Pages project → **Settings → Functions → KV
+   namespace bindings** → Add binding → Variable name: `VISITS` → select
+   the namespace created in step 1
+3. That's it — no further code changes needed; the function checks for
+   `env.VISITS` and no-ops harmlessly if the binding isn't present yet.
+
+**Viewing the tallies:** Cloudflare dashboard → Workers & Pages → KV →
+open the `savethehives-visits` namespace → browse keys directly (e.g.
+`state:NC`, `city:Raleigh|NC`, `country:CA`). No custom dashboard built
+yet — worth revisiting if this becomes a frequent enough check to want a
+nicer view.
+
+**Known limitation:** increments are a plain read-then-write against KV
+(no atomic counter), so simultaneous requests from the same
+state/city within the same instant could theoretically undercount by one.
+Not worth solving with a Durable Object at this project's traffic volume.
+
+---
+
 ### Supabase — Database, Auth & File Storage
 
 **What it does:** Three jobs in one platform:
