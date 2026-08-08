@@ -1521,14 +1521,19 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ── STALE-HIVE NUDGE (2026-07-31) ──
-     Same floating-pill z-index tier (900) and bottom-clearance calc as
-     #fab-locate/#bottom-tabs — sits just above the nav pill so it never
-     gets tucked behind it on a notched-safe-area device. */
+  /* ── STALE-HIVE NUDGE (2026-07-31, fixed same day) ──
+     Originally bottom-anchored like #fab-locate, but that row is already
+     claimed by #map-search (bottom:calc(88px+safe-area); left:16px) —
+     same z-index tier, so with equal stacking the later-painted #map-search
+     icon sat on top of this banner's left edge, clipping the stat text
+     (spotted live: "1,149" rendering as "49"). Reuses .validate-banner's
+     top spot instead (top:14px, left:60px clears Leaflet's zoom control,
+     same as that banner) — safe to share since maybeShowStaleNudge()
+     already guards on !validateActive, so the two never show at once. */
   .stale-nudge {
     position: absolute;
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-    left: 14px;
+    top: 14px;
+    left: 60px;
     right: 14px;
     z-index: 900;
     display: flex;
