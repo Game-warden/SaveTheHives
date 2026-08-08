@@ -95,6 +95,42 @@ delete from checkins where hive_id in (
 delete from hives where description ilike '%<keyword>%';
 ```
 
+### Find test hives vs. test check-ins on a real hive (important distinction)
+When hunting for "testing" junk, don't assume every hit is a fake hive —
+sometimes the *hive* is completely real (a genuine legacy submission with a
+real name/description) and only a *check-in* on it was a test. Deleting the
+whole hive in that case would destroy real data. Always join hives and
+check-ins together first and eyeball which is which before deciding what to
+delete:
+```sql
+select h.id, h.name, h.description, h.city, h.state, h.submitted_at,
+       c.id as checkin_id, c.notes as checkin_notes
+from hives h
+left join checkins c on c.hive_id = h.id
+where h.name in ('Field Observer', 'Tester', 'Tester Dude')  -- known placeholder/test names
+   or c.notes ilike '%test%'
+order by h.submitted_at desc;
+```
+Then split the results into two groups before deleting:
+- **Fully fake hives** (placeholder name, empty description, e.g. "Field
+  Observer"/"Tester"/"Tester Dude" with no real content) — delete the hive
+  and its check-in(s):
+  ```sql
+  delete from checkins where hive_id in (<id1>, <id2>, ...);
+  delete from hives where id in (<id1>, <id2>, ...);
+  ```
+- **Real hives with a stray test check-in** (real name/description/city,
+  but a check-in with notes like "Testing" or "Testing again") — delete
+  only the check-in, leave the hive alone:
+  ```sql
+  delete from checkins where id in (<checkin_id1>, <checkin_id2>, ...);
+  ```
+Example from Jul 31 2026: hives 1163/1167/1168/1169/1170/1172/1173 were
+fully fake ("Field Observer"/"Tester"/"Tester Dude") and got deleted
+outright; check-ins 29/31/32 were "testing again" notes left on real
+legacy hives (455, 885, 459 — the last one is Ronnie's own hive) and only
+the check-ins were removed, hives kept.
+
 ## Check-ins (comments/status updates on a hive)
 
 ### View all check-ins for a hive

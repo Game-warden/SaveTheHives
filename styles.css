@@ -1521,6 +1521,61 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* ── STALE-HIVE NUDGE (2026-07-31) ──
+     Same floating-pill z-index tier (900) and bottom-clearance calc as
+     #fab-locate/#bottom-tabs — sits just above the nav pill so it never
+     gets tucked behind it on a notched-safe-area device. */
+  .stale-nudge {
+    position: absolute;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    left: 14px;
+    right: 14px;
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 10px 10px 10px 14px;
+  }
+  .stale-nudge.hidden { display: none; }
+  .stale-nudge-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .stale-nudge-action {
+    flex: 0 0 auto;
+    background: var(--honey);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .stale-nudge-close {
+    flex: 0 0 auto;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   /* ── FIRST-VISIT ON-RAMP OVERLAY (v2.8) ──
      Dims the map itself rather than a blocking modal-overlay; shown once
      via localStorage (see maybeShowOnramp()/dismissOnramp() in app.js). */

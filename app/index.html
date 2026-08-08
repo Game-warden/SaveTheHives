@@ -392,6 +392,23 @@
     <button class="validate-banner-close" onclick="exitValidateToMap()" title="Exit Check In mode" aria-label="Exit Check In mode">✕</button>
   </div>
 
+  <!-- Stale-hive nudge (2026-07-31, CONTENT_LIBRARY_IDEAS.md item #15) — a
+       low-key, dismissible-per-session reminder for RETURNING visitors
+       (gated on ONRAMP_SEEN_KEY in maybeShowStaleNudge(), app.js) who
+       already dismissed the one-time onramp overlay above. Sits above
+       #bottom-tabs (same bottom:calc(88px + safe-area) treatment as
+       #fab-locate) rather than up top, so it never competes with
+       #validate-banner. Hidden automatically while Validate mode is
+       active (redundant with that banner's own stale count) or on any
+       non-map tab. -->
+  <div id="stale-nudge" class="stale-nudge hidden">
+    <div class="stale-nudge-text">
+      <span id="stale-nudge-text"></span>
+    </div>
+    <button class="stale-nudge-action" onclick="setTab('validate')">Check In</button>
+    <button class="stale-nudge-close" onclick="dismissStaleNudge()" title="Dismiss" aria-label="Dismiss">✕</button>
+  </div>
+
   <!-- Floating search (replaces the old static search bar row, v2.8) -->
   <div id="map-search" class="collapsed">
     <button id="map-search-icon" onclick="toggleMapSearch(true)" title="Search location" aria-label="Search location">
@@ -510,15 +527,22 @@
   </div>
 
   <!-- First-visit on-ramp overlay (v2.8) — shown once via localStorage,
-       dimmed background over the map itself rather than a blocking modal. -->
+       dimmed background over the map itself rather than a blocking modal.
+       Reframed 2026-07-31 (CONTENT_LIBRARY_IDEAS.md item #15, "Elevate
+       Validate as the Primary On-Ramp") to lead with the stale-hive stat
+       and make Validate the primary CTA instead of "Explore the map" —
+       title/body text below is a neutral fallback shown for the instant
+       before real data loads; updateCounts() in app.js overwrites both
+       with the live count (#onramp-title/#onramp-body) once allHives is
+       populated, same pattern as the header tagline's live hive count. -->
   <div id="onramp-overlay" class="onramp-overlay hidden">
     <div class="onramp-card">
       <div class="onramp-emoji" aria-hidden="true">🐝</div>
-      <div class="onramp-title">Could there be a wild bee colony within a mile of you?</div>
-      <div class="onramp-body">1,152+ feral hives logged since 2008 by citizen scientists. Tap any pin to see what's been found — or check in on an existing hive, or go find a brand-new one.</div>
+      <div class="onramp-title" id="onramp-title">Most of the wild bee colonies we've found haven't been checked on in years.</div>
+      <div class="onramp-body" id="onramp-body">We've logged 1,150+ feral hives since 2008 — but almost none have been confirmed still active since. You can check on one near you in under a minute. No experience needed.</div>
       <div class="onramp-actions">
-        <button class="btn onramp-primary" onclick="dismissOnramp()">Explore the map</button>
-        <button class="btn btn-outline onramp-secondary" onclick="dismissOnramp();setTab('learn');">How can I help?</button>
+        <button class="btn onramp-primary" onclick="dismissOnramp();setTab('validate');">Check in on a hive near me</button>
+        <button class="btn btn-outline onramp-secondary" onclick="dismissOnramp()">Explore the map first</button>
       </div>
     </div>
   </div>

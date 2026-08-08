@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.2'; // Contact-submitter feature wired end to end: submitHive() now sends allow_contact on insert, HIVE_COLUMNS/dbRowToHive() read it + submitted_by back, addMarker() shows a "📬 Contact Submitter" popup button (hidden for your own hives), and a new #contact-modal collects the message and calls the contact-submitter Edge Function (supabase/functions/contact-submitter/index.ts, deployed separately via the Supabase dashboard — not part of this SW cache). privacy.html updated to disclose the opt-in relay. Requires the allow_contact column to exist on `hives` before this build is merged to main — see chat 2026-07-29 for the ALTER TABLE statement.
+const CACHE_VERSION = 'v2.13.3'; // Validate-first onramp (2026-07-31, CONTENT_LIBRARY_IDEAS.md item #15): #onramp-overlay reframed to lead with a live "X hives never checked" stat and Validate as the primary CTA (was "Explore the map"), text updated dynamically by updateCounts() in app.js once real data loads. New persistent #stale-nudge banner (app.js: maybeShowStaleNudge()/dismissStaleNudge()) surfaces the same live count to returning visitors who already dismissed the one-time overlay, dismissible per session, hidden during Validate mode and on non-map tabs. No backend/schema changes.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

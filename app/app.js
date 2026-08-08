@@ -242,6 +242,39 @@ function dismissOnramp() {
 }
 
 // ═══════════════════════════════════════
+// STALE-HIVE NUDGE (2026-07-31, CONTENT_LIBRARY_IDEAS.md item #15) — a
+// persistent, low-key reminder for RETURNING visitors (gated on
+// ONRAMP_SEEN_KEY, so it never doubles up with the one-time overlay above)
+// surfacing a live "X hives have never been checked" count. Dismissible
+// per browser session (sessionStorage, not localStorage) — reappears next
+// visit rather than being silenced forever after one tap, since the
+// underlying number is still true and worth resurfacing. Driven from
+// updateCounts() so it shares that function's existing call sites
+// (initial load, delta sync, new submissions, check-ins) instead of a
+// separate polling/refresh path.
+// ═══════════════════════════════════════
+const STALE_NUDGE_DISMISSED_KEY = 'staleNudgeDismissed';
+function dismissStaleNudge() {
+  sessionStorage.setItem(STALE_NUDGE_DISMISSED_KEY, '1');
+  const nudge = document.getElementById('stale-nudge');
+  if (nudge) nudge.classList.add('hidden');
+}
+function maybeShowStaleNudge(neverValidatedCount) {
+  const nudge = document.getElementById('stale-nudge');
+  if (!nudge) return;
+  const eligible =
+    localStorage.getItem(ONRAMP_SEEN_KEY) &&         // returning visitor only
+    !sessionStorage.getItem(STALE_NUDGE_DISMISSED_KEY) &&
+    !validateActive &&                                // Validate's own banner already covers this
+    neverValidatedCount > 0 &&
+    document.getElementById('map-container')?.style.display !== 'none'; // map tab only
+  if (!eligible) { nudge.classList.add('hidden'); return; }
+  const text = document.getElementById('stale-nudge-text');
+  if (text) text.textContent = `🐝 ${neverValidatedCount.toLocaleString()} hives have never been checked.`;
+  nudge.classList.remove('hidden');
+}
+
+// ═══════════════════════════════════════
 // FLOATING SEARCH (v2.8) — morphs the map-search icon into an inline field
 // ═══════════════════════════════════════
 function toggleMapSearch(open) {
@@ -778,6 +811,25 @@ function updateCounts() {
   const tagline = document.getElementById('header-tagline');
   if (tagline && allHives.length) {
     tagline.textContent = `Feral Honeybee Mapping Network · ${allHives.length.toLocaleString()} hives logged`;
+  }
+
+  // Live "never validated" stat (2026-07-31, CONTENT_LIBRARY_IDEAS.md #15)
+  // feeds both the first-visit onramp overlay (if still open — replaces
+  // its static fallback copy with the real, current number, same pattern
+  // as the tagline above) and the persistent stale-hive nudge for
+  // returning visitors.
+  if (allHives.length) {
+    const neverValidated = allHives.filter(h => !h.last_verified_at).length;
+
+    const onrampOverlay = document.getElementById('onramp-overlay');
+    if (onrampOverlay && !onrampOverlay.classList.contains('hidden')) {
+      const title = document.getElementById('onramp-title');
+      const body = document.getElementById('onramp-body');
+      if (title) title.textContent = `${neverValidated.toLocaleString()} wild bee colonies haven't been checked on in years.`;
+      if (body) body.textContent = `We've logged ${allHives.length.toLocaleString()} feral hives since 2008 — but almost none have been confirmed still active since. You can check on one near you in under a minute. No experience needed.`;
+    }
+
+    maybeShowStaleNudge(neverValidated);
   }
 }
 
