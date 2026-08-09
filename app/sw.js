@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.3'; // Validate-first onramp (2026-07-31, CONTENT_LIBRARY_IDEAS.md item #15): #onramp-overlay reframed to lead with a live "X hives never checked" stat and Validate as the primary CTA (was "Explore the map"), text updated dynamically by updateCounts() in app.js once real data loads. New persistent #stale-nudge banner (app.js: maybeShowStaleNudge()/dismissStaleNudge()) surfaces the same live count to returning visitors who already dismissed the one-time overlay, dismissible per session, hidden during Validate mode and on non-map tabs. No backend/schema changes.
+const CACHE_VERSION = 'v2.13.4'; // Canonical tag fix (2026-08-08): added <link rel="canonical" href="https://savethehives.org/app/"> to app/index.html's <head> after Google Search Console flagged /app/?onboard=validate as "Duplicate without user-selected canonical" post-sitemap-submission. Tells Google all ?onboard= query variants (validate/add/learn) should index as the single clean /app/ URL. No visual/behavioral changes.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

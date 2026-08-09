@@ -284,6 +284,14 @@
 <title>The Map — SaveTheHives</title>
 <meta name="description" content="Validate a known wild honey bee colony, report a new one, or browse 1,150+ logged sightings across North America.">
 
+<!-- Canonical (added 2026-08-08): the ?onboard=validate|add|learn query params
+     used by the landing page's "way" cards (see maybeShowOnboardCallout() in
+     app.js) don't change the served HTML at all — same shell either way. GSC
+     flagged /app/?onboard=validate as "Duplicate without user-selected
+     canonical" after crawling it, so this points every variant back at the
+     clean /app/ URL for indexing purposes. -->
+<link rel="canonical" href="https://savethehives.org/app/">
+
 <!-- Open Graph / Facebook (added Jul 23 2026) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://savethehives.org/app/">
