@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.4'; // Canonical tag fix (2026-08-08): added <link rel="canonical" href="https://savethehives.org/app/"> to app/index.html's <head> after Google Search Console flagged /app/?onboard=validate as "Duplicate without user-selected canonical" post-sitemap-submission. Tells Google all ?onboard= query variants (validate/add/learn) should index as the single clean /app/ URL. No visual/behavioral changes.
+const CACHE_VERSION = 'v2.13.5'; // Structured data added (2026-08-15): added HowTo JSON-LD (mirrors the visible "How to Beeline" list in #pf-howto-box) and Dataset JSON-LD (describes the public hive-sighting map data) to app/index.html's <head>. No visual/behavioral changes, but bumping since app/index.html is a precached SHELL_ASSET — without this bump, returning visitors would keep serving the old <head> indefinitely.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

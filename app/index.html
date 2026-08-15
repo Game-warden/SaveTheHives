@@ -313,6 +313,70 @@
 <link rel="icon" href="/logo.jpg" type="image/jpeg">
 <link rel="apple-touch-icon" href="/logo.jpg">
 
+<!-- HowTo structured data (added 2026-08-15) — mirrors the visible
+     "How to Beeline" list in #pf-howto-box below almost verbatim. Keep
+     these two in sync: if the in-app steps change, update this block too,
+     since Google's structured-data guidelines require the markup to match
+     what's actually on the page. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "How to Beeline: Track a Wild Honey Bee Colony Home Using a Phone Compass",
+  "description": "Beelining is a 300-year-old technique for tracking foraging honey bees back to their wild colony using compass bearings from two points. SaveTheHives' Pathfinder tool guides you through it with your phone's built-in compass.",
+  "totalTime": "PT30M",
+  "tool": [
+    { "@type": "HowToTool", "name": "Smartphone with compass" },
+    { "@type": "HowToTool", "name": "Bee box with bait (anise oil, lemongrass oil, wintergreen oil, or dark honeycomb soaked in sugar syrup)" }
+  ],
+  "step": [
+    { "@type": "HowToStep", "name": "Trap 7-8 bees", "text": "Trap 7-8 bees minimum. You'll release one bee per bearing reading (3 per point x 2 points = 6), plus a couple spares in case one doesn't fly straight home." },
+    { "@type": "HowToStep", "name": "Use a bee box with bait", "text": "A few drops of anise oil, lemongrass oil, or wintergreen oil works well, or use old dark honeycomb soaked in sugar syrup. Avoid plain commercial honey due to disease risk." },
+    { "@type": "HowToStep", "name": "Let bees feed until calm", "text": "A fed bee flies straight home; a startled one won't give a reliable bearing." },
+    { "@type": "HowToStep", "name": "Release one bee at a time", "text": "Watch closely as it circles briefly then takes off, that's its beeline home." },
+    { "@type": "HowToStep", "name": "Record the bearing with your phone flat and level", "text": "Hold your phone flat and level, like a tabletop compass, screen facing up. Point the top edge of the phone in the same direction the bee flew, then record the reading." },
+    { "@type": "HowToStep", "name": "Repeat 3 times per point", "text": "Repeat 3 times per point for a reliable averaged bearing before locking it in." },
+    { "@type": "HowToStep", "name": "Stay away from metal", "text": "Mailboxes, cars, fences, and metal posts throw off phone compasses badly. Take readings in open ground at least 10-15 feet from anything metal." },
+    { "@type": "HowToStep", "name": "Calibrate your compass first", "text": "Wave your phone in a slow figure-8 motion a few times before starting. Most phones do this automatically but it helps accuracy." },
+    { "@type": "HowToStep", "name": "Walk as far as you reasonably can between Point A and B", "text": "Even 20m works, but 40m+ gives noticeably tighter results since short baselines amplify small compass errors." }
+  ]
+}
+</script>
+
+<!-- Dataset structured data (added 2026-08-15) — describes the crowd-sourced
+     hive sighting data browsable on the map. Distribution points at this
+     page (not the raw Supabase REST endpoint) since the map is the intended
+     public access point, not the database API. No license field — none has
+     been formally established yet; add one here if/when that's decided. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "SaveTheHives Feral Honey Bee Colony Sightings",
+  "description": "A crowd-sourced, citizen-science dataset of 1,150+ wild (non-managed) honey bee colony sightings across North America, submitted and periodically re-validated by the public. Includes location, discovery notes, and check-in history used to identify long-surviving 'Genetic Goldmine' colonies for research.",
+  "url": "https://savethehives.org/app/",
+  "isAccessibleForFree": true,
+  "keywords": ["feral honey bees", "wild honey bee colonies", "citizen science", "honey bee conservation", "survivor stock", "beelining", "non-managed colonies"],
+  "creator": {
+    "@type": "Organization",
+    "name": "Save The Hives",
+    "url": "https://savethehives.org/"
+  },
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "North America"
+  },
+  "temporalCoverage": "2008/..",
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "contentUrl": "https://savethehives.org/app/",
+      "encodingFormat": "text/html"
+    }
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">

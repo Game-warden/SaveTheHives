@@ -55,6 +55,7 @@
 
 <link rel="icon" href="/logo.jpg" type="image/jpeg">
 <link rel="apple-touch-icon" href="/logo.jpg">
+<link rel="canonical" href="https://savethehives.org/">
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://savethehives.org/">
@@ -216,6 +217,41 @@
     header, .hero, .ways, .why-teaser-block, #why-it-matters, .final-cta, footer { padding-left: 18px; padding-right: 18px; }
   }
 </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Save The Hives",
+        "url": "https://savethehives.org/",
+        "description": "The Feral Honeybee Mapping Network. Track wild honey bee colonies, record compass bearings, and locate resilient feral bee populations using our interactive mapping tools.",
+        "applicationCategory": "MapApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "featureList": [
+          "Interactive feral honeybee colony mapping",
+          "Line-trapping data entry",
+          "Phone compass bearing tracking for bee lining"
+        ],
+        "author": { "@id": "https://savethehives.org/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://savethehives.org/#organization",
+        "name": "Save The Hives",
+        "alternateName": "Save The Hives Network",
+        "url": "https://savethehives.org/",
+        "logo": "https://savethehives.org/logo.jpg",
+        "description": "A citizen-science project mapping and tracking non-managed (feral) honey bee colonies across North America to support survivor-stock research.",
+        "sameAs": [
+          "https://www.facebook.com/savethehives"
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -270,7 +306,7 @@
   <div class="section-label">Why it matters</div>
   <a class="teaser" href="#why-it-matters">
     <div class="teaser-scene">
-      <video src="/images/teaser-bee.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+      <video src="/images/teaser-bee.mp4" poster="/images/teaser-bee-poster.jpg" autoplay muted loop playsinline aria-hidden="true"></video>
     </div>
     <div class="teaser-text">
       <div class="title">Why do untreated colonies matter?</div>
