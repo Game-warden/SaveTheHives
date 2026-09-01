@@ -454,7 +454,7 @@ User's Browser / iPhone
 
 ---
 
-### Visit Counter — State/City Breakdown via Pages Functions (v2.14, 2026-07-29)
+### Visit Counter — State/City Breakdown via Pages Functions (v2.14, 2026-07-29; migrated KV → D1, 2026-08-31)
 
 **Why it exists:** Cloudflare's free-tier dashboard only shows country-level
 geo data for visitors — no state or city breakdown. Rather than adding a
@@ -468,32 +468,57 @@ runs in the visitor's browser.
 whole Pages project (root landing page and `/app/*` both). On real page
 loads only (detected via the `sec-fetch-dest: document` header, so the
 dozens of image/CSS/JS/map-tile sub-requests per visit aren't
-double-counted), it reads `request.cf.regionCode` (US state) and
-`request.cf.city` from Cloudflare's built-in geolocation data and
-increments a plain counter in Cloudflare KV — one key per state, one per
-city, one per non-US country. No cookies, no IP address stored, no
-per-visit log, no per-visitor identifier of any kind — just running
-tallies like `state:NC` → `412`.
+double-counted) from a request whose User-Agent doesn't look like an
+obvious script/bot, it reads `request.cf.regionCode` (US state) and
+`request.cf.city` from Cloudflare's built-in geolocation data and upserts
+a row per `(scope, key, day)` in a D1 table — `state`/`NC`, `city`/
+`Raleigh|NC`, `country`/`CA`, one row per location per day. No cookies, no
+IP address stored, no per-visit log, no per-visitor identifier of any
+kind — just running daily tallies.
 
-**One-time setup (KV namespace + binding):**
-1. Cloudflare dashboard → Workers & Pages → **KV** → Create a namespace,
-   name it e.g. `savethehives-visits`
-2. Go to the SaveTheHives Pages project → **Settings → Functions → KV
-   namespace bindings** → Add binding → Variable name: `VISITS` → select
-   the namespace created in step 1
-3. That's it — no further code changes needed; the function checks for
-   `env.VISITS` and no-ops harmlessly if the binding isn't present yet.
+**Migrated from KV to D1 (2026-08-31):** KV's free tier caps at 1,000
+writes/day, which a burst of automated/scraper traffic (investigated in
+chat that day — not AI crawlers, not search engines; country/city
+distribution pointed at generic bot noise from cloud-hosted IPs) blew
+through in a single evening, pausing the counter until the daily reset.
+KV's get-then-put was also non-atomic (previously documented here as a
+known, accepted limitation), so concurrent requests could silently lose
+an increment. D1's free tier is 100,000 row-writes/day — 100x the
+headroom — and a single `INSERT ... ON CONFLICT DO UPDATE` is atomic,
+fixing both problems at once. Schema: `d1_visit_counter_schema.sql`
+(repo root). The old KV namespace/binding (`VISITS` →
+`savethehives-visits`) was left in place rather than deleted, but the
+middleware no longer references it — safe to remove later if desired.
 
-**Viewing the tallies:** Cloudflare dashboard → Workers & Pages → KV →
-open the `savethehives-visits` namespace → browse keys directly (e.g.
-`state:NC`, `city:Raleigh|NC`, `country:CA`). No custom dashboard built
-yet — worth revisiting if this becomes a frequent enough check to want a
-nicer view.
+**One-time setup (D1 database + binding):**
+1. Cloudflare dashboard → Workers & Pages → **D1 SQLite Database** →
+   Create database, name it e.g. `savethehives-visits`
+2. Run the schema in `d1_visit_counter_schema.sql` via that database's
+   **Console** tab (creates the `visit_counts` table)
+3. Go to the SaveTheHives Pages project → **Settings → Functions →
+   Bindings** → Add → D1 database → Variable name: `VISITS_DB` → select
+   the database created in step 1 → Save
+4. That's it — no further code changes needed; the function checks for
+   `env.VISITS_DB` and no-ops harmlessly if the binding isn't present yet.
 
-**Known limitation:** increments are a plain read-then-write against KV
-(no atomic counter), so simultaneous requests from the same
-state/city within the same instant could theoretically undercount by one.
-Not worth solving with a Durable Object at this project's traffic volume.
+**Gotcha found during this migration:** the Cloudflare dashboard's "Add
+binding" side panel was unreliable when driven by browser automation —
+selecting a value from the D1-database dropdown inside it would silently
+close the panel before Save could register, across several different
+interaction methods (mouse click, keyboard nav, coordinate click). Root
+cause looked like the browser pane's viewport being resized between
+actions rather than anything wrong with the binding flow itself. Doing it
+by hand in a normal browser (as Ronnie did) worked on the first try —
+worth remembering if this ever needs doing again from an automated
+session.
+
+**Viewing the tallies:** Cloudflare dashboard → Workers & Pages → D1 →
+open the `savethehives-visits` database → **Console** tab → plain SQL,
+e.g. `select key as state, sum(count) as total from visit_counts where
+scope = 'state' group by key order by total desc;`. More example queries
+(daily trend for one state, busiest day site-wide) are in
+`d1_visit_counter_schema.sql`. No custom dashboard built yet — worth
+revisiting if this becomes a frequent enough check to want a nicer view.
 
 ---
 
