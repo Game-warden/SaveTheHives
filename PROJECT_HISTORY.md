@@ -12,20 +12,33 @@ SaveTheHives has been rebuilt from scratch twice. It's now live at **savethehive
 
 ---
 
-## Era 0 — the original savethehives.com (2008–2015)
+## Era 0 — the original savethehives.com (2008–2018)
 
-Predates every era below by roughly a decade. Reconstructed Jul 22 2026 from an old marketing one-pager Ronnie used to hand out/send around at the time (last footer-dated 2015).
+Predates every era below by roughly a decade and a half. Originally reconstructed Jul 22 2026 from an old marketing one-pager (footer-dated 2015); **corrected and substantially expanded Aug 9 2026** once Ronnie surfaced three primary-source email threads with exact dates, archived at `archive/historical-emails/`. Those threads supersede the one-pager and the earlier ~2015/"Apple API demands" shutdown guess below — treat the dates in this section as the reliable record now.
 
 - **Origin:** Ronnie was an active beekeeper in the mid-to-late 2000s and met Dr. Tarpy at an NC State beekeepers meeting — one thing led to another, and the two started what became "The Feral Bee Project" together.
 - **2008:** Formalized as a joint effort between Ronnie Bouchon and **Dr. David Tarpy** (NC State) — researchers needed known locations of feral honey bee colonies to do genetic sampling for Colony Collapse Disorder (CCD) research. Domain `www.savethehives.com` registered the same year; the site let "citizen scientists" log feral-bee sightings with lat/long and field notes, including an option to keep entries private.
 - Got real press: a **News & Observer** article featuring Dr. Tarpy covered the original launch — explains the unusually high density of legacy hive records still concentrated around Raleigh, NC in today's dataset.
 - Grew wider recognition: known across beekeeping associations, and pulled entries from countries around the world.
-- **August 2012:** shipped an iPhone app, **Honey Bee Mapper**, on the Apple App Store — gave contributors more precise lat/long mapping than the web form alone.
+- **Sep 4, 2012:** Ronnie emailed Tarpy and **Dr. Deborah Delaney** (UDel) announcing the release of **Honeybee Mapper**, a companion iPhone/iPad app on the Apple App Store (`archive/historical-emails/2012-09-04_honeybee-mapper-released.pdf`) — corrects the earlier "August 2012" guess to the actual announcement date. The app added a 20-question honeybee quiz and easier in-field hive logging/mapping than the web form alone; Ronnie's own email notes it was "an even bigger learning experience than creating the website 4 years ago" (i.e., confirms the 2008 launch independently). Delaney replied the same evening that she'd used savethehives.com colonies directly in her own research ("I could not have done this research without your awesome brain and site!!") — the earliest documented confirmation of the site being cited in outside research, predating her later UDel faculty-page listing.
 - By the marketing sheet's own count, the project held **1,095 records** at that point, averaging 3–5 hives per update.
-- **Cited in outside research** — most notably by **Dr. Debbie Delaney**, who still lists savethehives.com as a resource on her University of Delaware faculty page as of 2026 (see `KEY_PEOPLE_CONTACTS.md`) — plus a Dr. Tarpy Google Hangout and his "The Buzz on Bees: Coping with Vanishing Colonies" piece, and various bee journals.
-- **Shutdown, ~2015:** the site and iPhone app went dark as Apple's security/API requirements for apps became too demanding to keep maintaining solo — not from loss of interest, funding, or data. The `www.savethehives.com` domain and its data lapsed after that; the ~1,150+ "legacy records" loaded into the current (2026) app trace back to this original dataset.
+- **Cited in outside research** — most notably by **Dr. Debbie Delaney** (see above), who still lists savethehives.com as a resource on her University of Delaware faculty page as of 2026 (see `KEY_PEOPLE_CONTACTS.md`) — plus a Dr. Tarpy Google Hangout and his "The Buzz on Bees: Coping with Vanishing Colonies" piece, and various bee journals.
+- **Wind-down, Oct 2016 – Oct 2018 (not a sudden ~2015 shutdown):** per `archive/historical-emails/2016-2018_shutdown-discussion.pdf` ("SaveThe Hives is For Sale!" thread):
+  - **Oct 25, 2016:** Ronnie emailed Tarpy that he'd had to give up beekeeping "a couple years ago" due to increasing allergic reactions, and — busy with other things — wanted to discuss handing SaveTheHives off. At that point the site/domain were still stable and still gaining new entries, and the iPhone app was still selling, just needing updates. This is the real reason for stepping back — not an Apple API/security issue as previously guessed.
+  - **Oct 28 – Dec 1, 2016:** Tarpy was open to meeting; mentioned Debbie Delaney had told him she'd already acquired the site from Ronnie "up in UDel" — Tarpy himself flagged this could be "just my misunderstanding," and no handoff was ever actually completed.
+  - **Oct 10, 2018:** ~22 months later, Ronnie followed up again — site still not actively maintained, domain **set to renew in ~27 days**, and he told Tarpy he'd be "shutting everything off at that time" unless someone wanted it; made the same donation offer to both Tarpy and Delaney. Tarpy replied the same day, still willing to check with Delaney, but the thread ends there with no further reply on record.
+  - **Best-evidenced shutdown window: ~early November 2018** (≈27 days after the Oct 10, 2018 email) — not 2015. The `www.savethehives.com` domain and its data lapsed around then; the ~1,150+ "legacy records" loaded into the current (2026) app trace back to this original dataset.
 
-This is the direct predecessor to everything below — Dr. Tarpy's 2026 return as scientific advisor (see `KEY_PEOPLE_CONTACTS.md`, `MEETING_NOTES_2026-07-21_Tarpy.md`) is a continuation of this original 2008 collaboration, not a new relationship.
+This is the direct predecessor to everything below — Dr. Tarpy's 2026 return as scientific advisor (see `KEY_PEOPLE_CONTACTS.md`, `MEETING_NOTES_2026-07-21_Tarpy.md`) is a continuation of this original 2008 collaboration, not a new relationship. **Also worth noting:** the 2026 reconnection actually started earlier than the "Jul 21 2026 lunch" — see the new note at the top of Era 1 below.
+
+## The 2026 reconnection actually started Feb 19, 2026 — before git history begins
+
+Added Aug 9 2026, from `archive/historical-emails/2026-02_announcing-new-version.pdf` ("Save The Hives (ver 2)" thread). The git log and the rest of this doc treat Feb 23–24, 2026 as the start of the rebuild, and the Jul 21, 2026 lunch as the start of Tarpy's renewed advisor role — but the actual first contact was several days and one full email exchange earlier:
+
+- **Feb 19, 2026, 11:32 AM:** Ronnie emailed Tarpy cold (first contact since the 2018 thread above) — "I am currently re-constructing a new and updated SaveTheHives mapping program... With AI assistance, I've been able to reconstruct what originally took me months of hand coding, in a couple of hours." This is the actual re-birth announcement.
+- **Feb 20, 2026, 1:41 PM:** Tarpy replied enthusiastically same day ("So great to hear from you!... Such timing!") and, unprompted, gave Ronnie his first batch of 2026 researcher leads: a Kleckner (grad student in Jamie Ellis' lab, Florida, studying wild nests in sub-Saharan Africa), **Juliana Rangel** (Texas A&M), and **Boris Baer** (UC Riverside — "survivor" stock with a lot of AHB genetics). **This means Boris Baer was first surfaced by Tarpy here, not in the Jul 28–29 "FUP from our meeting" thread as `KEY_PEOPLE_CONTACTS.md` currently states** — see the correction there.
+- **Feb 20, 2026, 3:05 PM:** Ronnie shared the very first beta link the same afternoon — `https://game-warden.github.io/SaveTheHives-pwa/` — three to four days before the earliest commit (`3ee1349 Initial commit`) in the Era 1 git history below. Also floated the idea (still open) of a Scouts bee-lining badge, tied to re-validating the ~1,100 legacy hives.
+- **Feb 23, 2026, 8:03 AM:** Tarpy replied he'd long dreamed the site could merge "naturalists/birding with geocaching," loved the Scouts idea, and mentioned being an empty-nester with more free time now — same day the Era 1 git commits begin.
 
 ## Era 1 — React + Leaflet PWA (Feb 23–24, 2026)
 
@@ -88,6 +101,7 @@ In other words: the actual live, deployed app — the thing that took 3 days and
 | `tarpy-email-draft.md` | Unsent outreach email draft to Dr. David Tarpy (NC State). |
 | `Archive.zip` | The exact zip last uploaded to Cloudflare Pages for deployment — not a historical archive despite the name. |
 | `archive/` | Era 1/2 (React + Leaflet, then React + MapLibre) source code and historical manifests. Useful only if reviving old features (DCA heatmap, beelining tools) that didn't carry over to the Era 3 rebuild. |
+| `archive/historical-emails/` | Three primary-source PDFs (Ronnie's own Gmail exports) establishing exact Era 0 dates: `2012-09-04_honeybee-mapper-released.pdf`, `2016-2018_shutdown-discussion.pdf`, `2026-02_announcing-new-version.pdf`. Added Aug 9 2026 — source of the corrections in Era 0 and the new "2026 reconnection" note above. |
 | `claudcode_savethehives/` | Earlier numbered drafts of the Era 3 single-file HTML, from a Jun 25 session that predates this one. |
 
 ---

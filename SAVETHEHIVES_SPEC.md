@@ -336,6 +336,25 @@ Discussed Jul 2 2026, not yet acted on — captured here so the reasoning isn't 
 | Email visibility | 🔒 Admins only | Never shown publicly; used only for magic-link auth |
 | Coordinate fuzzing for public | ❌ Deferred | Could be added in v3 if privacy concerns arise with scale |
 
+**Gap: the 2-decimal rounding above is display-only, not real fuzzing.** The
+popup *text* is rounded via `hive.lat.toFixed(2)` in `app/app.js`, but the
+map *pin* itself is placed at the full, unrounded coordinate
+(`L.marker([hive.lat, hive.lng])`), and the `public.hives` table has public
+SELECT RLS with no server-side rounding — so the exact coordinate is fully
+queryable via the Supabase API by anyone, not just visible in the UI. A
+casual visitor reading the popup gets ~0.7-mile precision; a determined
+party (or anyone hitting the API directly) can get the exact spot. This
+came up concretely on 2026-08-14 in outreach to The Honey Company
+(thehoneycompany.com), a Utah queen-breeding operation whose Feral Bee
+Project depends on specific feral colony locations staying obscure — the
+"our users could surface leads on new feral populations" angle in that
+outreach email is weaker than it sounds given this gap, since anything
+logged on the public map is effectively public to anyone who wants exact
+coordinates, not just to a would-be partner. Worth real fuzzing (server-side
+rounding or offset, not just client display truncation) before leaning on
+"privacy-conscious" as a pitch to conservation-minded or genetics-focused
+partners.
+
 ---
 
 ## 11. Known Issues / Backlog

@@ -30,20 +30,20 @@ contact. No new domain, handle, or visual identity introduced here.
 > Citizen-science mapping of wild honey bee colonies. Find one, log it, help track survivors. 🐝
 
 **Long "About" section:**
-> SaveTheHives is a free, volunteer-run citizen science project mapping non-managed honey bee colonies across North America. Over 1,150 legacy records dating back to 2008 are already on the map, and growing. Our focus: colonies that persist winter after winter with zero human treatment — what we call Genetic Goldmines — because each one is a real candidate for understanding how honey bees might survive without constant chemical support. Anyone can log a wild hive or confirm one that's already on the map, no experience or equipment required. savethehives.org
+> SaveTheHives is a free, volunteer-run citizen science project mapping non-managed honey bee colonies across North America. Over 1,150 legacy records dating back to 2008 are already on the map, and growing. Our focus: colonies that persist winter after winter with zero human treatment — what we call Genetic Goldmines — because each one is a real candidate for understanding how honey bees might survive without constant chemical support. Anyone can log a wild hive or confirm one that's already on the map, no experience or equipment required. SaveTheHives.org
 >
 > *Scientific framing reviewed and approved by Dr. David Tarpy, NC State University Scholar Professor & Extension Apiculturist.*
 
 ## 2. Pinned post (post this first, pin it to the top)
 
 **Copy:**
-> 🐝 SaveTheHives is live at savethehives.org.
+> 🐝 SaveTheHives is live at SaveTheHives.org.
 >
 > Somewhere within a mile or two of where you're standing, there's almost certainly a colony of wild honey bees living completely on their own — no beekeeper, no treatments, no help. Some of them have survived that way for years, and that survival matters more than you'd think: those colonies may be carrying natural resistance to the mites and disease wiping out managed hives everywhere.
 >
 > We're building a map of them. 1,150+ historical records are already loaded, and we need people to help find new ones and check in on the old ones.
 >
-> No bees to own, no experience needed. Just log what you find (or confirm a hive that's already on the map) at savethehives.org.
+> No bees to own, no experience needed. Just log what you find (or confirm a hive that's already on the map) at SaveTheHives.org.
 >
 > Follow along — we'll be sharing finds, the story behind the project, and how you can get involved.
 
@@ -62,7 +62,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   >
   > But some wild colonies don't. They've persisted on their own for years — real, sustained natural selection at work. We call these colonies Genetic Goldmines: not because the genetics are proven, but because each one's a real lead worth tracking. SaveTheHives is the map that finds them. 🗺️🐝
   >
-  > savethehives.org
+  > SaveTheHives.org
 - **Image:** `images/honeybee-on-comb.jpg` (macro shot, already in the repo — striking close-up, fits the "these bees matter" framing)
 - **Alt text:** "Close-up of a honey bee on honeycomb."
 - **Link:** keep the trailing "savethehives.org" line as-is — confirmed Jul 22 2026: Facebook doesn't generate a link-preview card when a photo is already attached, so the plain text is the only way readers get the link. Don't delete it.
@@ -75,7 +75,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 - **Post text:**
   > Ever heard of beelining? It's a nearly 300-year-old trick: catch a foraging bee, feed it sugar syrup, and watch which direction it flies home. Follow that line, repeat a few times, and you can walk right up to a wild colony's tree.
   >
-  > It's part orienteering, part treasure hunt — and every colony you find is a real scientific data point. We've got a full field guide to get you started: savethehives.org (Learn tab)
+  > It's part orienteering, part treasure hunt — and every colony you find is a real scientific data point. We've got a full field guide to get you started: SaveTheHives.org (Learn tab)
 - **Image:** `images/1. Hero — "The Beeline" (Module 1 + hub landing).png` — the illustrated bee-line-to-a-tree artwork already used in the app's Learn tab; literally depicts the concept
 - **Alt text:** "Illustration of a bee flying a straight line from wildflowers to a hollow tree, showing the beelining technique."
 - **Link:** as of v2.9.3 (Jul 22 2026) there's a real deep link — use `savethehives.org/?tab=learn` in place of the plain "savethehives.org" mention. Still keep it as trailing plain text, not a pasted-in preview card: a photo is attached, so Facebook won't generate a link-preview card regardless of which URL is used
@@ -88,7 +88,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 - **Post text:**
   > Not ready to go bee hunting? You can still help. SaveTheHives has 1,150+ historical hive records from 2008–2017 that nobody has checked on in years. If one happens to be near you, confirming whether it's still active takes under a minute — tap a pin, tap Validate, done.
   >
-  > Every confirmation is real data for researchers. savethehives.org
+  > Every confirmation is real data for researchers. SaveTheHives.org
 - **Image:** `SaveTheHives_map_screenshot_cropped.jpg` (live screenshot of the map around Raleigh, browser chrome cropped out — captured Jul 20 2026)
 - **Alt text:** "Screenshot of the SaveTheHives map showing hive pin locations around Raleigh, NC."
 - **Link:** keep the trailing URL as-is — no preview card will generate since a photo is attached (confirmed Jul 22 2026); the plain text is the only way readers get the link
@@ -101,7 +101,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 - **Post text:**
   > Honey bees have lost 30–50% of managed colonies most years since the mid-2000s. Most of the survivors only make it because of constant human intervention.
   >
-  > The colonies that make it on their own — no treatment, no help — are living proof that natural resistance is possible. Finding and tracking them is the whole point of SaveTheHives. Every pin on our map is a lead worth following. savethehives.org
+  > The colonies that make it on their own — no treatment, no help — are living proof that natural resistance is possible. Finding and tracking them is the whole point of SaveTheHives. Every pin on our map is a lead worth following. SaveTheHives.org
 - **Image:** `images/learn-hero.jpg` (same bee-line/tree illustration set, alternate crop — keeps visual consistency with Post 2 without literally repeating it)
 - **Alt text:** "Illustration of a honey bee in a wildflower meadow with a hollow tree in the distance."
 - **Link:** keep the trailing URL as-is — no preview card will generate since a photo is attached (confirmed Jul 22 2026); the plain text is the only way readers get the link
@@ -113,7 +113,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 **POST 5 — Call for founding contributors**
 
 - **Post text:**
-  > SaveTheHives is entirely volunteer-run — no funding, no ad budget, just people who care about wild bees. If you're a beekeeper, a Scout leader, a hiker, or just someone who likes a good treasure hunt, we could use you. Log a hive, confirm one that's already logged, or just share this with someone who'd like it. savethehives.org 🐝
+  > SaveTheHives is entirely volunteer-run — no funding, no ad budget, just people who care about wild bees. If you're a beekeeper, a Scout leader, a hiker, or just someone who likes a good treasure hunt, we could use you. Log a hive, confirm one that's already logged, or just share this with someone who'd like it. SaveTheHives.org 🐝
 - **Image:** `logo.jpg` — closes the launch sequence on the brand mark itself, appropriate for a "join us" post
 - **Alt text:** "SaveTheHives logo."
 - **Link:** keep the trailing URL as-is — no preview card will generate since a photo is attached (confirmed Jul 22 2026); the plain text is the only way readers get the link
@@ -126,11 +126,35 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 - **Milestone posts** — round-number pin counts, "X hives confirmed this month," first Genetic Goldmine badge once that feature ships.
 - **Behind-the-scenes** — the project's own history (the original 2012-era version, the 1,150+ legacy records) is good, low-effort storytelling content.
 
+- **How-To video series** (added 2026-08-16/17) — short vertical (1080x1920) Reels demonstrating exactly where to tap in the app, built via screen recording + ffmpeg highlight overlays (ring/pill flashes on the tapped button, banner callouts for anything the app does automatically). Two ready so far:
+  - **Add a hive** — `howto-add-hive-fb-ready.mp4` (10.6s)
+  - **Check In on a hive** — `howto-checkin-fb-ready-v3.mp4` (8.9s) — v3 fixes: added a highlight ring on the bottom-nav Check In tap (was missing), blurred out the submitter's name on the sample hive card shown mid-video
+  - Post as a **Reel**, not a regular Post/photo — Reels get pushed to non-followers, which matters most for a page this size. Paste the caption into the Reel's Description field on the details screen (not the "Edit reel" trim/captions screen).
+  - **Recurring intro lines** — rotate between these so reposts/resends into groups don't read as duplicate content:
+    - *Add video:* "Found a hive but not sure how to log it? Here's exactly where to tap. 🐝"
+    - *Check In video:* "A hive on the map hasn't been checked in a while? Takes under a minute to confirm it's still there — here's how."
+    - *Both together:* "Two of the easiest ways to help SaveTheHives: log a hive you've found, or check in on one that's already on the map. Both take under a minute. 🐝"
+  - **Hashtags:** add as a first comment, not in the caption itself — `#SaveTheHives #CitizenScience #Beekeeping #Beelining`, matching the standing hashtag set in §9. Note Facebook hashtags carry much less discovery weight than Instagram/X, so treat this as a low-cost add, not a growth lever.
+  - **Still open:** a third clip for the **Learn** tab tap hasn't been recorded yet.
+
+- **Mission/tour video** (added 2026-08-17) — `savethehives-tour-v3.mp4` (31.5s, 1080x1920), a broader "what we're all about" piece rather than a task-specific how-to: real site screenshots + existing repo photos (oak-tree colony, honeybee macro, meadow), Ken Burns pans, burned-in captions (no spoken voiceover — none available). Built via the same ffmpeg pipeline as the How-To series; full asset/shot breakdown in `AI_VIDEO_PROMPT_TOUR.md`.
+  - **Post as a Reel**, same reasoning as the How-To series.
+  - **Post text:**
+    > Somewhere near you, there's probably a wild honeybee colony surviving completely on its own — no beekeeper, no treatments, no help.
+    >
+    > That's the whole idea behind SaveTheHives: find these survivors, log them, and help us understand why some colonies make it without any help at all.
+    >
+    > Take a minute to see what we're all about. 🐝
+    >
+    > SaveTheHives.org
+  - **Reuse down the road:** this caption + video is evergreen — not tied to a specific date or event, so it's a good repeat candidate for slow content weeks, new-follower pushes (e.g. right after a round of friend invites), or cross-posting into beekeeping groups alongside the How-To clips. Vary the opening line slightly on repeat posts if it's going out to the same audience within a few months, so it doesn't read as an exact re-run.
+  - **Hashtags:** same standing set as first comment — `#SaveTheHives #CitizenScience #Beekeeping #Beelining`.
+
   **Ready post — "How this started" (added Jul 22 2026):**
   - **Post text:**
     > Before this was an app, it was a friendship. SaveTheHives actually started in 2008 — Ronnie was an active beekeeper and met Dr. David Tarpy at an NC State beekeepers meeting. One thing led to another, and the two started "The Feral Bee Project": researchers needed known locations of wild honey bee colonies for genetic sampling tied to Colony Collapse Disorder research, so we built a simple web map for anyone to log what they found. By 2012 there was even an iPhone app (Honey Bee Mapper). The project got cited in outside bee research and grew entries from around the world before the original site went dark around 2015.
     >
-    > Those original 1,000+ records never disappeared — they're the backbone of the map you see today, and Dr. Tarpy is back on board as scientific advisor. Same mission, 18 years later. savethehives.org
+    > Those original 1,000+ records never disappeared — they're the backbone of the map you see today, and Dr. Tarpy is back on board as scientific advisor. Same mission, 18 years later. SaveTheHives.org
   - **Image:** no asset fits yet — consider a fresh photo, or the `SaveTheHives_map_screenshot_cropped.jpg` if nothing else is available
   - **Alt text:** (set based on whichever image is used)
   - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
@@ -139,7 +163,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
 
 - **Ready post — "Why do queens mate so much?" (research hook, added Jul 22 2026, reserved for Monday Aug 3 2026 — the first Monday of the ongoing rotation once the launch sequence finishes):**
   - **Post text:**
-    > Turns out one of honey bees' strangest traits might be a survival trick. Queens mate with 10–20+ drones each — far more than needed just for genetic diversity. A 2015 study by Dr. David Tarpy, Dr. Debbie Delaney, and Dr. Thomas Seeley (our own scientific advisor among them) genotyped offspring from feral colonies in NY's Arnot Forest and found their queens mate at the same high rate as managed-colony queens — no more, no less. That points to something interesting: this level of polyandry likely evolved over deep evolutionary time, not as a recent adaptation to survive Varroa. It's baked in. Every non-managed colony we map carries that same trait — one more reason each one is worth finding. savethehives.org
+    > Turns out one of honey bees' strangest traits might be a survival trick. Queens mate with 10–20+ drones each — far more than needed just for genetic diversity. A 2015 study by Dr. David Tarpy, Dr. Debbie Delaney, and Dr. Thomas Seeley (our own scientific advisor among them) genotyped offspring from feral colonies in NY's Arnot Forest and found their queens mate at the same high rate as managed-colony queens — no more, no less. That points to something interesting: this level of polyandry likely evolved over deep evolutionary time, not as a recent adaptation to survive Varroa. It's baked in. Every non-managed colony we map carries that same trait — one more reason each one is worth finding. SaveTheHives.org
   - **Image:** no asset fits yet — consider a fresh photo, or fall back to `images/honeybee-on-comb.jpg`
   - **Alt text:** (set based on whichever image is used)
   - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
@@ -150,7 +174,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   - **Post text:**
     > This little wooden box is the entire toolkit for beelining. Two compartments, a scrap of honeycomb, and a lid. Catch a foraging bee, let her fill up on syrup inside, then open the lid and watch which way she flies home — dead straight, every time.
     >
-    > That's it. No expensive gear, no bees to own. Just patience and a compass. Full how-to in the Learn tab: savethehives.org/?tab=learn 🐝
+    > That's it. No expensive gear, no bees to own. Just patience and a compass. Full how-to in the Learn tab: SaveTheHives.org/?tab=learn 🐝
   - **Image:** a real photo of a bee-lining box in a wildflower field (Ronnie has this saved locally — not stored in the repo, unlike other post images, since it isn't used anywhere in the app itself)
   - **Alt text:** "A wooden bee-lining box with glass viewing panels and an engraved honey bee, sitting on a wooden fence post in a wildflower field."
   - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
@@ -158,6 +182,10 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   - **Note:** deliberately a real photo rather than the app's watercolor illustration set (`images/learn-bee-box.jpg`, already used/reserved for the Aug 5 "Not every nest is a honey bee colony" post) — a tangible, real-world object works well for this specific "here's the actual gear" angle, and keeps the two bee-box posts visually distinct from each other.
 
 - **Meet our scientific advisor** (new, added Jul 21 2026) — once Dr. Tarpy sends his bio synopsis (see `KEY_PEOPLE_CONTACTS.md`), a post introducing him lends real credibility and is a natural press-adjacent piece. Hold until the synopsis arrives — don't publish one written on his behalf.
+
+**"What SaveTheHives is all about" tour video + hive-in-tree photos (flagged 2026-08-17):**
+  - **Tour video — decided: app walkthrough format.** Reuse the same screen-recording + ffmpeg highlight pipeline as the How-To series, narrated/captioned over a tour through Map, Add, Check In, and Learn/About — broader and more mission-framed than the task-focused How-To clips, not real-world/talking-to-camera footage. Not yet recorded — needs a shot list before Ronnie records (offer to draft one).
+  - **Hive-in-tree photos — none exist yet.** Ronnie confirmed he doesn't have real photos of wild hives in trees on hand; this needs a dedicated shoot before it can be used in any post. Backlog item, no timeline set — flag opportunistically if a hive check-in trip comes up.
 
 **Strategic note (Jul 21 2026):** Dr. Tarpy's read at the first advisor meeting was that Validate should be the project's central focus over recruiting new hive submissions — re-verifying the 1,150+ legacy records is more scientifically valuable right now than growing the map further. This reinforces `CONTENT_LIBRARY_IDEAS.md` item #15 ("Elevate Validate as the Primary On-Ramp"), which was already scoped but unbuilt. Worth weighting future post content (and eventually the on-ramp UI itself) more toward Validate messaging than the launch sequence currently does — Post 3 already covers it, but ongoing content should lean this direction too.
 
@@ -206,7 +234,7 @@ The long-form About text doesn't fit Facebook's 255-character Bio field (already
   >
   > Scientific framing reviewed and approved by Dr. David Tarpy, NC State University Scholar Professor & Extension Apiculturist.
   >
-  > savethehives.org
+  > SaveTheHives.org
 - **Image:** `logo.jpg` — this is the "who we are" anchor post, so the brand mark fits better here than an illustration
 - **Alt text:** "SaveTheHives logo."
 - **Link:** keep the trailing URL as-is — no preview card will generate since a photo is attached (confirmed Jul 22 2026); the plain text is the only way readers get the link
@@ -220,6 +248,8 @@ The long-form About text doesn't fit Facebook's 255-character Bio field (already
 - **Tone:** warm, plainspoken, not academic — matches the app and the beelining guide's existing voice. Avoid jargon; explain terms (Varroa, non-managed colony) briefly inline rather than assuming knowledge.
 
 **Terminology note (added Jul 22 2026):** Dr. Tarpy mentioned the field is trending toward "non-managed" rather than "feral" to describe these colonies — updated throughout this doc and the mission explainer. Use "non-managed" going forward in new content.
+
+**Branding note (added 2026-08-16):** the trailing site mention in post copy is now capitalized as "SaveTheHives.org" (not lowercase "savethehives.org") going forward — Ronnie's call, confirmed this doesn't read as self-promotional on Facebook (capitalized brand names are the norm, same as "YouTube" or "TikTok"). Applies to the display-text mention at the end of post copy specifically; actual hrefs/URLs elsewhere in this doc (Website link, deep links like `savethehives.org/?tab=learn`) are unaffected — URLs stay lowercase as a technical convention. Existing post copy in this doc has been updated to match; use the capitalized form in all new drafts.
 - **Don't claim features that aren't live** — Genetic Goldmine badges, DCA mapping, and the Guardian Network are all marked "Coming soon" in the app. Describe them as mission/vision, not as something to go try today.
 
 ## 10. Post settings checklist (added Jul 22 2026 — applies to every post)

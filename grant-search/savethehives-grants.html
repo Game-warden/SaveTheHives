@@ -1,0 +1,871 @@
+<title>Grant Prospects for SaveTheHives</title>
+<style>
+  :root {
+    --ink: #241d14;
+    --ink-soft: #5a4f3d;
+    --ground: #f6f1e4;
+    --panel: #ece1c8;
+    --panel-line: #d9cba8;
+    --honey: #a85a0d;
+    --honey-strong: #8a4a09;
+    --moss: #4c5c33;
+    --moss-bg: #e2e6d3;
+    --rust: #8c3f2e;
+    --rust-bg: #ecdcd4;
+    --ok: #3d6b40;
+    --ok-bg: #dde6d5;
+    --watch: #4d5f6e;
+    --watch-bg: #dde3e6;
+    --amber: #a06a12;
+    --amber-bg: #ecdfc0;
+    --card-bg: #fbf8f0;
+    --shadow: rgba(36, 29, 20, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ede4d0;
+      --ink-soft: #c1b49a;
+      --ground: #1c160f;
+      --panel: #2a2116;
+      --panel-line: #3d3020;
+      --honey: #e0a23a;
+      --honey-strong: #f0b658;
+      --moss: #a9bb85;
+      --moss-bg: #303626;
+      --rust: #d98a76;
+      --rust-bg: #3a2620;
+      --ok: #8fbf8a;
+      --ok-bg: #253425;
+      --watch: #a9bcc9;
+      --watch-bg: #263038;
+      --amber: #e0b356;
+      --amber-bg: #372c14;
+      --card-bg: #241d13;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #ede4d0;
+    --ink-soft: #c1b49a;
+    --ground: #1c160f;
+    --panel: #2a2116;
+    --panel-line: #3d3020;
+    --honey: #e0a23a;
+    --honey-strong: #f0b658;
+    --moss: #a9bb85;
+    --moss-bg: #303626;
+    --rust: #d98a76;
+    --rust-bg: #3a2620;
+    --ok: #8fbf8a;
+    --ok-bg: #253425;
+    --watch: #a9bcc9;
+    --watch-bg: #263038;
+    --amber: #e0b356;
+    --amber-bg: #372c14;
+    --card-bg: #241d13;
+    --shadow: rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: "Public Sans", -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  header.masthead {
+    border-bottom: 2px solid var(--panel-line);
+    padding-bottom: 1.75rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--honey);
+    margin: 0 0 0.6rem;
+  }
+
+  h1 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    line-height: 1.12;
+    margin: 0 0 0.7rem;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .dek {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  .status-note {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 1rem 1.15rem;
+    margin: 1.5rem 0 0;
+    font-size: 0.93rem;
+  }
+
+  .status-note strong { color: var(--honey-strong); }
+
+  section.tier {
+    margin-top: 3rem;
+  }
+
+  .tier-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+    flex-wrap: wrap;
+  }
+
+  .tier-head h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-style: italic;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  .tier-count {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+
+  .tier-desc {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+    max-width: 68ch;
+    margin: 0.2rem 0 1.25rem;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--panel-line);
+    border-left: 4px solid var(--tier-color, var(--honey));
+    border-radius: 10px;
+    padding: 1.15rem 1.3rem 1.25rem;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card h3 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.18rem;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  .funder {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    font-weight: 400;
+    margin-top: 0.15rem;
+  }
+
+  .badge {
+    flex: none;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.28rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: var(--badge-bg, var(--ok-bg));
+    color: var(--badge-fg, var(--ok));
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.6rem 1rem;
+    font-size: 0.85rem;
+    margin: 0.7rem 0 0.8rem;
+    padding: 0.65rem 0.8rem;
+    background: var(--panel);
+    border-radius: 8px;
+  }
+
+  .meta div { min-width: 0; }
+
+  .meta .label {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.15rem;
+  }
+
+  .meta .value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .fit {
+    font-size: 0.92rem;
+    margin: 0;
+  }
+
+  .fit .fit-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-right: 0.4rem;
+  }
+
+  .card a {
+    color: var(--honey);
+  }
+
+  /* ruled-out: denser list, less visual weight */
+  .ruled-out-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .ruled-out-item {
+    padding: 0.75rem 1rem;
+    background: var(--panel);
+    border-radius: 8px;
+    border-left: 3px solid var(--rust);
+    font-size: 0.88rem;
+  }
+
+  .ruled-out-item .name {
+    font-weight: 600;
+    margin-right: 0.4rem;
+  }
+
+  .ruled-out-item .why {
+    color: var(--ink-soft);
+  }
+
+  .ledger {
+    margin: 1.5rem 0 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 1.15rem 1.3rem 1.3rem;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+
+  .ledger-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .ledger-head h3 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .ledger-note {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+  }
+
+  .ledger-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--panel-line);
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr 9rem 8.5rem;
+    gap: 0.6rem 0.9rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--panel-line);
+    font-size: 0.86rem;
+    align-items: start;
+  }
+
+  .ledger-row--header {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-top: 0;
+    padding-bottom: 0.5rem;
+  }
+
+  .lyear {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+  }
+
+  .lamt {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+
+  .lsub {
+    display: block;
+    font-family: "Public Sans", sans-serif;
+    font-weight: 400;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    margin-top: 0.15rem;
+  }
+
+  .ltag {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0.22rem 0.5rem;
+    border-radius: 999px;
+    background: var(--tag-bg);
+    color: var(--tag-fg);
+    white-space: nowrap;
+    justify-self: start;
+  }
+
+  .ledger-footnote {
+    margin: 0.9rem 0 0;
+    font-size: 0.83rem;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 720px) {
+    .ledger-row {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+    .ledger-row--header { display: none; }
+    .lyear { order: -1; }
+    .ltag { justify-self: start; }
+  }
+
+  .pathways {
+    margin-top: 3rem;
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 12px;
+    padding: 1.5rem 1.6rem;
+  }
+
+  .pathways h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin: 0 0 0.9rem;
+  }
+
+  .pathways .path {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: 0.3rem 1.2rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--panel-line);
+    font-size: 0.92rem;
+  }
+
+  .pathways .path:first-of-type { border-top: none; }
+
+  .pathways .path .term {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    color: var(--honey-strong);
+    font-weight: 600;
+  }
+
+  .recap {
+    margin-top: 3rem;
+  }
+
+  .recap h2 {
+    font-family: "Newsreader", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin: 0 0 0.9rem;
+  }
+
+  .recap-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .recap-row {
+    display: grid;
+    grid-template-columns: 13rem 1fr;
+    gap: 0.3rem 1rem;
+    font-size: 0.9rem;
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--panel-line);
+  }
+
+  .recap-row:first-child { border-top: none; }
+
+  .recap-row .hyp { font-weight: 600; }
+  .recap-row .verdict { color: var(--ink-soft); }
+
+  footer.note {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--panel-line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  @media (min-width: 640px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+    .ruled-out-list { grid-template-columns: 1fr 1fr; display: grid; }
+  }
+
+  @media (max-width: 480px) {
+    .meta { grid-template-columns: 1fr 1fr; }
+  }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--honey);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500;1,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Grant landscape · compiled 22 Aug 2026</p>
+    <h1>Grant Prospects for SaveTheHives</h1>
+    <p class="dek">A survey of real, currently-trackable funding opportunities for a volunteer-run citizen-science project mapping non-managed honeybee colonies — sorted by how reachable each one actually is today, not by how well it sounds on paper. Covers conservation/citizen-science philanthropy, the research/food-manufacturing/commercial-beekeeping/government-food-supply funders closer to the industry itself, and — as a separate lens — funding worth surfacing <em>for</em> Dr. David Tarpy, not from him.</p>
+    <div class="status-note">
+      <span>🗒️</span>
+      <div>
+        <strong>Where things stand:</strong> SaveTheHives is currently a sole proprietorship — no 501(c)(3), no fiscal sponsor. That single fact rules more programs out than mission fit does. Everything below is tagged by whether that status is a blocker, and the closing section lays out what it would take to unblock it.
+      </div>
+    </div>
+  </header>
+
+  <section class="tier" style="--tier-color: var(--ok)">
+    <div class="tier-head">
+      <h2>Apply now</h2>
+      <span class="tier-count">1 opportunity — no legal-status barrier</span>
+    </div>
+    <p class="tier-desc">Open to individuals and sole proprietors as-is. Nothing to unblock — the only question is whether the proposal is strong enough.</p>
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--ok)">
+        <div class="card-top">
+          <h3>Awesome Foundation<span class="funder">Triangle / Durham chapter</span></h3>
+          <span class="badge" style="--badge-bg: var(--ok-bg); --badge-fg: var(--ok)">Eligible now</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$1,000</span></div>
+          <div><span class="label">Deadline</span><span class="value">Rolling, reviewed monthly</span></div>
+          <div><span class="label">Entity required</span><span class="value">None</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Their own FAQ states it plainly: "individuals, groups, and organizations alike… if you can fill out the application form, you can apply." Small enough to be a realistic first win, and a low-stakes way to test a grant pitch before writing the bigger asks below. The Durham chapter is the nearest local one — some cities also run themed chapters (e.g. Earth, Global), worth a quick look for a better mission match.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier" style="--tier-color: var(--amber)">
+    <div class="tier-head">
+      <h2>Real money, needs a fiscal sponsor</h2>
+      <span class="tier-count">2 opportunities — one is time-sensitive</span>
+    </div>
+    <p class="tier-desc">Legitimate programs at meaningful scale. Both require a 501(c)(3) as the lead applicant, but both explicitly accept a fiscal sponsor standing in that role — so these are the two to weigh against how fast a sponsorship could realistically be set up.</p>
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--amber)">
+        <div class="card-top">
+          <h3>Impact / Catalyst Grants<span class="funder">One Hive Foundation</span></h3>
+          <span class="badge" style="--badge-bg: var(--amber-bg); --badge-fg: var(--amber)">Time-sensitive</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Up to $75,000/yr</span></div>
+          <div><span class="label">LOI due</span><span class="value">Sep 15, 2026</span></div>
+          <div><span class="label">Entity required</span><span class="value">501(c)3 or fiscal sponsor</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>~$1.5M available this round, no minimum ask, multi-year funding possible. The RFP's stated priorities (pollinator-health research, public education, research translation, ~$150K org-budget floor not stated here) lean toward pesticide/ag-policy work more than pure monitoring — a real but imperfect fit. Worth a direct inquiry email regardless, framed around the Genetic Goldmine / Varroa-resistance research angle, given the size of the pot. <strong>LOI deadline is about three weeks out</strong> — decide on fiscal sponsorship fast if pursuing this one.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--amber)">
+        <div class="card-top">
+          <h3>Civic Engagement Microgrant<span class="funder">Research!America</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Cycle closed</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Up to $4,000</span></div>
+          <div><span class="label">Next cycle</span><span class="value">Opens ~Fall 2026</span></div>
+          <div><span class="label">Entity required</span><span class="value">University fiscal sponsor</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Built for grad-student / postdoc pairs with a university department as fiscal sponsor — not a fit for Ronnie applying solo, but a near-zero-effort ask if the Tarpy relationship is live by fall: pair with a grad student in his lab as co-applicant and let his department stand in as sponsor. Small dollar amount, but a good low-risk test of that relationship.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier" style="--tier-color: var(--watch)">
+    <div class="tier-head">
+      <h2>Monitor — real programs, unclear current status</h2>
+      <span class="tier-count">3 opportunities — worth a direct check-in email</span>
+    </div>
+    <p class="tier-desc">Each of these is a genuine funding mechanism with no fundamental mission mismatch, but public information couldn't confirm whether a 2026/2027 cycle is actually live. A short email to each program is worth more than more searching.</p>
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>Explorer / early-career grants<span class="funder">National Geographic Society</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Watch portal</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$20K–$100K (historic)</span></div>
+          <div><span class="label">Deadline</span><span class="value">RFP-only, rolling calls</span></div>
+          <div><span class="label">Entity required</span><span class="value">None — funds individuals</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>One of the few programs at real scale that explicitly funds individuals, no organization needed. NGS has shifted from open calls to a narrow request-for-proposals model, though — the single open call found (Okavango River Basin ecology, closing Sep 23, 2026) isn't a fit. Worth bookmarking <em>funding.nationalgeographic.org</em> and checking back for a broader call.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>Citizen Science Competitive Funding<span class="funder">US Forest Service</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Email to confirm</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Up to $60K / 6 yrs</span></div>
+          <div><span class="label">Deadline</span><span class="value">Last confirmed cycle 2023–24</span></div>
+          <div><span class="label">Entity required</span><span class="value">None — any partner type</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Genuinely open to any entity type, including individuals — the catch is it requires a National Forest unit as an active co-applicant and project lead, not just a funder. No confirmation the program is still running found on the open web. A short email to <em>SM.FS.FSCCS@USDA.GOV</em> would settle it either way.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>ecoTech / ecoSTEM grants<span class="funder">Captain Planet Foundation</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Currently paused</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$500–$2,500 (historic)</span></div>
+          <div><span class="label">Deadline</span><span class="value">Rolling, when open</span></div>
+          <div><span class="label">Entity required</span><span class="value">Historically flexible</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Small-dollar, community/classroom-friendly grants — the right size for a project this stage. The foundation's own grants page currently states "no External Grant Opportunities at this time." Worth a periodic check rather than an application right now.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier" style="--tier-color: var(--honey)">
+    <div class="tier-head">
+      <h2>Food, beekeeping-industry &amp; government funders</h2>
+      <span class="tier-count">5 leads — added for the scientist / food-manufacturer / commercial-beekeeping / food-supply-agency audience</span>
+    </div>
+    <p class="tier-desc">A second pass aimed squarely at the four audiences the funding ask should really be framed around: researchers, food manufacturers, commercial beekeeping/production, and government food-supply agencies. This is a different funder ecosystem than conservation philanthropy — most of the money here flows to accredited research institutions, but two leads are genuinely reachable now.</p>
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--ok)">
+        <div class="card-top">
+          <h3>Friends of the Bee Fund<span class="funder">American Beekeeping Federation</span></h3>
+          <span class="badge" style="--badge-bg: var(--ok-bg); --badge-fg: var(--ok)">Contact directly</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Small, not fixed</span></div>
+          <div><span class="label">Deadline</span><span class="value">Rolling, board review</span></div>
+          <div><span class="label">Entity required</span><span class="value">None stated</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>The most individual-friendly lead in the commercial-beekeeping world: ABF's own language says the fund supports "beekeepers who may not be scientists" running small research projects under the ABF Research Committee's supervision. No 501c3 mentioned anywhere. Worth a direct call to ABF (317-503-0583) to pitch the wild-colony/Varroa-resistance angle — this is exactly the industry audience that would find "Genetic Goldmine" colonies valuable.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>Nate's Hives Research Grant<span class="funder">Sweet Harvest Foods</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Next cycle Mar 2027</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Up to $100,000/yr</span></div>
+          <div><span class="label">Deadline</span><span class="value">Mar 1 (2026 window closed)</span></div>
+          <div><span class="label">Entity required</span><span class="value">Unclear — worth testing</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>A honey packer's brand-new (inaugural 2026) research fund — a genuine food-manufacturer funder, exactly the audience flagged. Eligibility text names "academic institutions, nonprofit organizations, <em>and industry researchers</em>" without an explicit 501c3 requirement — unusually open language, worth confirming directly rather than assuming it's closed. This year's March 1 deadline has passed; email now to get on the list for the next cycle and to ask about eligibility before assuming a sponsor is needed.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--moss)">
+        <div class="card-top">
+          <h3>Research Proposal Funding<span class="funder">Project Apis m.</span></h3>
+          <span class="badge" style="--badge-bg: var(--moss-bg); --badge-fg: var(--moss)">Needs a PI partner</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$5,000–$200,000+</span></div>
+          <div><span class="label">Deadline</span><span class="value">Feb 1 / Jun 1 / Oct 1</span></div>
+          <div><span class="label">Entity required</span><span class="value">Research institution</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>The commercial beekeeping industry's own research funder — co-funded in part by the National Honey Board, which now routes its bee-health research dollars through this program. Restricted to universities, USDA-ARS, and extension programs as applicants, so not directly reachable as a sole proprietorship, but a strong match once Tarpy (or another university PI) is willing to lead a proposal with SaveTheHives supplying the wild-colony dataset.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--moss)">
+        <div class="card-top">
+          <h3>AFRI — Pollinator Health<span class="funder">USDA NIFA</span></h3>
+          <span class="badge" style="--badge-bg: var(--moss-bg); --badge-fg: var(--moss)">Needs a PI partner</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Often $100K–$2M+</span></div>
+          <div><span class="label">Deadline</span><span class="value">Per annual NOFO</span></div>
+          <div><span class="label">Entity required</span><span class="value">Accredited institution</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>The clearest "federal government, food-supply-and-sustainability" funder that exists for this space — USDA's flagship competitive research program. Structurally closed to individuals: eligibility runs through degree-granting institutions and state agricultural experiment stations. Only reachable as a named data/citizen-science partner under a university PI's proposal — again, the Tarpy channel is the door here, not a direct application.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>National Honey Bee Survey<span class="funder">USDA APHIS</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Partnership, not funding</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">N/A</span></div>
+          <div><span class="label">Deadline</span><span class="value">Ongoing program</span></div>
+          <div><span class="label">Entity required</span><span class="value">N/A</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Not a grant at all — a federal pest/disease surveillance network APHIS runs with partners like Bee Informed Partnership, sampling managed colonies nationwide for pathogens and Varroa. Flagging it anyway because it's exactly the "government agency, food supply" relationship worth having: worth asking whether SaveTheHives' wild-colony data could feed or complement federal surveillance — a credibility and visibility angle, not a check, but one that could open funding conversations later.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier" style="--tier-color: var(--moss)">
+    <div class="tier-head">
+      <h2>University channel</h2>
+      <span class="tier-count">2 leads — contingent on the Cooper/Tarpy connection</span>
+    </div>
+    <p class="tier-desc">Real NC State programs, but structured for people already inside the university — the opening is the pending introduction to Dr. Caren Cooper, not a direct application from Ronnie.</p>
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--moss)">
+        <div class="card-top">
+          <h3>Participatory Sciences Microgrants<span class="funder">NC State Citizen Science Campus</span></h3>
+          <span class="badge" style="--badge-bg: var(--moss-bg); --badge-fg: var(--moss)">Needs a co-applicant</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$1,000</span></div>
+          <div><span class="label">Cycle</span><span class="value">Jan–Jun, annually</span></div>
+          <div><span class="label">Entity required</span><span class="value">NC State grad student only</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>Restricted to NC State graduate students as applicants — not open to Ronnie directly. But it's a natural ask once the Cooper introduction lands: recruit an NC State grad student to co-apply, using SaveTheHives' dataset as their participatory-science project.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--moss)">
+        <div class="card-top">
+          <h3>Wolfpack Citizen Science Challenge<span class="funder">NC State Citizen Science Campus</span></h3>
+          <span class="badge" style="--badge-bg: var(--moss-bg); --badge-fg: var(--moss)">Watch, not fund</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Not published</span></div>
+          <div><span class="label">Cycle</span><span class="value">Annual, spring</span></div>
+          <div><span class="label">Entity required</span><span class="value">Faculty-led entry</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it fits</span>An annual faculty-led research competition, not a cash grant program in the usual sense. Worth watching once the Cooper connection is live mainly as a visibility and legitimacy channel inside NC State, not as a funding source.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier" style="--tier-color: var(--honey)">
+    <div class="tier-head">
+      <h2>A different lens: funding for David Tarpy</h2>
+      <span class="tier-count">Not funding for SaveTheHives — funding to hand him, grounded in a 5-year look at what he's already landed</span>
+    </div>
+    <p class="tier-desc">Tarpy is an established, well-funded PI — NSF, USDA-AFRI, Project Apis m., and SARE are all already on his radar (SARE's own records show three prior grants under his name). Handing him something he already knows about isn't useful. What follows is aimed narrower: things genuinely plausible to be off his radar, or freshly relevant given what's changed recently at NC State — the new Apiculture Research &amp; Extension Center that broke ground in late 2024. The real value-add, though, isn't any single line item below — it's that SaveTheHives can credibly become the "cooperating farmers" / outreach-and-broader-impacts partner that reviewers on nearly every one of these programs are explicitly scored on wanting to see.</p>
+
+    <div class="ledger">
+      <div class="ledger-head">
+        <h3>What he's actually landed, 2021–2026</h3>
+        <span class="ledger-note">Public records only — no institutional financial-system access. Multi-year grants counted at their start year.</span>
+      </div>
+      <div class="ledger-table">
+        <div class="ledger-row ledger-row--header">
+          <span>When</span><span>What</span><span>Amount</span><span>Type</span>
+        </div>
+        <div class="ledger-row">
+          <span class="lyear">Feb 2025</span>
+          <span>Hurricane Helene beekeeper recovery (queen-rearing workshops + disease monitoring in WNC/SC, co-led with Clemson) — USDA-NIFA Rapid Response to Extreme Weather Events</span>
+          <span class="lamt">Undisclosed<br><span class="lsub">share of $1.8M program total</span></span>
+          <span class="ltag" style="--tag-bg: var(--amber-bg); --tag-fg: var(--amber)">1-yr, reactive</span>
+        </div>
+        <div class="ledger-row">
+          <span class="lyear">2024–Jun 2026</span>
+          <span>"Training Master Beekeepers... Local Queen Production" — the Microbreeding Initiative, regional queen-rearing capacity — Southern SARE Professional Development grant</span>
+          <span class="lamt">$80,000</span>
+          <span class="ltag" style="--tag-bg: var(--ok-bg); --tag-fg: var(--ok)">Confirmed amount</span>
+        </div>
+        <div class="ledger-row">
+          <span class="lyear">Oct 2024–Sep 2029</span>
+          <span>NC1173 multistate bee-health research (virus/pathogen surveillance in managed &amp; wild pollinators) — USDA-NIFA Hatch Multistate formula funding</span>
+          <span class="lamt">Not disclosed<br><span class="lsub">prior 5-yr cycle, ALL participants: $40M+</span></span>
+          <span class="ltag" style="--tag-bg: var(--watch-bg); --tag-fg: var(--watch)">Base funding, ongoing</span>
+        </div>
+        <div class="ledger-row">
+          <span class="lyear">Signed 2021</span>
+          <span>Apiculture Research &amp; Extension Center construction — NC General Assembly appropriation (facility broke ground Oct 2024, opens 2026)</span>
+          <span class="lamt">$4,000,000</span>
+          <span class="ltag" style="--tag-bg: var(--ok-bg); --tag-fg: var(--ok)">Confirmed amount</span>
+        </div>
+        <div class="ledger-row">
+          <span class="lyear">2022–ongoing</span>
+          <span>Endowed Professorship in Apiculture — private fundraising campaign, not a competitive grant</span>
+          <span class="lamt">$1,000,000</span>
+          <span class="ltag" style="--tag-bg: var(--moss-bg); --tag-fg: var(--moss)">Philanthropy</span>
+        </div>
+      </div>
+      <p class="ledger-footnote"><strong>Verified 2026-08-23:</strong> SaveTheHives already appears in Tarpy's own peer-reviewed record, independent of anything self-reported on SciStarter — Appler, Frank &amp; Tarpy (2015), <em>Insects</em> 6(4):912–925 (DOI <a href="https://doi.org/10.3390/insects6040912">10.3390/insects6040912</a>), Methods section: "We located feral colonies through hobbyist beekeepers and the citizen-scientist website Save the Hives© (2013)…" Worth citing directly in any proposal's prior-work section — it's evidence the tool has real scientific track record, not just potential.</p>
+      <p class="ledger-footnote">Searched and came up empty: <strong>zero NSF awards</strong> under his name via NSF's own public award-search API; no USDA-NIFA AFRI competitive award in this window (the AFRI-funded projects under his name are all 2000s–2012, including the original citizen-science mapping project that preceded SaveTheHives itself); nothing confirmed from Project Apis m., Bee Informed Partnership, or the Almond Board specifically tied to him in 2021–2026, despite his board seat at Bee Informed. That gap is the headline: the one clearly document-able competitive-style grant in five years is one-year disaster-response money. No evidence of an active, large, multi-year research grant currently funding the core queen-genetics/Varroa-resistance program — which is exactly the shape of gap Southern SARE's R&amp;E track (below) could fill.</p>
+    </div>
+
+    <div class="cards">
+      <div class="card" style="--tier-color: var(--honey)">
+        <div class="card-top">
+          <h3>Research &amp; Education Grant<span class="funder">Southern SARE</span></h3>
+          <span class="badge" style="--badge-bg: var(--amber-bg); --badge-fg: var(--amber)">Likely his best-kept secret</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Up to $400,000 / 3 yrs</span></div>
+          <div><span class="label">Deadline</span><span class="value">Pre-proposal ~June, confirm directly</span></div>
+          <div><span class="label">Lead</span><span class="value">Any researcher, no farm req.</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it's the needle</span>Tarpy's SARE history is all small-dollar (a Professional Development grant, a student's Graduate grant, a conference-training grant) — never the flagship R&amp;E track. That track <em>requires</em> at least three cooperating farmer-partners with defined roles, plus a mandatory outreach component — structurally, that's commercial beekeepers plus SaveTheHives, not an add-on. And it funds exactly his "Integrated Pest Management" and "Queen Reproductive Quality" paradigms: SARE has already funded near-identical work elsewhere (a Kansas project preserving feral/survivor bee genetics as breeding stock). Southern SARE's own NC state coordinator, Chris Reberg-Horton, is on the NC State faculty — a hallway introduction, not cold outreach. Last confirmed full-proposal deadline was Nov 21, 2025; confirm the 2026–27 pre-proposal window directly at southern.sare.org before assuming it's open or closed.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--honey)">
+        <div class="card-top">
+          <h3>NSF Major Research Instrumentation<span class="funder">National Science Foundation</span></h3>
+          <span class="badge" style="--badge-bg: var(--amber-bg); --badge-fg: var(--amber)">Timed to the new building</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">$100K–$4M</span></div>
+          <div><span class="label">Deadline</span><span class="value">Annual, per current NOFO</span></div>
+          <div><span class="label">Lead</span><span class="value">Institutional (NC State applies)</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it's the needle</span>MRI funds shared research equipment — mentally filed under physics and chemistry cores far more often than apiculture, which is exactly why it's easy for a bee lab to overlook. NC State's new Apiculture Research &amp; Extension Center (groundbreaking Oct 2024, ~$4M in state construction funding) is built for genetics testing and artificial insemination work — precisely the capital-equipment case MRI exists to fund. Worth raising with Tarpy or NC State's research development office as the facility nears completion, if it isn't already in motion.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--honey)">
+        <div class="card-top">
+          <h3>Producer Grant<span class="funder">Southern SARE</span></h3>
+          <span class="badge" style="--badge-bg: var(--moss-bg); --badge-fg: var(--moss)">For a beekeeper partner, not Tarpy</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">~$15,000 (typical range)</span></div>
+          <div><span class="label">Deadline</span><span class="value">Early Dec, confirm directly</span></div>
+          <div><span class="label">Lead</span><span class="value">Farmers / ranchers (beekeepers qualify)</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it's the needle</span>Not something to hand Tarpy directly — this is the track that funded the Kansas feral-genetics precedent almost exactly, and it's open to commercial beekeeping operations as "producers." A genuinely reciprocal thing to bring him: a grant one of his commercial-beekeeper collaborators could win, using SaveTheHives-sourced colony leads as the raw material — turning an intro into something with real money attached from day one.</p>
+      </div>
+      <div class="card" style="--tier-color: var(--watch)">
+        <div class="card-top">
+          <h3>Honey Bee Breeding, Genetics &amp; Physiology Unit<span class="funder">USDA-ARS, Baton Rouge</span></h3>
+          <span class="badge" style="--badge-bg: var(--watch-bg); --badge-fg: var(--watch)">Probably already knows</span>
+        </div>
+        <div class="meta">
+          <div><span class="label">Award</span><span class="value">Cooperative agreement, varies</span></div>
+          <div><span class="label">Deadline</span><span class="value">N/A — direct partnership</span></div>
+          <div><span class="label">Lead</span><span class="value">Federal co-funding, not a grant call</span></div>
+        </div>
+        <p class="fit"><span class="fit-label">Why it's here anyway</span>The federal government's own honey-bee breeding and genetics lab — same mission, government funding. Including it with lower confidence: an apiculturist at Tarpy's level almost certainly already knows his ARS counterparts. Logged for completeness rather than as a genuine surprise.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tier">
+    <div class="tier-head">
+      <h2>Ruled out</h2>
+      <span class="tier-count">8 researched and set aside — saving you the trip</span>
+    </div>
+    <p class="tier-desc">Each of these came up under the original hypotheses and looked promising by name. None hold up on closer reading — logged here so they don't get re-researched later.</p>
+    <div class="ruled-out-list">
+      <div class="ruled-out-item"><span class="name">NFWF Monarch Butterfly &amp; Pollinators Fund</span><span class="why">$200–300K awards, but requires 500+ acres of on-the-ground habitat restoration and explicitly excludes unincorporated individuals. Wrong project shape entirely — it funds planting, not monitoring.</span></div>
+      <div class="ruled-out-item"><span class="name">Firedoll Foundation</span><span class="why">Requires a $150K+ annual organizational budget and states it does not fund individuals or start-up ventures.</span></div>
+      <div class="ruled-out-item"><span class="name">Sigma Xi Grants-in-Aid of Research</span><span class="why">Undergraduate and graduate students only — independent/citizen researchers explicitly not eligible.</span></div>
+      <div class="ruled-out-item"><span class="name">The Bee Grant (Whole Kids Foundation)</span><span class="why">Requires an EIN and K-12/nonprofit status; funds live observation hives in classrooms — a mission mismatch with untreated wild-colony tracking.</span></div>
+      <div class="ruled-out-item"><span class="name">REI Cooperative Action Fund</span><span class="why">Nomination-based only, no public application; awards run $10K–$1.3M and skew toward established organizations.</span></div>
+      <div class="ruled-out-item"><span class="name">Echoing Green Fellowship</span><span class="why">No 501(c)3 required — the one point in its favor — but requires the founder to work full-time (40 hrs/week) on the project, and the 2026 cycle is already closed.</span></div>
+      <div class="ruled-out-item"><span class="name">Shuttleworth Foundation Flash Grants</span><span class="why">$5,000, no strings — but nomination-only by existing Fellows, with no public application path in.</span></div>
+      <div class="ruled-out-item"><span class="name">Pollinator Partnership / NAPPC grants</span><span class="why">Honey Bee Health, Bombus, and Lepidoptera research calls are all in closed cycles, and historically earmarked for graduate-student researchers.</span></div>
+      <div class="ruled-out-item"><span class="name">Häagen-Dazs / Nestlé bee giving</span><span class="why">Real corporate money (e.g. a $100K UC Davis gift, a Xerces Society partnership) but relationship-based corporate philanthropy with no public application process to apply into.</span></div>
+      <div class="ruled-out-item"><span class="name">National Honey Board (direct)</span><span class="why">Since 2017 it routes its ~$3M in honey-bee research funding through Project Apis m. rather than accepting applications itself — same institutional-applicant restriction applies.</span></div>
+      <div class="ruled-out-item"><span class="name">FFAR Pollinator Health Fund</span><span class="why">Confirmed a concluded program — FFAR's own site lists it as closed, last grants awarded 2018. Worth flagging to Tarpy directly in case it's still on his mental list of live funders.</span></div>
+      <div class="ruled-out-item"><span class="name">Almond Board "2026 Honey Bee Health Grant"</span><span class="why">A submission form for this surfaced in search but the form itself was dead/unavailable on inspection, and no matching program page exists on almonds.org. Couldn't confirm it's real — Tarpy's industry contacts could verify faster than more web searching.</span></div>
+    </div>
+  </section>
+
+  <section class="recap">
+    <h2>How the five starting hypotheses actually held up</h2>
+    <div class="recap-grid">
+      <div class="recap-row"><span class="hyp">Citizen science funders</span><span class="verdict">Mixed. Most big names (NSF AISL, NatGeo open calls) have moved to narrow RFP models with nothing open right now. The best live find wasn't on the original list at all — the Awesome Foundation.</span></div>
+      <div class="recap-row"><span class="hyp">Pollinator conservation funders</span><span class="verdict">Weaker than expected. Most pollinator money is shaped for acreage-based habitat restoration, not colony monitoring — SaveTheHives doesn't plant anything. One Hive Foundation is the one real exception, and even that's an imperfect fit.</span></div>
+      <div class="recap-row"><span class="hyp">NC State / Tarpy seed funding</span><span class="verdict">Real programs exist (Participatory Sciences Microgrants, Wolfpack Challenge), but both are gated behind NC State affiliation — they become useful once the Cooper introduction lands, not before.</span></div>
+      <div class="recap-row"><span class="hyp">Open data / civic tech infra grants</span><span class="verdict">Largely a dead end for now. Cloudflare's Project Galileo is security protection, not funding; Mozilla's Technology Fund and Shuttleworth's grants are invitation/nomination-only. Nothing here to act on.</span></div>
+      <div class="recap-row"><span class="hyp">Youth STEM / education angle</span><span class="verdict">The NC Beekeepers 4-H grant is real money but structurally requires an NCSBA-chapter/4-H partnership; Captain Planet's small grants are the right size but currently paused.</span></div>
+      <div class="recap-row"><span class="hyp">Scientists, food manufacturers, commercial beekeepers, food-supply agencies <span style="font-weight:400; color: var(--ink-soft);">(added mid-search)</span></span><span class="verdict">The strongest single new find of the whole search: ABF's Friends of the Bee Fund explicitly welcomes non-scientist beekeepers. Everything else in this world — Project Apis m., USDA AFRI, the National Honey Board — is a research-institution funder that only opens up once an academic PI (Tarpy) is willing to lead the proposal.</span></div>
+    </div>
+  </section>
+
+  <div class="pathways">
+    <h2>If a fiscal sponsor becomes worth pursuing</h2>
+    <p style="margin: 0 0 0.5rem; color: var(--ink-soft); font-size: 0.92rem;">Two of the strongest opportunities above (One Hive Foundation, and eventually larger programs) are blocked only by legal status, not mission fit. Two paths, roughly in order of effort:</p>
+    <div class="path">
+      <span class="term">Fiscal sponsor</span>
+      <span>A nonprofit "parent" holds the funds and legal liability for a specific project. Setup typically takes a few weeks to a couple of months; the sponsor usually takes 5–10% of funds passing through as an admin fee. Generalist sponsors worth a look: Players Philanthropy Fund, Social Good Fund, Third Sector New England.</span>
+    </div>
+    <div class="path">
+      <span class="term">NC State host</span>
+      <span>A narrower, informal alternative: ask whether Tarpy's department or the Citizen Science Campus would host a specific grant as a research collaboration, rather than a commercial fiscal-sponsorship relationship. Only works grant-by-grant, and only once the relationship is further along.</span>
+    </div>
+    <div class="path">
+      <span class="term">File 501(c)3</span>
+      <span>Form 1023-EZ, self-filed, ~$275 filing fee for orgs expecting under $50K/year; approval typically takes a few weeks to a few months. The bigger lift, but removes the dependency on a sponsor going forward — worth it once funding needs outgrow what fiscal sponsors and individual-friendly grants can cover.</span>
+    </div>
+  </div>
+
+  <footer class="note">
+    Compiled from public sources on 22 Aug 2026 — several funder pages don't publish full guidelines online, so a few entries above (One Hive Foundation's exact fit, NGS's current portal listings, USFS's 2026 status) are flagged for a direct email rather than treated as settled. This session didn't have access to the project repo's contact trackers, so nothing here cross-references <em>KEY_PEOPLE_CONTACTS.md</em> or the outreach spreadsheets directly — worth checking those for any funder-adjacent contacts already in motion.
+  </footer>
+
+</div>

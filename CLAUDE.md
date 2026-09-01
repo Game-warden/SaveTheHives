@@ -198,3 +198,28 @@ scratchpad.
 Cross-reference: `KEY_PEOPLE_CONTACTS.md` tracks the same people/orgs in
 prose form and should get a status update whenever the spreadsheet does, so
 the two don't drift apart.
+
+## Never use hello@savethehives.org in outreach email drafts (2026-08-14)
+
+Ronnie confirmed `hello@savethehives.org` doesn't reliably reach him — it's
+not a valid contact address for his purposes. When drafting any outreach or
+follow-up email (Gmail drafts for legacy submitters, university contacts,
+reply threads, etc.), never use `hello@savethehives.org` anywhere — not as
+the From address, not as a reply-to, not in a signature line asking people
+to reach out. Use `ronniebouchon@gmail.com` instead.
+
+## Weekly scheduled task: outreach bounce/reply check
+
+A recurring scheduled task (`savethehives-outreach-bounce-check`, Mondays
+9am) checks Gmail via Claude in Chrome for new bounces/replies on the two
+active outreach campaigns — subject lines containing "Wild honeybee colony
+mapping project" (university researchers, tracked in
+`University_Bee_Research_Contacts.xlsx`) and "Following up on the wild
+hive(s) you" (legacy hive submitters, tracked in
+`Legacy_Submitter_Outreach_Tracker.xlsx`). It never auto-updates either
+spreadsheet — Ronnie explicitly wants to approve each bounce/reply
+individually before the tracker changes, so the task always surfaces
+findings via AskUserQuestion first. The University tracker's Status
+dropdown was extended on 2026-08-14 to add an "Emailed - Bounced" option
+(previously only the Legacy tracker had that value) — keep both dropdowns
+in sync if either gets more status values added later.

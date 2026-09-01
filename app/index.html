@@ -346,8 +346,15 @@
 <!-- Dataset structured data (added 2026-08-15) — describes the crowd-sourced
      hive sighting data browsable on the map. Distribution points at this
      page (not the raw Supabase REST endpoint) since the map is the intended
-     public access point, not the database API. No license field — none has
-     been formally established yet; add one here if/when that's decided. -->
+     public access point, not the database API.
+     License added 2026-08-16 (Ronnie's decision, prompted by a Google
+     Search Console "missing field license" notice): CC BY 4.0 — free
+     reuse/sharing/adaptation, attribution required back to the `creator`
+     named below (Save The Hives / savethehives.org). Chosen over CC0
+     specifically to keep that credit line, since research-citation and
+     being named as a source is part of the project's goal (see the
+     Tarpy-advisor framing and the research API in
+     SEO_IDENTITY_MIGRATION_PLAN.md). -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -355,6 +362,7 @@
   "name": "SaveTheHives Feral Honey Bee Colony Sightings",
   "description": "A crowd-sourced, citizen-science dataset of 1,150+ wild (non-managed) honey bee colony sightings across North America, submitted and periodically re-validated by the public. Includes location, discovery notes, and check-in history used to identify long-surviving 'Genetic Goldmine' colonies for research.",
   "url": "https://savethehives.org/app/",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
   "isAccessibleForFree": true,
   "keywords": ["feral honey bees", "wild honey bee colonies", "citizen science", "honey bee conservation", "survivor stock", "beelining", "non-managed colonies"],
   "creator": {

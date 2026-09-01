@@ -1,9 +1,12 @@
 <!--
 SQL_HOUSEKEEPING_CHEATSHEET.md — quick reference, added Jul 29 2026.
+Visit Counter (D1) section added 2026-09-01.
 
-Reusable SQL snippets for Ronnie to run in the Supabase SQL editor when
-cleaning up test data, spam, or bad entries. Covers the `hives` and
-`checkins` tables — the two most likely to need manual housekeeping.
+Reusable SQL snippets for Ronnie to run when cleaning up test data, spam,
+bad entries, or checking visit-counter stats. Covers the `hives` and
+`checkins` tables (Supabase) plus the `visit_counts` table (Cloudflare
+D1) — two entirely separate databases, run in two different dashboards.
+See each section header for which one applies.
 
 RULE OF THUMB: always run the matching SELECT first and read the results
 before running any DELETE. Every DELETE below has a SELECT right above it
@@ -13,8 +16,12 @@ delete.
 
 # SQL Housekeeping Cheat Sheet
 
-Run these in the Supabase dashboard → SQL Editor. Replace anything in
-`<angle brackets>` with a real value — don't leave the brackets in.
+The Hives and Check-ins sections below run in the Supabase dashboard →
+SQL Editor. The Visit Counter section near the end runs somewhere
+different — the Cloudflare dashboard's D1 console — since it's a
+separate database; don't paste those queries into Supabase. Replace
+anything in `<angle brackets>` with a real value — don't leave the
+brackets in.
 
 ## Hives
 
@@ -40,6 +47,61 @@ from hives
 order by submitted_at desc
 limit 20;
 ```
+
+### "Conversions" — daily count of hive adds + check-ins combined
+Ronnie's own term for engagement events: any new hive submission OR any
+check-in counts as one "conversion" (someone taking an action on the map,
+not just browsing). Quick daily rollup:
+```sql
+select day, count(*) as conversions from (
+  select submitted_at::date as day from hives
+  union all
+  select created_at::date as day from checkins
+) t
+group by day
+order by day desc;
+```
+
+### "Conversions" — expanded, one row per event (hive number, who, what)
+Same union, but row-level detail instead of a daily count — added
+2026-08-15 after Ronnie asked to see hive number and more context per
+event, not just a per-day total. Shows event type (Hive Added vs
+Check-in), the hive's id/name/city/state, the status or hive type as
+`detail`, the submitter's email (via `auth.users`, admin-only join — works
+in the Supabase SQL Editor since it runs with elevated privileges, same
+reason the app itself never exposes emails client-side), and a ready-to-click
+deep link to that hive's popup on the live map.
+```sql
+select
+  event_type,
+  event_at,
+  hive_id,
+  hive_name,
+  city,
+  state,
+  detail,
+  u.email as submitter_email,
+  'https://savethehives.org/app/?hive=' || hive_id as hive_link
+from (
+  select 'Hive Added' as event_type, h.submitted_at as event_at, h.id as hive_id,
+         h.name as hive_name, h.city, h.state, h.hivetype as detail,
+         h.submitted_by as auth_id
+  from hives h
+  union all
+  select 'Check-in' as event_type, c.created_at as event_at, c.hive_id,
+         h.name as hive_name, h.city, h.state, c.status as detail,
+         c.user_id as auth_id
+  from checkins c
+  join hives h on h.id = c.hive_id
+) t
+left join auth.users u on u.id = t.auth_id
+order by event_at desc
+limit 20;
+```
+`submitter_email` will be null for anonymous/legacy rows (no `auth_id` —
+most pre-2026 legacy hives and a few early test check-ins were logged
+without a signed-in user). Adjust `limit 20` or add `where event_at >=
+now() - interval '7 days'` to scope it to a specific window.
 
 ### Search hives by keyword (name or description)
 ```sql
@@ -166,6 +228,76 @@ update hives set status = 'unverified', last_verified_at = null where id = <1166
 select * from checkins where hive_id = <1166>;
 delete from checkins where hive_id = <1166>;
 ```
+
+## Visit Counter (Cloudflare D1 — different dashboard, not Supabase)
+
+Added 2026-09-01, when the visit counter migrated from Workers KV to D1
+(see `SAVETHEHIVES_SPEC.md`'s Visit Counter section for the why). **Run
+these in the Cloudflare dashboard, not the Supabase SQL Editor:** Workers
+& Pages → D1 SQLite Database → `savethehives-visits` → either the
+**Console** tab (simple one-line queries) or **Explore Data → Studio**
+tab (full editor, better for anything longer). This is a completely
+separate database from everything above — nothing here touches `hives`
+or `checkins`, and none of the Supabase housekeeping habits below apply
+to it (there's nothing to accidentally mass-delete; it's just counters).
+
+Single table, `visit_counts`:
+```sql
+CREATE TABLE visit_counts (
+  scope TEXT NOT NULL,   -- 'state' | 'city' | 'country'
+  key   TEXT NOT NULL,   -- e.g. 'NC', 'Raleigh|NC', 'CA'
+  day   TEXT NOT NULL,   -- 'YYYY-MM-DD', UTC
+  count INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (scope, key, day)
+);
+```
+
+### All-time total per state
+```sql
+select key as state, sum(count) as total
+from visit_counts where scope = 'state'
+group by key order by total desc;
+```
+
+### All-time total per city
+```sql
+select key as city, sum(count) as total
+from visit_counts where scope = 'city'
+group by key order by total desc;
+```
+
+### Daily trend for one state
+```sql
+select day, count from visit_counts
+where scope = 'state' and key = 'NC'
+order by day;
+```
+
+### Busiest day site-wide, last 30 days
+```sql
+select day, sum(count) as total from visit_counts
+where day >= date('now', '-30 days')
+group by day order by total desc;
+```
+
+### Non-US visitors by country
+```sql
+select key as country, sum(count) as total
+from visit_counts where scope = 'country'
+group by key order by total desc;
+```
+
+**Old KV data — still around, not yet ported.** Visit counts from
+2026-07-29 through 2026-08-31 live in the old `savethehives-visits`
+Workers KV namespace, left in place but disconnected — the middleware no
+longer writes to it, and D1 started from zero on 2026-09-01. Ronnie
+hasn't decided yet whether to do a one-time backfill of those KV totals
+into D1 (they'd need to land under some placeholder date, since KV never
+tracked per-day numbers). Until that decision is made, D1's numbers are
+the complete picture only from 2026-09-01 forward — for the full
+all-time total, the old KV values still need to be checked separately:
+Cloudflare dashboard → Workers & Pages → KV → `savethehives-visits` →
+browse keys directly (`state:NC`, `city:Raleigh|NC`, `country:CA`).
 
 ## General safety habits
 
