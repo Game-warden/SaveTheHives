@@ -333,29 +333,33 @@ async function init() {
   // Zoom-adaptive basemap — muted overview at low zoom, more street-level
   // reference detail (fields, trails, forest) once someone zooms into a
   // neighborhood to judge whether a hive is a good check-in candidate.
-  // Low zoom: CartoDB Positron (clean, minimal, cheap). High zoom: Stadia
-  // Outdoors (2026-07-24 — swapped from CARTO Voyager after Ronnie compared
-  // styles live and preferred the added trail/field/forest detail; raw OSM
-  // Standard tiles were considered too, but tile.openstreetmap.org's usage
-  // policy asks heavy-traffic sites not to hit it directly, so Stadia is used
-  // instead — same underlying OSM data, served properly for production use).
-  // Stadia auth is domain-based (savethehives.org registered in the Stadia
-  // dashboard under Manage Properties -> Authentication Configuration) — no
-  // API key lives in this codebase at all.
-  const basemapAttrCarto = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>';
+  // Low zoom: Stadia Alidade Smooth (clean, light — the Positron-equivalent
+  // style). High zoom: Stadia Outdoors (2026-07-24 — swapped from CARTO
+  // Voyager after Ronnie compared styles live and preferred the added
+  // trail/field/forest detail; raw OSM Standard tiles were considered too,
+  // but tile.openstreetmap.org's usage policy asks heavy-traffic sites not
+  // to hit it directly, so Stadia is used instead — same underlying OSM
+  // data, served properly for production use).
+  // 2026-09-03: low-zoom layer moved off CARTO (basemaps.cartocdn.com)
+  // entirely — CARTO now requires a registered API key for raster basemap
+  // tiles and was serving an "API KEY REQUIRED" watermark in production
+  // instead of real tiles. Both tiers now run on Stadia, which is already
+  // domain-authenticated for savethehives.org (Stadia dashboard -> Manage
+  // Properties -> Authentication Configuration) — no API key lives in this
+  // codebase at all, and there's nothing to expire or rotate.
   const basemapAttrStadia = '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>';
   const basemapLayers = {
-    positron: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: basemapAttrCarto, subdomains: 'abcd', maxZoom: 20
+    light: L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+      attribution: basemapAttrStadia, maxZoom: 20
     }),
     outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
       attribution: basemapAttrStadia, maxZoom: 20
     })
   };
-  let activeBasemap = 'positron';
-  basemapLayers.positron.addTo(map);
+  let activeBasemap = 'light';
+  basemapLayers.light.addTo(map);
 
-  function basemapForZoom(z) { return z >= 15 ? 'outdoors' : 'positron'; }
+  function basemapForZoom(z) { return z >= 15 ? 'outdoors' : 'light'; }
   map.on('zoomend', () => {
     const key = basemapForZoom(map.getZoom());
     if (key !== activeBasemap) {
