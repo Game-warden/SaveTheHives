@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.5'; // Structured data added (2026-08-15): added HowTo JSON-LD (mirrors the visible "How to Beeline" list in #pf-howto-box) and Dataset JSON-LD (describes the public hive-sighting map data) to app/index.html's <head>. No visual/behavioral changes, but bumping since app/index.html is a precached SHELL_ASSET — without this bump, returning visitors would keep serving the old <head> indefinitely.
+const CACHE_VERSION = 'v2.13.6'; // Basemap fix (2026-09-03): CARTO's raster basemap tiles (basemaps.cartocdn.com) started requiring a registered API key and were showing an "API KEY REQUIRED" watermark instead of real tiles at low zoom in production. Low-zoom basemap moved to Stadia Alidade Smooth (app/app.js) — Stadia is already domain-authenticated for savethehives.org, no key to manage. Bumping since app/app.js is a precached SHELL_ASSET — without this bump, returning visitors would keep serving the old CARTO-based app.js indefinitely. Also updated isMapTile() here to recognize tiles.stadiamaps.com for the network-first capped tile cache.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
@@ -40,7 +40,7 @@ function isNetworkOnly(url) {
 }
 
 function isMapTile(url) {
-  return url.hostname.endsWith('.basemaps.cartocdn.com');
+  return url.hostname === 'tiles.stadiamaps.com' || url.hostname.endsWith('.basemaps.cartocdn.com');
 }
 
 self.addEventListener('install', event => {
