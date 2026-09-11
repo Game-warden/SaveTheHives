@@ -271,6 +271,12 @@ cbcoope3@ncsu.edu (faculty.cnr.ncsu.edu/carencooper/). Full record in
 drafted an intro email cc'ing David and has it scheduled to send Tue Aug
 25 AM — next thing to watch for is her reply.
 
+**RESOLVED 2026-08-27 — MEETING SCHEDULED:** Caren replied Aug 27 and the
+two landed on **Thursday, Oct 1, 2:00 PM** (David cc'd on the thread).
+No longer "awaiting reply" — next step is just showing up to that meeting.
+Update `University_Bee_Research_Contacts.xlsx` Status to reflect the
+scheduled meeting/Planned date if it isn't already.
+
 ### NC 4-H / NC State Beekeepers Association — LEAD
 NC already has an active **4-H Educational Grant Program** run jointly by the NC State Beekeepers Association (NCSBA) and local county Cooperative Extension offices — chapters can be reimbursed up to $500 for gear/materials, and several counties (Franklin, Burke) already run 4-H beekeeping schools. This means David's instinct (every NC county has a 4-H office) lines up with existing infrastructure — the fastest path in may be through NCSBA's existing 4-H program rather than cold-contacting individual county offices. Future Farmers of America (FFA) angle not yet researched — separate follow-up.
 

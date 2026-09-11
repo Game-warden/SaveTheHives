@@ -223,3 +223,23 @@ findings via AskUserQuestion first. The University tracker's Status
 dropdown was extended on 2026-08-14 to add an "Emailed - Bounced" option
 (previously only the Legacy tracker had that value) — keep both dropdowns
 in sync if either gets more status values added later.
+
+## Beelining PWA is a separate Cloudflare project — do not touch from this repo (2026-09-01)
+
+Ronnie is running a companion citizen-science tool, the Beelining PWA, as
+its own **standalone** Cloudflare Pages project (`beelining`, deployed at
+`https://beelining.pages.dev`) — fully isolated from `savethehives.org`:
+
+- Deployed via direct static asset upload (`wrangler pages deploy dist
+  --project-name beelining`), not Git-connected like this repo.
+- No `functions/`, no D1/KV bindings, no `wrangler.toml` — and none of
+  that lives in *this* repository. If asked to work on Beelining, it is
+  not in `SaveTheHives-pwa-claude` at all; don't go looking for it here.
+- Shares nothing with `savethehives.org`'s infra — not `VISITS_DB`
+  (D1), not `VISITS` (the old KV namespace), not the Pages Functions
+  middleware in `functions/_middleware.js`. Changes to one never need to
+  touch the other.
+- Only planned integration point: a CNAME for `beelining.savethehives.org`
+  → `beelining.pages.dev`. That's DNS-only — it doesn't fold Beelining
+  into this Git repo or this Pages project, and doesn't require any
+  changes here.

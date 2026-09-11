@@ -4,170 +4,52 @@ PRODID:-//SaveTheHives//Facebook Posting Schedule//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-SUMMARY:SaveTheHives FB Post — USDA’s own numbers show the treadmill (
- research hook)
-DTSTART:20260831T150000Z
-DTEND:20260831T153000Z
-DTSTAMP:20260830T220000Z
-UID:savethehives-fbpost-ongoing-usdacolonynumbers-20260831@savethehives.or
- g
-CATEGORIES:SaveTheHives,Facebook
-COLOR:purple
-DESCRIPTION:ONGOING ROTATION — Monday science/mission slot. Carried over
-  unchanged from the Aug 23 2026 run.\n\nExpert-authorship check: N/A. Sour
- ce is a USDA National Agricultural Statistics Service report plus trade-pr
- ess coverage (RFD-TV)\, not a peer-reviewed paper with named academic co-a
- uthors — no individual researcher to cross-check against KEY_PEOPLE_CONT
- ACTS.md.\n\nPost text:\nUSDA's own mid-2026 numbers show the treadmill in 
- action. Commercial beekeeping operations started the year with 2.81 millio
- n colonies — up 6% from a year before — but lost 16% of them in the fi
- rst quarter and another 11% in the second. Varroa mites affected more than
-  a quarter of colonies by spring. The only reason the total keeps climbing
-  is that beekeepers keep rebuilding: requeening\, adding packages\, replac
- ing losses as fast as they happen.\n\nThat's not colonies surviving — it
- 's colonies being propped up. The non-managed colonies we map are the rare
-  exception: no requeening\, no replacement\, no chemical support\, and sti
- ll here year after year. Every one we find and confirm is a real data poin
- t on how that's possible. SaveTheHives.org\n\nImage: images/facebook/honey
- bee-on-comb_fb-square-1080x1080.jpg (also available as _fb-portrait-1080x1
- 350.jpg)\n\nAlt text: "Close-up of a honey bee on honeycomb."\n\nLink: kee
- p the trailing "SaveTheHives.org" as plain text — a photo is attached so
-  no preview card will generate.\n\nSource: USDA NASS\, "Honey Bee Colonies
- " report\, released Jul 2026 (data through mid-2026): https://release.nass
- .usda.gov/reports/hcny0726.pdf — covered by RFD-TV\, Aug 11 2026: https:
- //www.rfdtv.com/honey-bee-colonies-rise-despite-persistent-health-pressure
- \n\nSuggested timing: Mon Aug 31\, 11am-2pm ET\n\nFull copy in FACEBOOK_ST
- ARTER_PACK.md — generated Aug 23 2026 run\, unchanged this run.
-LOCATION:facebook.com/savethehives
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:SaveTheHives FB Post — Reading the waggle dance (practical/Learn
-  tab)
-DTSTART:20260902T150000Z
-DTEND:20260902T153000Z
-DTSTAMP:20260830T220000Z
-UID:savethehives-fbpost-waggledance-20260902@savethehives.org
-CATEGORIES:SaveTheHives,Facebook
-COLOR:purple
-DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot. Carr
- ied over unchanged from the Aug 23 2026 run.\n\nPost text:\nEver wonder ho
- w bees tell each other where the good flowers are? It's called the waggle 
- dance — a returning forager runs a figure-eight pattern on the comb\, an
- d the angle and duration of her waggle run point the rest of the colony st
- raight to a food source\, sometimes over a mile away.\n\nIt's one of the w
- ildest examples of animal communication anywhere\, and you can learn to re
- ad the basics yourself in our Learn tab — same tab that covers beelining
- . savethehives.org/?tab=learn 🐝\n\nImage: images/facebook/learn-waggle-
- decoder_fb-square-1080x1080.jpg (also available as _fb-portrait-1080x1350.
- jpg)\n\nAlt text: "Illustration of a honey bee performing a waggle dance f
- igure-eight pattern on honeycomb\, showing how bees communicate flower dir
- ections and distance."\n\nLink: use savethehives.org/?tab=learn as trailin
- g plain text — a photo is attached so no preview card will generate.\n\n
- Suggested timing: Wed Sep 2\, 11am-2pm ET\n\nFull copy — generated Aug 2
- 3 2026 run\, unchanged this run.
-LOCATION:facebook.com/savethehives
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:SaveTheHives FB Post — A 20-year colony in a barn wall (found-co
- lony spotlight)
-DTSTART:20260906T150000Z
-DTEND:20260906T153000Z
-DTSTAMP:20260830T220000Z
-UID:savethehives-fbpost-barnwallcolony-20260906@savethehives.org
-CATEGORIES:SaveTheHives,Facebook
-COLOR:purple
-DESCRIPTION:ONGOING ROTATION — Sunday community/reflective slot. Carried
-  over unchanged from the Aug 23 2026 run.\n\nFLAG FOR RONNIE — before po
- sting: built around Clay Heilman's real find (see KEY_PEOPLE_CONTACTS.md /
-  Legacy_Submitter_Outreach_Tracker.xlsx) — a ~20-year wild colony in a b
- arn wall near the Snoqualmie River\, WA\, confirmed by a neighbor. He hasn
- 't been asked whether it's OK to share his story or general location publi
- cly on Facebook — get his OK first\, or use the anonymized alternate bel
- ow.\n\nPost text (names Clay + general area — needs his OK first):\nOne 
- of our legacy dataset submitters just gave us the best kind of update. Cla
- y\, near the Snoqualmie River in Washington\, wrote in about a wild honey 
- bee colony that's been living in a barn wall for roughly 20 years — with
-  a neighbor who can confirm the timeline. Since reconnecting\, he's alread
- y logged several new hives and checked in on ones already on the map\, and
-  started scouting the river for more.\n\nThat's a Genetic Goldmine if ther
- e ever was one: two decades of surviving completely on its own. This is ex
- actly the kind of find SaveTheHives exists to capture. If you know of a hi
- ve that's been around for years\, log it — you never know how long its s
- tory already is. SaveTheHives.org\n\nAlternate post text (anonymized\, saf
- e to post without asking):\nA supporter who's been helping check on legacy
-  hive records just shared one of the best finds so far: a wild honey bee c
- olony that's been living in a barn wall for roughly 20 years\, confirmed b
- y a neighbor who's watched it that whole time. Since then\, several nearby
-  hives have gotten logged too — turns out one good tip often leads to mo
- re.\n\nThat's a Genetic Goldmine if there ever was one: two decades of sur
- viving completely on its own. If you know of a hive that's been around for
-  years\, log it — you never know how long its story already is. SaveTheH
- ives.org\n\nImage: no dedicated asset — flagged for Ronnie\, consider as
- king Clay for a real photo of the barn (with permission). Fallback: images
- /facebook/logo_fb-square-1080x1080.jpg.\n\nAlt text: (set based on whichev
- er image is used\; if logo fallback: "SaveTheHives logo.")\n\nLink: keep t
- he trailing URL as plain text if a photo is attached — no preview card w
- ill generate.\n\nSuggested timing: Sun Sep 6\, 11am-2pm ET\n\nSource: KEY_
- PEOPLE_CONTACTS.md (Clay Heilman entry\, updates through 2026-08-22) and L
- egacy_Submitter_Outreach_Tracker.xlsx.\n\nFull copy — generated Aug 23 2
- 026 run\, unchanged this run.
-LOCATION:facebook.com/savethehives
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
 SUMMARY:SaveTheHives FB Post — Darwin’s solution: 17 years of natural 
  selection on Oahu (research hook)
 DTSTART:20260907T150000Z
 DTEND:20260907T153000Z
-DTSTAMP:20260830T220000Z
+DTSTAMP:20260906T220000Z
 UID:savethehives-fbpost-ongoing-darwinssolution-20260907@savethehives.org
 CATEGORIES:SaveTheHives,Facebook
 COLOR:purple
-DESCRIPTION:ONGOING ROTATION — Monday science/mission slot — fresh res
- earch-hook search this run (Aug 30 2026)\, per FACEBOOK_POST_LOG.md's "Nex
- t up" note to resume searching starting Sep 7.\n\nExpert-authorship check:
-  PARTIAL MATCH. "Darwin's solution: honeybees survive mite vectors and vir
- uses through natural selection" (Neumann\, Beaurepaire\, Bouga\, Brodschne
- ider\, Carreck\, Dahle\, de Miranda\, de Sousa\, Dietemann\, Eliash\, Elli
- s\, Erler\, Evans\, Locke\, Martin\, Mondet\, Morawetz\, Moro\, Özkırım
- \, Panziera\, Traynor and others — a ~20-author COLOSS-network consortiu
- m piece) lists James D. Ellis as a co-author — almost certainly the same
-  "Jamie Ellis (U Florida)" already in KEY_PEOPLE_CONTACTS.md's Batch 1 uni
- versity outreach list (not yet contacted). Worth a soft mention if outreac
- h to him ever happens\, though he's one of ~20 co-authors on an opinion pi
- ece\, not the lead — don't overstate his role. No new name worth adding 
- to KEY_PEOPLE_CONTACTS.md\; the rest of the author list is European/intern
- ational COLOSS-network researchers outside that file's US-only scope.\n\nP
- ost text:\nNew research just backed up exactly what SaveTheHives is built 
- to track. A 17-year study of a free-living honey bee population on Oahu fo
- und that colonies left alone with Varroa mites — no treatment\, no rescu
- e — crashed hard at first\, then rebounded\, evolving better mite-detect
- ion and removal behavior along the way. Natural selection did in under two
-  decades what chemical treatments still can't fully solve.\n\nThe paper (T
- rends in Parasitology\, out this month) has nearly 20 co-authors from the 
- global bee-research community — including Jamie Ellis at the University 
- of Florida\, already on our own list of researchers to reach out to. Its t
- akeaway: the field needs standardized\, ongoing monitoring of colony survi
- val to find more populations like this one. That's exactly what a map of n
- on-managed colonies\, checked in on year after year\, gives us. SaveTheHiv
- es.org\n\nImage: no asset fits the Oahu-specific angle well — flagged fo
- r Ronnie. Fallback: images/facebook/oak-tree-colony_fb-square-1080x1080.jp
- g (also _fb-portrait-1080x1350.jpg)\, last used Aug 26 — general wild-co
- lony-surviving-on-its-own imagery\, reasonable reuse at a ~12-day gap.\n\n
- Alt text: "A honey bee colony's entrance in a cavity of an old oak tree." 
- (if oak-tree fallback used)\n\nLink: keep the trailing "SaveTheHives.org" 
- as plain text — a photo is attached so no preview card will generate.\n
- \nSource: Neumann\, P. et al. (2026). Darwin's solution: honeybees survive
-  mite vectors and viruses through natural selection. Trends in Parasitolog
- y 42(8):3-5. https://www.cell.com/trends/parasitology/fulltext/S1471-4922(
- 26)00156-X\n\nSuggested timing: Mon Sep 7\, 11am-2pm ET\n\nNote: new conte
- nt this run — resumed fresh Monday research-hook search per the Aug 23 r
- un's "Next up" note. This piece is unusually on-thesis: it's an explicit c
- all for standardized\, ongoing monitoring of non-managed colony survival 
- — the exact mechanism SaveTheHives already runs as a citizen-science map
- .
+DESCRIPTION:ONGOING ROTATION — Monday science/mission slot. Carried over
+  unchanged from the Aug 30 2026 run.\n\nExpert-authorship check: PARTIAL M
+ ATCH. "Darwin's solution: honeybees survive mite vectors and viruses throu
+ gh natural selection" (Neumann\, Beaurepaire\, Bouga\, Brodschneider\, Car
+ reck\, Dahle\, de Miranda\, de Sousa\, Dietemann\, Eliash\, Ellis\, Erler
+ \, Evans\, Locke\, Martin\, Mondet\, Morawetz\, Moro\, Özkırım\, Panzie
+ ra\, Traynor and others — a ~20-author COLOSS-network consortium piece) 
+ lists James D. Ellis as a co-author — almost certainly the same "Jamie E
+ llis (U Florida)" already in KEY_PEOPLE_CONTACTS.md's Batch 1 university o
+ utreach list (not yet contacted). Worth a soft mention if outreach to him 
+ ever happens\, though he's one of ~20 co-authors on an opinion piece\, not
+  the lead — don't overstate his role. No new name worth adding to KEY_PE
+ OPLE_CONTACTS.md\; the rest of the author list is European/international C
+ OLOSS-network researchers outside that file's US-only scope.\n\nPost text:
+ \nNew research just backed up exactly what SaveTheHives is built to track.
+  A 17-year study of a free-living honey bee population on Oahu found that 
+ colonies left alone with Varroa mites — no treatment\, no rescue — cra
+ shed hard at first\, then rebounded\, evolving better mite-detection and r
+ emoval behavior along the way. Natural selection did in under two decades 
+ what chemical treatments still can't fully solve.\n\nThe paper (Trends in 
+ Parasitology\, out this month) has nearly 20 co-authors from the global be
+ e-research community — including Jamie Ellis at the University of Florid
+ a\, already on our own list of researchers to reach out to. Its takeaway: 
+ the field needs standardized\, ongoing monitoring of colony survival to fi
+ nd more populations like this one. That's exactly what a map of non-manage
+ d colonies\, checked in on year after year\, gives us. SaveTheHives.org\n
+ \nImage: no asset fits the Oahu-specific angle well — flagged for Ronnie
+ . Fallback: images/facebook/oak-tree-colony_fb-square-1080x1080.jpg (also 
+ _fb-portrait-1080x1350.jpg)\, last used Aug 26 — general wild-colony-sur
+ viving-on-its-own imagery\, reasonable reuse at a ~12-day gap.\n\nAlt text
+ : "A honey bee colony's entrance in a cavity of an old oak tree." (if oak-
+ tree fallback used)\n\nLink: keep the trailing "SaveTheHives.org" as plain
+  text — a photo is attached so no preview card will generate.\n\nSource:
+  Neumann\, P. et al. (2026). Darwin's solution: honeybees survive mite vec
+ tors and viruses through natural selection. Trends in Parasitology 42(8):3
+ -5. https://www.cell.com/trends/parasitology/fulltext/S1471-4922(26)00156-
+ X\n\nSuggested timing: Mon Sep 7\, 11am-2pm ET\n\nNote: generated Aug 30 2
+ 026 run\, unchanged this run.
 LOCATION:facebook.com/savethehives
 STATUS:CONFIRMED
 END:VEVENT
@@ -176,29 +58,27 @@ SUMMARY:SaveTheHives FB Post — The best time of day to go beelining (pra
  ctical)
 DTSTART:20260909T150000Z
 DTEND:20260909T153000Z
-DTSTAMP:20260830T220000Z
+DTSTAMP:20260906T220000Z
 UID:savethehives-fbpost-besttimeofday-20260909@savethehives.org
 CATEGORIES:SaveTheHives,Facebook
 COLOR:purple
-DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot — n
- ew content this run (Aug 30 2026)\, no ready post existed for this slot.\n
- \nPost text:\nTiming matters almost as much as technique. The best window 
- for beelining is mid-morning to early afternoon on a warm\, calm\, sunny d
- ay — bees are out foraging heavily\, wind isn't scattering their flight 
- lines\, and you've got enough daylight left to follow more than one bee's 
- route. Overcast\, windy\, or late-in-the-day trips are still possible\, ju
- st harder.\n\nEarly fall (right now) is one of the best stretches of the w
- hole year for it — plenty of blooming forage still out\, and bees packin
- g in stores before the weather turns. Full how-to in the Learn tab. saveth
- ehives.org/?tab=learn 🐝\n\nImage: images/facebook/meadow-hero_fb-square
- -1080x1080.jpg (also available as _fb-portrait-1080x1350.jpg) — open wil
- dflower meadow\, unused in any post so far\, fits the mid-day foraging fra
- ming.\n\nAlt text: "A honey bee foraging in a sunlit wildflower meadow."\n
- \nLink: use savethehives.org/?tab=learn as trailing plain text — a photo
-  is attached so no preview card will generate.\n\nSuggested timing: Wed Se
- p 9\, 11am-2pm ET\n\nNote: new content this run — seasonal/practical ang
- le\, timed to early fall being a strong beelining window\; first use of th
- e meadow-hero asset in a post.
+DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot. Carr
+ ied over unchanged from the Aug 30 2026 run.\n\nPost text:\nTiming matters
+  almost as much as technique. The best window for beelining is mid-morning
+  to early afternoon on a warm\, calm\, sunny day — bees are out foraging
+  heavily\, wind isn't scattering their flight lines\, and you've got enoug
+ h daylight left to follow more than one bee's route. Overcast\, windy\, or
+  late-in-the-day trips are still possible\, just harder.\n\nEarly fall (ri
+ ght now) is one of the best stretches of the whole year for it — plenty 
+ of blooming forage still out\, and bees packing in stores before the weath
+ er turns. Full how-to in the Learn tab. savethehives.org/?tab=learn 🐝\n
+ \nImage: images/facebook/meadow-hero_fb-square-1080x1080.jpg (also availab
+ le as _fb-portrait-1080x1350.jpg) — open wildflower meadow\, fits the mi
+ d-day foraging framing.\n\nAlt text: "A honey bee foraging in a sunlit wil
+ dflower meadow."\n\nLink: use savethehives.org/?tab=learn as trailing plai
+ n text — a photo is attached so no preview card will generate.\n\nSugges
+ ted timing: Wed Sep 9\, 11am-2pm ET\n\nNote: generated Aug 30 2026 run\, u
+ nchanged this run.
 LOCATION:facebook.com/savethehives
 STATUS:CONFIRMED
 END:VEVENT
@@ -207,31 +87,151 @@ SUMMARY:SaveTheHives FB Post — We're part of a bigger movement (communit
  y)
 DTSTART:20260913T150000Z
 DTEND:20260913T153000Z
-DTSTAMP:20260830T220000Z
+DTSTAMP:20260906T220000Z
 UID:savethehives-fbpost-biggermovement-20260913@savethehives.org
 CATEGORIES:SaveTheHives,Facebook
 COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Sunday community/reflective slot. Carried
+  over unchanged from the Aug 30 2026 run. Pulled from the standing idea al
+ ready flagged in FACEBOOK_STARTER_PACK.md §6 ("worth a 'we're part of a b
+ igger movement' post").\n\nPost text:\nSaveTheHives isn't the only citizen
+ -science project keeping an eye on honey bees right now — and that's a g
+ ood thing. Auburn University and the Apiary Inspectors of America run an a
+ nnual national beekeeping survey tracking managed-colony health across the
+  country. Different focus (they track managed hives\, we track non-managed
+  ones)\, same underlying idea: real data comes from real people paying att
+ ention\, not just from labs.\n\nThe more of these efforts there are\, the 
+ fuller the picture gets. If you've logged a hive with us\, you're part of 
+ that bigger picture too. SaveTheHives.org\n\nImage: images/facebook/map-sc
+ reenshot-full_fb-square-1080x1080.jpg (also available as _fb-portrait-1080
+ x1350.jpg) — full\, uncropped map screenshot\, unused in any post before
+  Sep 13.\n\nAlt text: "Screenshot of the full SaveTheHives map showing hiv
+ e pin locations across the region."\n\nLink: keep the trailing URL as plai
+ n text — a photo is attached so no preview card will generate.\n\nSugges
+ ted timing: Sun Sep 13\, 11am-2pm ET\n\nNote: generated Aug 30 2026 run\, 
+ unchanged this run.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — Two paths to the same trait (research hoo
+ k)
+DTSTART:20260914T150000Z
+DTEND:20260914T153000Z
+DTSTAMP:20260906T220000Z
+UID:savethehives-fbpost-hygienicselection-20260914@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Monday science/mission slot — fresh res
+ earch-hook search this run (Sep 6 2026)\, per FACEBOOK_POST_LOG.md's "Next
+  up" note to resume searching starting Sep 14.\n\nExpert-authorship check:
+  NO DIRECT MATCH. Amiri\, E.\, Mehrparvar\, S.\, Valizadeh\, B.\, Wagoner
+ \, K. (2026). "Honey bee hygienic selection impacts virus dynamics of both
+  bees and Varroa mites." Virus Research 367:199715 (published online Mar 1
+ 8\, 2026). Lead author Esmaeil Amiri and co-authors Somayeh Mehrparvar and
+  Bita Valizadeh are all Mississippi State University\; Kaira Wagoner is UN
+ C Greensboro. None of the four are listed by name in KEY_PEOPLE_CONTACTS.m
+ d. However: Amiri works in the same Mississippi State apiculture program a
+ s Jeff Harris (already in KEY_PEOPLE_CONTACTS.md's Batch 1 outreach list\,
+  not yet contacted\, the researcher who originally developed the VSH-bred 
+ bee lines this study builds on) — a collegial/institutional connection\,
+  not a co-authorship match\, so the post copy below does not name-drop Har
+ ris. Separately\, worth flagging for Ronnie: Dr. Kaira Wagoner (UNC Greens
+ boro\, Plant and Pollinator Center) is an active Varroa/hygienic-behavior 
+ researcher based in North Carolina — same state as Tarpy/NC State — an
+ d is not currently in KEY_PEOPLE_CONTACTS.md. Suggested addition\, not mad
+ e automatically\; worth considering as an in-state lead.\n\nPost text:\nMa
+ naged beekeeping is trying to breed something wild colonies may already ha
+ ve for free. A new study out of Mississippi State and UNC Greensboro (Viru
+ s Research\, Mar 2026) found that honey bee colonies selected for "hygieni
+ c behavior" — the instinct to detect and remove mite-infested brood befo
+ re it hatches — don't just carry fewer Varroa mites. The viruses those m
+ ites spread show up at lower levels too\, in both the bees and the mites t
+ hemselves.\n\nThat's the exact trait breeders are trying to engineer throu
+ gh years of selective breeding programs. Non-managed colonies that survive
+  winter after winter may already carry it naturally — no breeding progra
+ m required. Two paths\, same destination. Every colony we map is a chance 
+ to find out which one got there on its own. SaveTheHives.org\n\nImage: no 
+ dedicated asset for lab/breeding research — fallback to images/facebook/
+ honeybee-on-comb_fb-square-1080x1080.jpg (also _fb-portrait-1080x1350.jpg)
+ \, last used Aug 31\, ~2-week gap\, reasonable reuse.\n\nAlt text: "Close-
+ up of a honey bee on honeycomb."\n\nLink: keep the trailing "SaveTheHives.
+ org" as plain text — a photo is attached so no preview card will generat
+ e.\n\nSource: Amiri\, E.\, Mehrparvar\, S.\, Valizadeh\, B.\, Wagoner\, K.
+  (2026). Honey bee hygienic selection impacts virus dynamics of both bees 
+ and Varroa mites. Virus Research 367:199715. DOI: 10.1016/j.virusres.2026.
+ 199715\n\nSuggested timing: Mon Sep 14\, 11am-2pm ET\n\nNote: new content 
+ this run — uses the "VSH breeding programs are trying to engineer what w
+ ild survivors may already have" framing already suggested in FACEBOOK_STAR
+ TER_PACK.md §6 ("two paths to the same goal").
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — Use the landscape\, not just the compass 
+ (practical)
+DTSTART:20260916T150000Z
+DTEND:20260916T153000Z
+DTSTAMP:20260906T220000Z
+UID:savethehives-fbpost-landscapenavigation-20260916@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
+DESCRIPTION:ONGOING ROTATION — Wednesday practical/recruiting slot — n
+ ew content this run (Sep 6 2026)\, no ready post existed for this slot. De
+ liberately a different angle from the Aug 26 "What you're actually looking
+  for" post (bee-ID/what-a-colony-looks-like) and the Jul 29 "Triangulation
+ " post (crossing two flight lines) — this one is about holding your bear
+ ing over a long walk using natural landmarks.\n\nPost text:\nA compass get
+ s you pointed the right direction\, but the landscape does a lot of the wo
+ rk too. Once you've got a bee's flight line\, look for a streambed\, fence
+  line\, or ridge that roughly follows it — natural landmarks make it muc
+ h easier to hold your bearing over a long walk\, especially if tree cover 
+ blocks your view of any fixed point ahead.\n\nIt's a small trick\, but it'
+ s the difference between wandering in the general direction and walking st
+ raight to the tree. Full field guide in the Learn tab. savethehives.org/?t
+ ab=learn 🐝\n\nImage: images/facebook/learn-terrain-b_fb-square-1080x108
+ 0.jpg (also _fb-portrait-1080x1350.jpg) — unused in any post so far\, sh
+ ows a bee flying along a winding stream through open grassland\, a strong 
+ visual match for this specific tip.\n\nAlt text: "Illustration of a honey 
+ bee flying along a winding stream through open grassland\, from the SaveTh
+ eHives Learn tab terrain guide."\n\nLink: use savethehives.org/?tab=learn 
+ as trailing plain text — a photo is attached so no preview card will gen
+ erate.\n\nSuggested timing: Wed Sep 16\, 11am-2pm ET\n\nNote: new content 
+ this run — first use of the learn-terrain-b asset in a post.
+LOCATION:facebook.com/savethehives
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:SaveTheHives FB Post — This started in North Carolina. It didn't
+  stay there. (community)
+DTSTART:20260920T150000Z
+DTEND:20260920T153000Z
+DTSTAMP:20260906T220000Z
+UID:savethehives-fbpost-startedinnc-20260920@savethehives.org
+CATEGORIES:SaveTheHives,Facebook
+COLOR:purple
 DESCRIPTION:ONGOING ROTATION — Sunday community/reflective slot — new 
- content this run (Aug 30 2026)\, no ready post existed for this slot. Pull
- ed from the standing idea already flagged in FACEBOOK_STARTER_PACK.md §6 
- ("worth a 'we're part of a bigger movement' post").\n\nPost text:\nSaveThe
- Hives isn't the only citizen-science project keeping an eye on honey bees 
- right now — and that's a good thing. Auburn University and the Apiary In
- spectors of America run an annual national beekeeping survey tracking mana
- ged-colony health across the country. Different focus (they track managed 
- hives\, we track non-managed ones)\, same underlying idea: real data comes
-  from real people paying attention\, not just from labs.\n\nThe more of th
- ese efforts there are\, the fuller the picture gets. If you've logged a hi
- ve with us\, you're part of that bigger picture too. SaveTheHives.org\n\nI
- mage: images/facebook/map-screenshot-full_fb-square-1080x1080.jpg (also av
- ailable as _fb-portrait-1080x1350.jpg) — full\, uncropped map screenshot
- \, unused in any post so far.\n\nAlt text: "Screenshot of the full SaveThe
- Hives map showing hive pin locations across the region."\n\nLink: keep the
-  trailing URL as plain text — a photo is attached so no preview card wil
- l generate.\n\nSuggested timing: Sun Sep 13\, 11am-2pm ET\n\nNote: new con
- tent this run — no individual researcher to expert-authorship-check (thi
- s is a peer-project shoutout\, not a research hook)\; first use of the map
- -screenshot-full asset in a post.
+ content this run (Sep 6 2026)\, no ready post existed for this slot.\n\nPo
+ st text:\nThe original 1\,150+ legacy records behind this map started arou
+ nd Raleigh\, NC — but by the time the first version of this project went
+  dark around 2015\, entries had come in from all over\, not just the Trian
+ gle. Wild honey bee colonies don't respect state lines\, and neither does 
+ this map.\n\nWherever you're reading this from\, there's a real chance a c
+ olony worth logging is closer than you think. SaveTheHives.org 🐝\n\nIma
+ ge: images/facebook/oak-tree-colony_fb-square-1080x1080.jpg (also _fb-port
+ rait-1080x1350.jpg) — reused from the Sep 7 fallback slot\, ~13-day gap
+ \, flagged for Ronnie as a placeholder. Also considered images/teaser-bee-
+ poster.jpg (the landing page's animated-bee teaser frame\, unused in any p
+ ost so far — same subject\, a bee at a hollow-tree entrance) but it's on
+ ly 17KB\, likely too low-resolution for a full Facebook photo post\; verif
+ y before using it in place of the oak-tree fallback.\n\nAlt text: "A honey
+  bee colony's entrance in a cavity of an old oak tree."\n\nLink: keep the 
+ trailing URL as plain text — a photo is attached so no preview card will
+  generate.\n\nSuggested timing: Sun Sep 20\, 11am-2pm ET\n\nNote: new cont
+ ent this run — behind-the-scenes/origin angle\, distinct from the Jul 22
+  "How this started" post (focused on the Tarpy friendship/Feral Bee Projec
+ t origin) — this one leans on the geographic-reach detail specifically\,
+  as a soft call for participation beyond NC.
 LOCATION:facebook.com/savethehives
 STATUS:CONFIRMED
 END:VEVENT
