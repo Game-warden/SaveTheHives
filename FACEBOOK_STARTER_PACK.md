@@ -89,7 +89,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   > Not ready to go bee hunting? You can still help. SaveTheHives has 1,150+ historical hive records from 2008–2017 that nobody has checked on in years. If one happens to be near you, confirming whether it's still active takes under a minute — tap a pin, tap Validate, done.
   >
   > Every confirmation is real data for researchers. SaveTheHives.org
-- **Image:** `SaveTheHives_map_screenshot_cropped.jpg` (live screenshot of the map around Raleigh, browser chrome cropped out — captured Jul 20 2026)
+- **Image:** `marketing/screenshots/SaveTheHives_map_screenshot_cropped.jpg` (live screenshot of the map around Raleigh, browser chrome cropped out — captured Jul 20 2026)
 - **Alt text:** "Screenshot of the SaveTheHives map showing hive pin locations around Raleigh, NC."
 - **Link:** keep the trailing URL as-is — no preview card will generate since a photo is attached (confirmed Jul 22 2026); the plain text is the only way readers get the link
 - **Suggested timing:** launch week, day 6–7
@@ -137,7 +137,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
   - **Hashtags:** add as a first comment, not in the caption itself — `#SaveTheHives #CitizenScience #Beekeeping #Beelining`, matching the standing hashtag set in §9. Note Facebook hashtags carry much less discovery weight than Instagram/X, so treat this as a low-cost add, not a growth lever.
   - **Still open:** a third clip for the **Learn** tab tap hasn't been recorded yet.
 
-- **Mission/tour video** (added 2026-08-17) — `savethehives-tour-v3.mp4` (31.5s, 1080x1920), a broader "what we're all about" piece rather than a task-specific how-to: real site screenshots + existing repo photos (oak-tree colony, honeybee macro, meadow), Ken Burns pans, burned-in captions (no spoken voiceover — none available). Built via the same ffmpeg pipeline as the How-To series; full asset/shot breakdown in `AI_VIDEO_PROMPT_TOUR.md`.
+- **Mission/tour video** (added 2026-08-17) — `marketing/video/savethehives-tour-v3.mp4` (31.5s, 1080x1920), a broader "what we're all about" piece rather than a task-specific how-to: real site screenshots + existing repo photos (oak-tree colony, honeybee macro, meadow), Ken Burns pans, burned-in captions (no spoken voiceover — none available). Built via the same ffmpeg pipeline as the How-To series; full asset/shot breakdown in `AI_VIDEO_PROMPT_TOUR.md`.
   - **Post as a Reel**, same reasoning as the How-To series.
   - **Post text:**
     > Somewhere near you, there's probably a wild honeybee colony surviving completely on its own — no beekeeper, no treatments, no help.
@@ -155,7 +155,7 @@ Space these out over 1–2 weeks rather than posting all at once; gives the Page
     > Before this was an app, it was a friendship. SaveTheHives actually started in 2008 — Ronnie was an active beekeeper and met Dr. David Tarpy at an NC State beekeepers meeting. One thing led to another, and the two started "The Feral Bee Project": researchers needed known locations of wild honey bee colonies for genetic sampling tied to Colony Collapse Disorder research, so we built a simple web map for anyone to log what they found. By 2012 there was even an iPhone app (Honey Bee Mapper). The project got cited in outside bee research and grew entries from around the world before the original site went dark around 2015.
     >
     > Those original 1,000+ records never disappeared — they're the backbone of the map you see today, and Dr. Tarpy is back on board as scientific advisor. Same mission, 18 years later. SaveTheHives.org
-  - **Image:** no asset fits yet — consider a fresh photo, or the `SaveTheHives_map_screenshot_cropped.jpg` if nothing else is available
+  - **Image:** no asset fits yet — consider a fresh photo, or the `marketing/screenshots/SaveTheHives_map_screenshot_cropped.jpg` if nothing else is available
   - **Alt text:** (set based on whichever image is used)
   - **Link:** keep the trailing URL as plain text if a photo is attached — no preview card will generate
   - **Suggested slot:** Sunday (community/reflective) — good candidate whenever the ongoing rotation needs a Sunday post
