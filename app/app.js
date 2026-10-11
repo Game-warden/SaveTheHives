@@ -1,12 +1,78 @@
 // ═══════════════════════════════════════
 // SERVICE WORKER (offline app-shell caching — Phase 3, v2.6)
 // ═══════════════════════════════════════
+// Update banner + eager update checks (2026-10-11) — added after repeated
+// real friction testing deploys on iPhone, where "reload twice" (the usual
+// fix for this SW's lifecycle — see sw.js's own skipWaiting()/
+// clients.claim(), already as aggressive as the spec allows) kept not
+// being enough, and nothing short of manually clearing site data in
+// Settings ever showed the update. The likely cause: browsers only check a
+// registered SW's script for changes on their own lazy schedule (up to 24h
+// by spec) unless something explicitly asks sooner — Safari in particular
+// is laxer about this than Chrome/Firefox. Cloudflare's headers and this
+// SW's own cache-bypassing install fetch were both already correct; the
+// missing piece was asking for an update check often enough to matter
+// during active testing, and surfacing it when one's found instead of
+// silently installing in the background with no visible sign to the user.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/app/sw.js').catch(err => {
+    navigator.serviceWorker.register('/app/sw.js').then(reg => {
+      // A worker was already waiting before this page even finished
+      // loading (e.g. this tab was open across a deploy) — surface it now.
+      if (reg.waiting) showUpdateBanner(reg);
+
+      // A NEW worker starts installing (this registration, or another tab's)
+      // sometime after load — watch it, and surface it once installed, but
+      // only if there's already an active controller (i.e. this isn't just
+      // the very first-ever install with nothing to update from).
+      reg.addEventListener('updatefound', () => {
+        const installing = reg.installing;
+        if (!installing) return;
+        installing.addEventListener('statechange', () => {
+          if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+            showUpdateBanner(reg);
+          }
+        });
+      });
+
+      // Don't just wait for the browser's own update-check timer — ask
+      // explicitly right away, and again every time the tab/PWA comes back
+      // to the foreground (covers "reopened the home-screen icon" and
+      // "switched back to this Safari tab", the two real-world moments a
+      // returning visitor is most likely to actually see a stale version).
+      reg.update();
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update();
+      });
+    }).catch(err => {
       console.warn('Service worker registration failed (app still works fully online):', err);
     });
+
+    // Fires once the new worker actually takes control (right after the
+    // update banner's button tells it to skipWaiting()) — reload so the
+    // page runs the new code instead of just having a new SW sitting
+    // underneath the old UI.
+    let reloadingForUpdate = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloadingForUpdate) return;
+      reloadingForUpdate = true;
+      window.location.reload();
+    });
   });
+}
+
+function showUpdateBanner(reg) {
+  const banner = document.getElementById('update-banner');
+  const btn = document.getElementById('update-banner-btn');
+  if (!banner || !btn) return;
+  banner.classList.add('show');
+  btn.onclick = () => {
+    btn.disabled = true;
+    btn.textContent = 'Updating…';
+    // reg.waiting may already be gone if another tab's click raced ours —
+    // the controllerchange listener above still catches that case fine.
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+  };
 }
 
 // ═══════════════════════════════════════

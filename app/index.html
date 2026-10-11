@@ -419,6 +419,16 @@
   <!-- Buttons removed — Add via bottom nav, Sign In triggered contextually -->
 </div>
 
+<!-- UPDATE BANNER (2026-10-11) — hidden until app.js's service-worker
+     registration code (top of app.js) finds a new version waiting; see
+     showUpdateBanner() there. Fixed at the very top of the viewport, above
+     everything (even modals), since it's not tied to any one tab/view —
+     works regardless of what screen you're on when an update lands. -->
+<div id="update-banner">
+  <span>🐝 A new version is ready.</span>
+  <button id="update-banner-btn">Update now</button>
+</div>
+
 <!-- DEBUG OVERLAY -->
 <div id="debug-panel" class="pf-hidden">
   <div class="debug-header">

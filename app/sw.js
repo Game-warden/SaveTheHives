@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.13.6'; // Basemap fix (2026-09-03): CARTO's raster basemap tiles (basemaps.cartocdn.com) started requiring a registered API key and were showing an "API KEY REQUIRED" watermark instead of real tiles at low zoom in production. Low-zoom basemap moved to Stadia Alidade Smooth (app/app.js) — Stadia is already domain-authenticated for savethehives.org, no key to manage. Bumping since app/app.js is a precached SHELL_ASSET — without this bump, returning visitors would keep serving the old CARTO-based app.js indefinitely. Also updated isMapTile() here to recognize tiles.stadiamaps.com for the network-first capped tile cache.
+const CACHE_VERSION = 'v2.14.0'; // Map mockup session (2026-10-11): app.js/styles.css/index.html changed across several commits today (basemap, filter bar, search bar, hive note panel, white-pill styling, iPhone-width fixes, SW update banner) but THIS FILE never changed in any of them — meaning the browser had no reason to even consider installing a new service worker, since that only happens when sw.js's own bytes change. No CACHE_VERSION bump + no sw.js change = nothing to refresh, no matter how many times app.js changed underneath it; this is almost certainly the real cause of the repeated "reload doesn't update it" friction during testing, more so than any single browser quirk. Bumping now, and the rule going forward is firm: touch app.js/styles.css/pathfinder.js/index.html → bump this, every time, even for a one-line change.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
@@ -66,6 +66,19 @@ self.addEventListener('install', event => {
       ))
       .then(() => self.skipWaiting())
   );
+});
+
+// Update banner support (2026-10-11, app.js) — the waiting worker already
+// calls skipWaiting() unconditionally on install (below), so in the normal
+// case there's nothing to wait for; this exists for the one real gap that
+// leaves: if a NEWER deploy's worker is installing while this one is still
+// mid-install/waiting on its own skipWaiting() promise chain, the app.js
+// banner can still reach it directly and ask it to finish immediately
+// rather than the user sitting on an indefinite spinner.
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', event => {
