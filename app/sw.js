@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.14.0'; // Map mockup session (2026-10-11): app.js/styles.css/index.html changed across several commits today (basemap, filter bar, search bar, hive note panel, white-pill styling, iPhone-width fixes, SW update banner) but THIS FILE never changed in any of them — meaning the browser had no reason to even consider installing a new service worker, since that only happens when sw.js's own bytes change. No CACHE_VERSION bump + no sw.js change = nothing to refresh, no matter how many times app.js changed underneath it; this is almost certainly the real cause of the repeated "reload doesn't update it" friction during testing, more so than any single browser quirk. Bumping now, and the rule going forward is firm: touch app.js/styles.css/pathfinder.js/index.html → bump this, every time, even for a one-line change.
+const CACHE_VERSION = 'v2.14.1'; // Chip padding tightened further in styles.css (2026-10-11) — bumping per the rule set in v2.14.0's note above: any styles.css/app.js/pathfinder.js/index.html change bumps this, every time.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

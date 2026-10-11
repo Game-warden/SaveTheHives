@@ -1521,7 +1521,7 @@
   }
   #type-filter-chips {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     overflow-x: auto;
     padding-bottom: 2px;
     scrollbar-width: none;
@@ -1530,12 +1530,13 @@
   .tf-chip {
     flex-shrink: 0;
     font-family: inherit;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     white-space: nowrap;
-    /* Tightened 2026-10-11 (iPhone feedback) — was 7px 12px; shrinking
-       padding/gap before resorting to dropping the type icons. */
-    padding: 6px 9px;
+    /* Tightened twice now (2026-10-11, iPhone feedback) — was 7px 12px,
+       then 6px 9px; shaved again to keep the type icons rather than
+       dropping them. */
+    padding: 5px 7px;
     border-radius: var(--radius-pill);
     border: 1.5px solid var(--border);
     background: var(--surface);
