@@ -1416,12 +1416,13 @@
      Replaces the old collapsed #map-search icon (bottom-left) AND the
      filter-drawer's separate notes-search field with one always-visible,
      full-width bar at the top — same spirit as traderecord.ai's persistent
-     "Address, builder or trade" input. left:60px clears Leaflet's top-left
-     zoom control, same convention as #type-filter-bar below. */
+     "Address, builder or trade" input. left:12px (not 60px — tightened
+     2026-10-11 once Leaflet's zoom +/- control was removed, freeing that
+     space for the iPhone-feedback chip-bar width fix below). */
   #top-search-bar {
     position: absolute;
     top: 12px;
-    left: 60px;
+    left: 12px;
     right: 12px;
     z-index: 900;
     display: flex;
@@ -1468,12 +1469,13 @@
      underneath (#type-filter-meta) — see #hive-note-panel's comment
      elsewhere for the broader traderecord mockup context. Sits right below
      #top-search-bar (top: 64px = that bar's 12px top + 44px height + 8px
-     gap). left:60px clears Leaflet's top-left zoom control, same
-     convention as .validate-banner below. */
+     gap). left:12px (tightened same as #top-search-bar once the zoom
+     control was removed) — every extra px here is one more type chip
+     visible before the row has to scroll on a phone-width screen. */
   #type-filter-bar {
     position: absolute;
     top: 64px;
-    left: 60px;
+    left: 12px;
     right: 12px;
     z-index: 900;
     display: flex;
@@ -1522,6 +1524,7 @@
   #type-filter-meta {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 6px;
   }
   #type-filter-count {
@@ -1543,11 +1546,28 @@
     padding: 3px 10px;
     font-size: 0.68rem;
   }
+  /* Replaces the dropped "All" chip's reset role (mockup, 2026-10-11) —
+     text-only, shown only via JS (syncTypeFilterUI()) when a type filter
+     is actually active, so it costs no width the rest of the time. */
+  #type-filter-clear {
+    display: none;
+    align-items: center;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    padding: 3px 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #type-filter-clear:hover { color: var(--text); }
 
   /* ── VALIDATE BANNER (v2.9) ──
-     left:60px (not 14px) deliberately clears Leaflet's own zoom +/-
-     control, which defaults to top-left and already caused one bug on
-     the search icon — see #map-search's comment above. */
+     left was 60px to clear Leaflet's zoom +/- control; that control was
+     removed 2026-10-11, so this is just left:14px/right:14px now, same as
+     any other full-width banner. */
   .validate-banner {
     position: absolute;
     /* top pushed down further, from 14px originally then 90px
@@ -1556,7 +1576,7 @@
        both are explicitly hidden anyway) stacks below them instead of
        overlapping. */
     top: 140px;
-    left: 60px;
+    left: 14px;
     right: 14px;
     z-index: 900;
     display: flex;
@@ -1602,9 +1622,10 @@
   .stale-nudge {
     position: absolute;
     /* top pushed down further (2026-10-11), same reason as
-       .validate-banner above. */
+       .validate-banner above; left tightened to 14px same time, once
+       Leaflet's zoom control (which 60px used to clear) was removed. */
     top: 140px;
-    left: 60px;
+    left: 14px;
     right: 14px;
     z-index: 900;
     display: flex;

@@ -300,7 +300,10 @@ async function init() {
   map = L.map('map', {
     center: [38.5, -96],
     zoom: 5,
-    zoomControl: true,
+    // Zoom +/- control removed (mockup, 2026-10-11, iPhone feedback) — it
+    // ate horizontal space the top search/filter bars needed, and pinch-
+    // to-zoom already covers the same action on mobile.
+    zoomControl: false,
   });
   // Geolocate on first load (silently, no prompt) — skipped entirely when
   // a ?hive=<id> deep link is present. Bug found 2026-07-23: this call
@@ -2189,23 +2192,33 @@ function reapplyFilters() {
   updateCounts();
 }
 
-// Traderecord.ai-style multi-select type chips (mockup, 2026-10-11). 'all'
-// clears the set (every type visible); any other type toggles membership,
-// cumulative with whatever else is already active.
+// Traderecord.ai-style multi-select type chips (mockup, 2026-10-11).
+// Toggles membership, cumulative with whatever else is already active. No
+// 'all' case — the "All" chip was dropped (iPhone feedback, same day): an
+// empty activeFilters Set already means "show every type," so the chip row
+// only ever needs to represent the types that are actually selected.
 function toggleTypeFilter(type) {
-  if (type === 'all') activeFilters.clear();
-  else if (activeFilters.has(type)) activeFilters.delete(type);
+  if (activeFilters.has(type)) activeFilters.delete(type);
   else activeFilters.add(type);
   syncTypeFilterUI();
   reapplyFilters();
 }
 
+// Replaces the old "tap All" reset now that there's no All chip to tap —
+// same effect (empty the Set), reached via #type-filter-clear, which only
+// shows once something is actually selected (see syncTypeFilterUI()).
+function clearTypeFilters() {
+  activeFilters.clear();
+  syncTypeFilterUI();
+  reapplyFilters();
+}
+
 function syncTypeFilterUI() {
-  const allActive = activeFilters.size === 0;
-  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
-    const isOn = t === 'all' ? allActive : activeFilters.has(t);
-    document.getElementById('tf-' + t)?.classList.toggle('active', isOn);
+  ['Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
+    document.getElementById('tf-' + t)?.classList.toggle('active', activeFilters.has(t));
   });
+  const clearBtn = document.getElementById('type-filter-clear');
+  if (clearBtn) clearBtn.style.display = activeFilters.size > 0 ? 'flex' : 'none';
 }
 
 // (The filter drawer this section used to support — openFilterDrawer(),

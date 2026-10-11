@@ -478,10 +478,18 @@
        search bar above fully replace the old #filter-drawer — once the
        type chips moved up here, the drawer only had two things left
        (notes search, radius toggle) and wasn't earning a whole popup
-       anymore. -->
+       anymore.
+
+       "All" chip dropped 2026-10-11 (iPhone feedback — chips were
+       scrolling off a phone-width screen): an empty activeFilters Set
+       already means "show every type," so All never did anything a
+       deselect-everything click couldn't; the count pill already says
+       "hives in view" (not a type name) in that state. #type-filter-clear
+       below covers the one thing All was still useful for — resetting
+       multiple selections in one tap — without permanently costing a
+       chip's worth of width. -->
   <div id="type-filter-bar">
     <div id="type-filter-chips">
-      <button class="tf-chip active" id="tf-all" onclick="toggleTypeFilter('all')">All</button>
       <button class="tf-chip" id="tf-Live Tree" onclick="toggleTypeFilter('Live Tree')">🌳 Live Tree</button>
       <button class="tf-chip" id="tf-Dead Tree" onclick="toggleTypeFilter('Dead Tree')">🪵 Dead Tree</button>
       <button class="tf-chip" id="tf-Beehive" onclick="toggleTypeFilter('Beehive')">🍯 Beehive</button>
@@ -491,6 +499,7 @@
     <div id="type-filter-meta">
       <div id="type-filter-count">— hives in view</div>
       <button class="tf-chip" id="radius-toggle-pill" onclick="toggleRadii()" title="Show the 3-mile mating radius for hives currently in view">⬤ Mating Radius</button>
+      <button id="type-filter-clear" onclick="clearTypeFilters()" title="Clear type filters" style="display:none;">✕ Clear</button>
     </div>
   </div>
 
