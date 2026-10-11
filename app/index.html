@@ -282,7 +282,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="SaveTheHives">
 <title>The Map — SaveTheHives</title>
-<meta name="description" content="Validate a known wild honey bee colony, report a new one, or browse 1,150+ logged sightings across North America.">
+<meta name="description" content="Validate a known wild honey bee colony, report a new one, or browse 1,100+ logged sightings across North America.">
 
 <!-- Canonical (added 2026-08-08): the ?onboard=validate|add|learn query params
      used by the landing page's "way" cards (see maybeShowOnboardCallout() in
@@ -297,7 +297,7 @@
 <meta property="og:url" content="https://savethehives.org/app/">
 <meta property="og:site_name" content="SaveTheHives">
 <meta property="og:title" content="The Map — SaveTheHives">
-<meta property="og:description" content="Validate a known wild honey bee colony, report a new one, or browse 1,150+ logged sightings across North America.">
+<meta property="og:description" content="Validate a known wild honey bee colony, report a new one, or browse 1,100+ logged sightings across North America.">
 <meta property="og:image" content="https://savethehives.org/facebook_cover_photo.jpg">
 <meta property="og:image:width" content="1702">
 <meta property="og:image:height" content="630">
@@ -306,7 +306,7 @@
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Map — SaveTheHives">
-<meta name="twitter:description" content="Validate a known wild honey bee colony, report a new one, or browse 1,150+ logged sightings across North America.">
+<meta name="twitter:description" content="Validate a known wild honey bee colony, report a new one, or browse 1,100+ logged sightings across North America.">
 <meta name="twitter:image" content="https://savethehives.org/facebook_cover_photo.jpg">
 
 <link rel="manifest" href="/manifest.json">
@@ -360,7 +360,7 @@
   "@context": "https://schema.org",
   "@type": "Dataset",
   "name": "SaveTheHives Feral Honey Bee Colony Sightings",
-  "description": "A crowd-sourced, citizen-science dataset of 1,150+ wild (non-managed) honey bee colony sightings across North America, submitted and periodically re-validated by the public. Includes location, discovery notes, and check-in history used to identify long-surviving 'Genetic Goldmine' colonies for research.",
+  "description": "A crowd-sourced, citizen-science dataset of 1,100+ wild (non-managed) honey bee colony sightings across North America, submitted and periodically re-validated by the public. Includes location, discovery notes, and check-in history used to identify long-surviving 'Genetic Goldmine' colonies for research.",
   "url": "https://savethehives.org/app/",
   "license": "https://creativecommons.org/licenses/by/4.0/",
   "isAccessibleForFree": true,
@@ -411,7 +411,7 @@
 <div id="app-header">
   <img class="logo" src="/logo.jpg" alt="SaveTheHives">
   <div class="title">
-    SaveTheHives <span id="app-version-badge" class="version-badge">v2.11</span>
+    SaveTheHives
     <span id="header-tagline">Feral Honeybee Mapping Network</span>
   </div>
   <!-- debug toggle hidden in production; restore for field testing -->
@@ -442,10 +442,9 @@
   <div class="debug-row"><span>Compass self-reported error</span><span id="dbg-compass-acc">—</span></div>
 </div>
 
-<!-- Smart search + filter controls moved into #map-container (v2.8) —
-     see #map-search / #map-filters below. They now float over the map
-     instead of taking their own full-width row. -->
-<!-- Stats bar removed — counts now in filter drawer -->
+<!-- Smart search + filter controls moved into #map-container (v2.8), then
+     consolidated into #top-search-bar / #type-filter-bar (2026-10-11) once
+     the filter drawer was retired — see those elements below. -->
 
 <!-- MAP CONTAINER -->
 <div id="map-container">
@@ -453,7 +452,48 @@
   <!-- Fixed crosshair always centered on map -->
   <div id="map-crosshair"><div class="ch-dot"></div></div>
   <div id="map-coords">pan to hive location</div>
-  <button id="radius-toggle" onclick="toggleRadii()">⬤ Mating Radius</button>
+
+  <!-- TRADERECORD-STYLE SEARCH BAR (mockup, 2026-10-11) — replaces the old
+       collapsed location-search icon (#map-search) AND the filter-drawer's
+       separate "Search Notes" field with one always-visible bar, same
+       spirit as traderecord.ai's persistent "Address, builder or trade"
+       search. Typing live-filters hives by name/notes/city (what the old
+       drawer search did); Enter also tries to geocode and jump there (what
+       the old location search did) — see onTopSearchInput()/doSmartSearch()
+       in app.js. -->
+  <div id="top-search-bar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="top-search-input"
+      placeholder="City, landmark, or hive notes…"
+      oninput="onTopSearchInput(this.value)"
+      onkeydown="if(event.key==='Enter') doSmartSearch()">
+    <button id="top-search-clear" onclick="clearTopSearch()" title="Clear search" aria-label="Clear search" style="display:none;">✕</button>
+  </div>
+
+  <!-- TYPE FILTER BAR (mockup, 2026-10-11) — traderecord.ai-style multi-
+       select category chips + a live viewport count, with the mating-
+       radius toggle folded in right next to the count (traderecord's own
+       count-pill + inline "Building/Done" status-dot legend, same row, was
+       the model) instead of a separate floating button. This bar plus the
+       search bar above fully replace the old #filter-drawer — once the
+       type chips moved up here, the drawer only had two things left
+       (notes search, radius toggle) and wasn't earning a whole popup
+       anymore. -->
+  <div id="type-filter-bar">
+    <div id="type-filter-chips">
+      <button class="tf-chip active" id="tf-all" onclick="toggleTypeFilter('all')">All</button>
+      <button class="tf-chip" id="tf-Live Tree" onclick="toggleTypeFilter('Live Tree')">🌳 Live Tree</button>
+      <button class="tf-chip" id="tf-Dead Tree" onclick="toggleTypeFilter('Dead Tree')">🪵 Dead Tree</button>
+      <button class="tf-chip" id="tf-Beehive" onclick="toggleTypeFilter('Beehive')">🍯 Beehive</button>
+      <button class="tf-chip" id="tf-Structure" onclick="toggleTypeFilter('Structure')">🏠 Structure</button>
+      <button class="tf-chip" id="tf-Ground" onclick="toggleTypeFilter('Ground')">🌿 Ground</button>
+    </div>
+    <div id="type-filter-meta">
+      <div id="type-filter-count">— hives in view</div>
+      <button class="tf-chip" id="radius-toggle-pill" onclick="toggleRadii()" title="Show the 3-mile mating radius for hives currently in view">⬤ Mating Radius</button>
+    </div>
+  </div>
+
   <button id="fab-locate" onclick="locateMe()" title="My Location">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
@@ -472,42 +512,14 @@
     <button class="validate-banner-close" onclick="exitValidateToMap()" title="Exit Check In mode" aria-label="Exit Check In mode">✕</button>
   </div>
 
-  <!-- Stale-hive nudge (2026-07-31, CONTENT_LIBRARY_IDEAS.md item #15) — a
-       low-key, dismissible-per-session reminder for RETURNING visitors
-       (gated on ONRAMP_SEEN_KEY in maybeShowStaleNudge(), app.js) who
-       already dismissed the one-time onramp overlay above. Sits above
-       #bottom-tabs (same bottom:calc(88px + safe-area) treatment as
-       #fab-locate) rather than up top, so it never competes with
-       #validate-banner. Hidden automatically while Validate mode is
-       active (redundant with that banner's own stale count) or on any
-       non-map tab. -->
-  <div id="stale-nudge" class="stale-nudge hidden">
-    <div class="stale-nudge-text">
-      <span id="stale-nudge-text"></span>
-    </div>
-    <button class="stale-nudge-action" onclick="setTab('validate')">Check In</button>
-    <button class="stale-nudge-close" onclick="dismissStaleNudge()" title="Dismiss" aria-label="Dismiss">✕</button>
-  </div>
-
-  <!-- Floating search (replaces the old static search bar row, v2.8) -->
-  <div id="map-search" class="collapsed">
-    <button id="map-search-icon" onclick="toggleMapSearch(true)" title="Search location" aria-label="Search location">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-    </button>
-    <input type="text" id="smart-search-input"
-      placeholder="City, landmark, or address"
-      onkeydown="if(event.key==='Enter') doSmartSearch()">
-    <button id="map-search-close" onclick="toggleMapSearch(false)" title="Close search" aria-label="Close search">✕</button>
-  </div>
-
-  <!-- Filter controls, stacked under the Mating Radius toggle (v2.8) -->
-  <div id="map-filters">
-    <button id="filter-drawer-btn" onclick="openFilterDrawer()" title="Filter hives">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M7 12h10M10 19h4"/></svg>
-      <span id="filter-drawer-badge"></span>
-    </button>
-    <button id="filter-clear-btn" onclick="clearAllFilters()" title="Clear all filters — filtered view active" style="display:none;">✕</button>
-  </div>
+  <!-- Stale-hive nudge banner removed from view 2026-10-11 (Ronnie's
+       request — it was the full-width "N hives have never been checked /
+       Check In" bar that used to sit right under the filter controls).
+       maybeShowStaleNudge()/dismissStaleNudge() in app.js are left as
+       harmless no-ops (both null-guard on this element) rather than
+       deleted outright, since the bottom-nav Check In button's own
+       behavior is getting reworked next and this may come back in some
+       form as part of that. -->
 
   <!-- ═══ PATHFINDER PANEL ═══ -->
   <div id="pathfinder-panel" class="pf-hidden">
@@ -619,7 +631,7 @@
     <div class="onramp-card">
       <div class="onramp-emoji" aria-hidden="true">🐝</div>
       <div class="onramp-title" id="onramp-title">Most of the wild bee colonies we've found haven't been checked on in years.</div>
-      <div class="onramp-body" id="onramp-body">We've logged 1,150+ feral hives since 2008 — but almost none have been confirmed still active since. You can check on one near you in under a minute. No experience needed.</div>
+      <div class="onramp-body" id="onramp-body">We've logged 1,100+ feral hives since 2008 — but almost none have been confirmed still active since. You can check on one near you in under a minute. No experience needed.</div>
       <div class="onramp-actions">
         <button class="btn onramp-primary" onclick="dismissOnramp();setTab('validate');">Check in on a hive near me</button>
         <button class="btn btn-outline onramp-secondary" onclick="dismissOnramp()">Explore the map first</button>
@@ -1064,7 +1076,7 @@
       <img src="/images/honeybee-on-comb.jpg" alt="Close-up of honey bees working on comb inside a hive." style="width:100%;border-radius:var(--radius-sm);margin-bottom:16px;display:block;">
       <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:16px;">
         SaveTheHives is a citizen science platform mapping feral honeybee colonies across North America —
-        <strong style="color:var(--honey)">1,152 legacy hive records</strong> from 2008–2017 and growing.
+        <strong style="color:var(--honey)">1,136 legacy hive records</strong> from 2008–2017 and growing.
         Each 3-mile "Mating Radius" overlay visualizes drone flight potential and genetic corridors; feral bees
         that survive 3+ winters without treatment are what this project calls <strong style="color:var(--honey)">Genetic Goldmines</strong> —
         valuable breeding stock for disease-resistant bee populations. Check-ins are how survival gets tracked today; automatic badges are coming soon.
@@ -1088,6 +1100,11 @@
 
 <!-- TOAST -->
 <div id="toast"></div>
+
+<!-- HIVE NOTE PANEL (mockup, 2026-10-11) — traderecord.ai-style fixed
+     white card for hive detail, replacing the old marker-anchored Leaflet
+     popup. See showHiveNotePanel()/closeHiveNotePanel() in app.js. -->
+<div id="hive-note-panel"></div>
 
 <!-- EMAIL-SENT CALLOUT (v2.11.9) — replaces a 2.5s toast for the
      magic-link "check your email" message. A field tester reported
@@ -1173,68 +1190,9 @@
   </div>
 </div>
 
-
-<!-- ── FILTER DRAWER (v2.3) ── -->
-<div id="filter-drawer" onclick="if(event.target===this)closeFilterDrawer()">
-  <div class="filter-sheet">
-    <div class="filter-sheet-title">🐝 Filter Hives</div>
-    <div class="filter-section-label">Search Notes</div>
-    <input type="text" id="fd-notes-input"
-      placeholder="Filter by keyword in notes…"
-      oninput="onDrawerNotesInput(this.value)"
-      autocomplete="off"
-      style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.07);
-        border:1px solid var(--border);border-radius:var(--radius-pill);
-        color:var(--text);font-size:0.88rem;padding:9px 14px;font-family:inherit;
-        outline:none;margin-bottom:16px;display:block;">
-    <div class="filter-section-label">Hive Type</div>
-    <div class="filter-type-grid">
-      <div class="filter-type-btn active" id="fd-all" onclick="fdFilterType('all')">
-        <div class="filter-type-dot" style="background:var(--honey)"></div>
-        <span>All</span>
-        <small id="count-all" style="color:var(--text-muted);">—</small>
-      </div>
-      <div class="filter-type-btn" id="fd-Live Tree" onclick="fdFilterType('Live Tree')">
-        <div class="filter-type-dot" style="background:var(--pin-live)"></div>
-        <span>Live Tree</span>
-        <small id="count-Live Tree" style="color:var(--text-muted);">—</small>
-      </div>
-      <div class="filter-type-btn" id="fd-Dead Tree" onclick="fdFilterType('Dead Tree')">
-        <div class="filter-type-dot" style="background:var(--pin-dead)"></div>
-        <span>Dead Tree</span>
-        <small id="count-Dead Tree" style="color:var(--text-muted);">—</small>
-      </div>
-      <div class="filter-type-btn" id="fd-Beehive" onclick="fdFilterType('Beehive')">
-        <div class="filter-type-dot" style="background:var(--pin-beehive)"></div>
-        <span>Beehive</span>
-        <small id="count-Beehive" style="color:var(--text-muted);">—</small>
-      </div>
-      <div class="filter-type-btn" id="fd-Structure" onclick="fdFilterType('Structure')">
-        <div class="filter-type-dot" style="background:var(--pin-building)"></div>
-        <span>Structure</span>
-        <small id="count-Structure" style="color:var(--text-muted);">—</small>
-      </div>
-      <div class="filter-type-btn" id="fd-Ground" onclick="fdFilterType('Ground')">
-        <div class="filter-type-dot" style="background:var(--pin-ground)"></div>
-        <span>Ground</span>
-        <small id="count-Ground" style="color:var(--text-muted);">—</small>
-      </div>
-    </div>
-    <div class="filter-radius-row">
-      <div>
-        <div class="filter-radius-label">🔵 Mating Radius</div>
-        <div class="filter-radius-sub">3-mile radius around each hive</div>
-      </div>
-      <label style="position:relative;display:inline-block;width:48px;height:26px;cursor:pointer;">
-        <input type="checkbox" id="fd-radius-toggle" onchange="toggleRadiiFromDrawer(this.checked)"
-          style="opacity:0;width:0;height:0;position:absolute;">
-        <span id="fd-radius-track" style="position:absolute;inset:0;border-radius:999px;background:#c8b89a;transition:background 0.2s;"></span>
-        <span id="fd-radius-thumb" style="position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:transform 0.2s,background 0.2s;"></span>
-      </label>
-    </div>
-    <button id="fd-clear-btn" class="btn btn-outline" style="width:100%;margin-top:12px;display:none;" onclick="clearAllFilters()">✕ Clear all filters</button>
-    <button class="btn" style="width:100%;margin-top:8px;" onclick="closeFilterDrawer()">Done</button>
-  </div>
-</div>
+<!-- Filter drawer (v2.3) removed 2026-10-11 — once the Hive Type chips
+     moved into the always-visible #type-filter-bar, this popup only had
+     two things left (notes search, radius toggle), both now folded into
+     the map's own top controls (#top-search-bar, #radius-toggle-pill). -->
 </body>
 </html>

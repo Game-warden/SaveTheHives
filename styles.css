@@ -480,17 +480,22 @@
     -webkit-tap-highlight-color: transparent;
   }
   .tab-btn svg { width: 21px; height: 21px; transition: transform 0.15s; }
-  .tab-btn.active { color: var(--honey); }
+  /* White/monochrome variant (2026-10-11, pushed further) — active tab
+     goes dark instead of honey (a literal white would vanish against the
+     already-white/cream nav bar, so "white direction" here means
+     monochrome black/white instead of the amber accent, same idea as
+     .tf-chip.active elsewhere). */
+  .tab-btn.active { color: #1a1a1a; }
   .tab-btn.active svg { transform: translateY(-1px); }
   .tab-btn.active::after {
     content: '';
     position: absolute;
     bottom: 2px;
     width: 16px; height: 2px;
-    background: var(--honey);
+    background: #1a1a1a;
     border-radius: 2px;
   }
-  .tab-btn:hover { color: var(--honey); background: none; }
+  .tab-btn:hover { color: #1a1a1a; background: none; }
   .tab-btn:active { transform: scale(0.93); }
 
   /* ── ONBOARD CALLOUT (v2.11.5) — points at a bottom-nav tab when arriving
@@ -804,12 +809,16 @@
     border-top: 1px solid var(--border);
     padding-top: 8px;
   }
+  /* White-pill variant (2026-10-11) — see .tf-chip.active's comment. Only
+     this default (Mating Radius) button; the Check In/Share/Contact
+     buttons keep their own explicit green/blue/amber inline-style colors,
+     set per-button in hivePopupHtml() (app.js), untouched here. */
   .popup-radius-btn {
     margin-top: 8px;
     font-size: 0.75rem;
-    background: rgba(245,166,35,0.15);
-    border: 1px solid var(--honey);
-    color: var(--honey);
+    background: #ffffff;
+    border: 1px solid #1a1a1a;
+    color: #1a1a1a;
     border-radius: 6px;
     padding: 4px 10px;
     cursor: pointer;
@@ -825,6 +834,79 @@
   }
   .leaflet-popup-content { margin: 0 !important; max-width: calc(100vw - 32px) !important; }
   .leaflet-popup-tip-container { display: none; }
+
+  /* ── HIVE NOTE PANEL (mockup, 2026-10-11) ──
+     traderecord.ai-style: a fixed white card docked lower-left, instead of
+     a Leaflet popup anchored to the marker. Same bottom offset as #toast
+     so it clears #bottom-tabs. */
+  #hive-note-panel {
+    position: fixed;
+    left: 16px;
+    bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    width: min(320px, calc(100vw - 32px));
+    max-height: min(60dvh, 480px);
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+    padding: 14px;
+    z-index: 900;
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  #hive-note-panel.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  #hive-note-panel .note-panel-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.06);
+    color: #5a5342;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Reuses the .hive-popup content markup/classes, recolored for a white
+     card instead of the dark glass popup they were designed for. */
+  #hive-note-panel .hive-popup {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    padding-right: 20px;
+    min-width: 0;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    color: #2a2410;
+  }
+  #hive-note-panel .popup-type { color: #8a7a55; }
+  #hive-note-panel .popup-name { color: #b5790a; }
+  #hive-note-panel .popup-desc { color: #4a4330; }
+  #hive-note-panel .popup-meta { color: #8a7a55; border-top-color: rgba(0,0,0,0.08); }
+  /* White-pill variant (2026-10-11) — matches .popup-radius-btn's own
+     update above; kept as an explicit override since this panel is white
+     already and the base rule's #1a1a1a border reads fine on it too, but
+     this keeps the two in sync if one changes independently later. */
+  #hive-note-panel .popup-radius-btn {
+    background: #ffffff;
+    border-color: #1a1a1a;
+    color: #1a1a1a;
+  }
 
   /* ── YOU ARE HERE — live position marker ── */
   .you-are-here-dot {
@@ -860,15 +942,18 @@
     transform-origin: 50% 60%;
   }
 
-  /* Cluster override */
+  /* Cluster override — traderecord.ai-style black bubbles (mockup, 2026-10-11),
+     replacing the previous honey/orange cluster styling. */
   .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
-    background-color: rgba(245,166,35,0.2) !important;
+    background-color: rgba(0,0,0,0.25) !important;
   }
   .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
-    background-color: rgba(245,166,35,0.7) !important;
-    color: #1a1a0e !important;
+    background-color: #1a1a1a !important;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    color: #fff !important;
     font-weight: bold;
-    font-family: Georgia, serif;
+    font-family: 'Outfit', system-ui, sans-serif;
   }
 
   /* ── TOAST ── */
@@ -968,30 +1053,10 @@
     width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
   }
 
-  /* ── RADIUS CIRCLE TOGGLE ── */
-  #radius-toggle {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 900;
-    background: rgba(14, 12, 6, 0.8);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-pill);
-    padding: 8px 14px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    cursor: pointer;
-    font-family: inherit;
-    min-height: 36px;
-    transition: all 0.18s;
-    box-shadow: var(--shadow-sm);
-  }
-  #radius-toggle:hover { border-color: rgba(245,166,35,0.5); color: var(--text); }
-  #radius-toggle.active { border-color: var(--honey); color: var(--honey); box-shadow: 0 0 0 3px rgba(245,166,35,0.15); }
-  #radius-toggle:active { transform: scale(0.96); }
+  /* ── RADIUS CIRCLE TOGGLE ── removed 2026-10-11 — the standalone floating
+     #radius-toggle button was replaced by #radius-toggle-pill, folded into
+     #type-filter-bar's #type-filter-meta row (reuses .tf-chip/.tf-chip.active
+     styling directly, see that block below). */
 
   #map-container {
     position: relative;
@@ -1279,10 +1344,12 @@
   }
 
 
-  /* Hide map overlays when check-in modal is open */
+  /* Hide map overlays when check-in modal (or the hive note panel, which
+     also sets checkin-open) is open */
   body.checkin-open #map-crosshair,
   body.checkin-open #map-coords,
-  body.checkin-open #radius-toggle { display: none !important; }
+  body.checkin-open #top-search-bar,
+  body.checkin-open #type-filter-bar { display: none !important; }
 
   /* ── CROSSHAIR ── */
   #map-crosshair {
@@ -1345,139 +1412,136 @@
   ::-webkit-scrollbar-thumb { background: rgba(245,166,35,0.25); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(245,166,35,0.4); }
 
-  /* ── FLOATING SEARCH (v2.8, repositioned in v2.8.1) — replaces the old
-     static search bar row ── Collapsed: a 44px circular icon button,
-     bottom-left over the map (see #map-search below for why it's not
-     top-left). Expanded (.collapsed removed): morphs in place into a
-     full-width pill along the same bottom row. */
-  #map-search {
-    /* Bottom-left, matching #fab-locate's row (v2.8.1) — top-left is
-       Leaflet's own zoom +/- control (zoomControl:true, default
-       'topleft' position), which was sitting on top of the search icon
-       and eating its taps entirely. bottom uses env(safe-area-inset-bottom)
-       to match #fab-locate and #bottom-tabs (v2.8.3 fix) — otherwise this
-       stays put while the nav pill rises to clear a notched iPhone's
-       home-indicator strip, tucking this behind it. */
+  /* ── TRADERECORD-STYLE SEARCH BAR (mockup, 2026-10-11) ──
+     Replaces the old collapsed #map-search icon (bottom-left) AND the
+     filter-drawer's separate notes-search field with one always-visible,
+     full-width bar at the top — same spirit as traderecord.ai's persistent
+     "Address, builder or trade" input. left:60px clears Leaflet's top-left
+     zoom control, same convention as #type-filter-bar below. */
+  #top-search-bar {
     position: absolute;
-    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
-    left: 16px;
-    right: auto;
+    top: 12px;
+    left: 60px;
+    right: 12px;
     z-index: 900;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     height: 44px;
-    padding: 0 4px;
+    padding: 0 14px;
     background: var(--surface);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1.5px solid var(--border);
     border-radius: var(--radius-pill);
     box-shadow: var(--shadow-md);
-    width: 44px;
-    overflow: hidden;
-    transition: width 0.22s cubic-bezier(.32,1.1,.6,1);
   }
-  #map-search.collapsed { width: 44px; }
-  #map-search:not(.collapsed) { width: calc(100% - 32px); }
-  #map-search-icon {
-    flex: 0 0 auto;
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: none;
-    border: none;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  /* Explicit size — without this, an inline SVG with only a viewBox (no
-     width/height attributes) falls back to each browser's own default
-     intrinsic size. Chrome happened to constrain it reasonably inside the
-     36px flex button; iOS Safari did not, which is why the icon rendered
-     as a blank circle there (every other icon button in the app already
-     has this same explicit sizing — this one was missed). */
-  #map-search-icon svg { width: 20px; height: 20px; flex-shrink: 0; }
-  #map-search.collapsed #smart-search-input,
-  #map-search.collapsed #map-search-close { display: none; }
-  #smart-search-input {
+  #top-search-bar svg { flex: 0 0 auto; width: 18px; height: 18px; color: var(--text-muted); }
+  #top-search-input {
     flex: 1 1 auto;
     min-width: 0;
     background: none;
     border: none;
     color: var(--text);
     font-size: 0.88rem;
-    padding: 0 4px;
+    padding: 0;
     font-family: inherit;
     outline: none;
   }
-  #smart-search-input::placeholder { color: var(--text-muted); }
-  #map-search-close {
+  #top-search-input::placeholder { color: var(--text-muted); }
+  #top-search-clear {
     flex: 0 0 auto;
-    width: 28px; height: 28px;
+    width: 24px; height: 24px;
     border-radius: 50%;
-    background: none;
+    background: rgba(0,0,0,0.06);
     border: none;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* ── FLOATING FILTER CONTROLS (v2.8) — stacked under Mating Radius ── */
-  #map-filters {
+  /* ── TYPE FILTER BAR (mockup, 2026-10-11) ──
+     traderecord.ai-style always-visible, multi-select category chips, with
+     a live viewport count + the mating-radius toggle sharing a row
+     underneath (#type-filter-meta) — see #hive-note-panel's comment
+     elsewhere for the broader traderecord mockup context. Sits right below
+     #top-search-bar (top: 64px = that bar's 12px top + 44px height + 8px
+     gap). left:60px clears Leaflet's top-left zoom control, same
+     convention as .validate-banner below. */
+  #type-filter-bar {
     position: absolute;
-    top: 58px;
+    top: 64px;
+    left: 60px;
     right: 12px;
     z-index: 900;
     display: flex;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
   }
-  #filter-drawer-btn {
+  #type-filter-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  #type-filter-chips::-webkit-scrollbar { display: none; }
+  .tf-chip {
     flex-shrink: 0;
-    position: relative;
-    width: 40px; height: 40px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    padding: 7px 12px;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border);
     background: var(--surface);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-pill);
     color: var(--text-muted);
     cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+  }
+  /* White-pill variant (2026-10-11, Ronnie's request — compare against the
+     honey-accent version above): active chip is a plain white pill with a
+     dark border/text instead of an amber tint, closer to traderecord's own
+     black-on-white active state (kept dark text rather than literal black-
+     fill to stay legible against this app's light theme). */
+  .tf-chip.active {
+    border-color: #1a1a1a;
+    background: #ffffff;
+    color: #1a1a1a;
+    font-weight: 700;
+  }
+  /* Count pill + mating-radius toggle, sharing one row — modeled on
+     traderecord's own count-pill-plus-status-dot-legend row (their
+     "2,306 projects • Building • Done"). */
+  #type-filter-meta {
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-sm);
-    transition: border-color 0.15s, color 0.15s;
+    gap: 6px;
   }
-  #filter-drawer-btn svg { width: 18px; height: 18px; }
-  #filter-drawer-btn.active {
-    border-color: var(--honey);
-    color: var(--honey);
-  }
-  #filter-drawer-badge {
-    display: none;
-    position: absolute;
-    top: -2px; right: -2px;
-    width: 8px; height: 8px;
-    background: var(--honey);
-    border-radius: 50%;
-  }
-  #filter-drawer-btn.active #filter-drawer-badge { display: block; }
-  #filter-clear-btn {
-    flex-shrink: 0;
-    width: 40px; height: 40px;
-    background: rgba(245,166,35,0.12);
-    border: 1.5px solid var(--honey);
+  #type-filter-count {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: #ffffff;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 3px 10px;
     border-radius: var(--radius-pill);
-    color: var(--honey);
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    line-height: 1;
-    -webkit-tap-highlight-color: transparent;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+  }
+  /* #radius-toggle-pill reuses .tf-chip/.tf-chip.active above as-is — same
+     pill look as the type chips, just living in this row instead of the
+     scrolling chip row (it toggles a view option, not a type filter). */
+  #radius-toggle-pill {
+    padding: 3px 10px;
+    font-size: 0.68rem;
   }
 
   /* ── VALIDATE BANNER (v2.9) ──
@@ -1486,7 +1550,12 @@
      the search icon — see #map-search's comment above. */
   .validate-banner {
     position: absolute;
-    top: 14px;
+    /* top pushed down further, from 14px originally then 90px
+       (2026-10-11) — #top-search-bar + #type-filter-bar now own that whole
+       band permanently; this banner (shown only in Validate mode, when
+       both are explicitly hidden anyway) stacks below them instead of
+       overlapping. */
+    top: 140px;
     left: 60px;
     right: 14px;
     z-index: 900;
@@ -1532,7 +1601,9 @@
      already guards on !validateActive, so the two never show at once. */
   .stale-nudge {
     position: absolute;
-    top: 14px;
+    /* top pushed down further (2026-10-11), same reason as
+       .validate-banner above. */
+    top: 140px;
     left: 60px;
     right: 14px;
     z-index: 900;
@@ -1556,11 +1627,12 @@
     color: var(--text);
     line-height: 1.3;
   }
+  /* White-pill variant (2026-10-11) — see .tf-chip.active's comment. */
   .stale-nudge-action {
     flex: 0 0 auto;
-    background: var(--honey);
-    color: #fff;
-    border: none;
+    background: #ffffff;
+    color: #1a1a1a;
+    border: 1.5px solid #1a1a1a;
     border-radius: var(--radius-pill);
     padding: 7px 14px;
     font-size: 0.76rem;
@@ -1618,92 +1690,10 @@
   .onramp-actions { display: flex; flex-direction: column; gap: 8px; }
   .onramp-primary, .onramp-secondary { width: 100%; }
 
-  /* ── FILTER DRAWER (v2.3) ── */
-  #filter-drawer {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    z-index: 8500;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-  #filter-drawer.open { opacity: 1; pointer-events: all; }
-  .filter-sheet {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: 20px 16px 40px;
-    box-shadow: var(--shadow-lg);
-    transform: translateY(100%);
-    transition: transform 0.25s cubic-bezier(0.32,0.72,0,1);
-  }
-  #filter-drawer.open .filter-sheet { transform: translateY(0); }
-  .filter-sheet-title {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--honey);
-    margin-bottom: 16px;
-    text-align: center;
-  }
-  .filter-section-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    margin-bottom: 10px;
-  }
-  .filter-type-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-  .filter-type-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    padding: 10px 4px;
-    border-radius: var(--radius-md);
-    border: 2px solid var(--border);
-    background: rgba(255,255,255,0.04);
-    cursor: pointer;
-    transition: all 0.15s;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: var(--text-muted);
-  }
-  .filter-type-dot {
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .filter-type-btn.active {
-    border-color: var(--honey);
-    background: rgba(245,166,35,0.12);
-    color: var(--honey);
-  }
-  .filter-radius-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-top: 1px solid var(--border);
-  }
-  .filter-radius-label {
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .filter-radius-sub {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-  }
+  /* ── FILTER DRAWER (v2.3) ── removed 2026-10-11, see app/index.html's
+     note at the old </body> spot for why (Hive Type chips, notes search,
+     and the radius toggle all moved to the map's own top controls once
+     the drawer was down to just two things). */
 
   /* ── SEARCH BAR LABELS (legacy — kept for transition) ── */
   .search-label {

@@ -154,10 +154,18 @@ let allHives = [];
 let visibleHives = []; // always mirrors what's actually in the cluster group
 let radiusCircles = [];
 let showRadii = false;
-let activeFilter = 'all';
+// Multi-select type filter (mockup, 2026-10-11, traderecord.ai-style) —
+// replaces the old single-value activeFilter ('all' or one type). An empty
+// Set means "All" (every type visible), same semantics as before but
+// allowing more than one type to be active at once (cumulative/OR, same as
+// traderecord's category chips). hiveTypeVisible() is the one place that
+// reads it — every filter/search/radius call site below goes through it
+// instead of comparing against a single string.
+let activeFilters = new Set();
+function hiveTypeVisible(h) { return activeFilters.size === 0 || activeFilters.has(h.type); }
 let selectedType = 'Live Tree';
 let pendingLat = null, pendingLng = null;
-let validateActive = false; // v2.9 — Validate mode temporarily narrows the visible pins to a radius; never mutates activeFilter/activeNotesQuery so exiting restores exactly what was there before
+let validateActive = false; // v2.9 — Validate mode temporarily narrows the visible pins to a radius; never mutates activeFilters/activeNotesQuery so exiting restores exactly what was there before
 
 // ═══════════════════════════════════════
 // FIRST-VISIT ON-RAMP OVERLAY (v2.8)
@@ -274,28 +282,10 @@ function maybeShowStaleNudge(neverValidatedCount) {
   nudge.classList.remove('hidden');
 }
 
-// ═══════════════════════════════════════
-// FLOATING SEARCH (v2.8) — morphs the map-search icon into an inline field
-// ═══════════════════════════════════════
-function toggleMapSearch(open) {
-  const wrap = document.getElementById('map-search');
-  if (!wrap) return;
-  wrap.classList.toggle('collapsed', !open);
-  // Expanded search now spans the bottom row (v2.8.1 — moved off Leaflet's
-  // top-left zoom control), overlapping the radius/filter stack (top-right)
-  // and fab-locate (same bottom-left row). Hide them rather than truly
-  // removing them, so nothing reflows.
-  const filters = document.getElementById('map-filters');
-  const radius = document.getElementById('radius-toggle');
-  const locate = document.getElementById('fab-locate');
-  if (filters) filters.style.visibility = open ? 'hidden' : '';
-  if (radius) radius.style.visibility = open ? 'hidden' : '';
-  if (locate) locate.style.visibility = open ? 'hidden' : '';
-  if (open) {
-    const input = document.getElementById('smart-search-input');
-    if (input) setTimeout(() => input.focus(), 60);
-  }
-}
+// (toggleMapSearch() — morphed the old collapsed #map-search icon into an
+// inline field — removed 2026-10-11 along with #map-search itself; search
+// is now the always-visible #top-search-bar, see onTopSearchInput()/
+// clearTopSearch() below and doSmartSearch() further down.)
 
 // ═══════════════════════════════════════
 // INIT
@@ -354,12 +344,15 @@ async function init() {
     }),
     outdoors: L.tileLayer('https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
       attribution: basemapAttrStadia, maxZoom: 20
+    }),
+    bright: L.tileLayer('https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
+      attribution: basemapAttrStadia, maxZoom: 20
     })
   };
-  let activeBasemap = 'light';
-  basemapLayers.light.addTo(map);
+  let activeBasemap = 'bright';
+  basemapLayers.bright.addTo(map);
 
-  function basemapForZoom(z) { return z >= 15 ? 'outdoors' : 'light'; }
+  function basemapForZoom(z) { return 'bright'; }
   map.on('zoomend', () => {
     const key = basemapForZoom(map.getZoom());
     if (key !== activeBasemap) {
@@ -387,6 +380,13 @@ async function init() {
   map.on('move', updateCrosshairCoords);
   map.on('load', updateCrosshairCoords);
   updateCrosshairCoords();
+
+  // Traderecord.ai-style live viewport count + mating radius (mockup,
+  // 2026-10-11) — both only need to recompute once a pan/zoom settles, not
+  // on every intermediate 'move' frame. redrawMatingRadii() itself no-ops
+  // when showRadii is off, so this is cheap even when the toggle is unused.
+  map.on('moveend', updateViewportFilterCount);
+  map.on('moveend', redrawMatingRadii);
 
   // Hide crosshair/radius overlay when any popup is open
   map.on('popupopen',  () => document.body.classList.add('checkin-open'));
@@ -561,7 +561,7 @@ async function loadHivesFromSupabase() {
           addMarker(h);
         }
       });
-      filterType(activeFilter); // re-applies current filter/keyword + refreshes counts
+      reapplyFilters(); // re-applies current filter/keyword + refreshes counts
     }
     return;
   }
@@ -647,10 +647,11 @@ function makeIcon(type) {
   });
 }
 
-function addMarker(hive) {
-  const marker = L.marker([hive.lat, hive.lng], {icon: makeIcon(hive.type)});
-  marker.hiveData = hive;
-
+// Shared by the hive note panel (showHiveNotePanel) — used to be a
+// Leaflet bindPopup() template directly; pulled out unchanged so the new
+// fixed-panel presentation (mockup, 2026-10-11) can reuse the exact same
+// content/buttons instead of duplicating them.
+function hivePopupHtml(hive) {
   const color = TYPE_COLORS[hive.type] || '#f5a623';
   const icon = TYPE_ICONS[hive.type] || '🐝';
   const _locParts = v => v && v.trim() && v.toLowerCase() !== 'unknown';
@@ -659,7 +660,7 @@ function addMarker(hive) {
   const desc = escapeHtml(hive.description || '');
   const safeName = escapeHtml(hive.name) || 'Anonymous Observer';
 
-  marker.bindPopup(`
+  return `
     <div class="hive-popup">
       <div class="popup-type">
         <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
@@ -679,12 +680,32 @@ function addMarker(hive) {
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
       ${hive.allowContact && hive.submittedBy && hive.submittedBy !== currentUser?.id ? `<button class="popup-radius-btn" style="margin-top:6px;background:rgba(245,166,35,0.15);color:var(--honey);border-color:rgba(245,166,35,0.3);" onclick="openContactSubmitter(${hive.id})">📬 Contact Submitter</button>` : ''}
     </div>
-  `, {maxWidth: 300, minWidth: 200, autoPanPadding: [16, 70]});
+  `;
+}
 
-  // Lazy-load most recent check-in note when popup opens
-  marker.on('popupopen', async () => {
-    const el = document.getElementById('ci-note-' + hive.id);
-    if (!el || el.dataset.loaded) return;
+// Traderecord.ai-style hive detail: fixed white card docked lower-left
+// (mockup, 2026-10-11), replacing the old marker-anchored Leaflet popup.
+// Also centers+zooms the map on the hive, same spirit as the cluster
+// click's own zoom-to-bounds.
+async function showHiveNotePanel(hive) {
+  // Never zoom OUT from wherever the map already is — only ensures AT LEAST
+  // zoom 13. A fixed zoom 13 (tried 2026-10-11, reverted same day) broke
+  // exactly this flow: click a 2-hive cluster (Leaflet zooms in only as far
+  // as needed to separate them, often past 13), then click one of the now-
+  // separated pins — flying to a flat 13 could zoom back OUT past whatever
+  // the cluster click had just zoomed to, re-merging the pair right after
+  // you separated them. Math.max avoids that: it can zoom in from a wide
+  // view, but never undoes a zoom-in you (or a cluster click) already did.
+  map.flyTo([hive.lat, hive.lng], Math.max(map.getZoom(), 13), { duration: 0.6 });
+
+  const panel = document.getElementById('hive-note-panel');
+  panel.innerHTML = `<button class="note-panel-close" onclick="closeHiveNotePanel()" aria-label="Close">&times;</button>${hivePopupHtml(hive)}`;
+  panel.classList.add('open');
+  document.body.classList.add('checkin-open');
+
+  // Lazy-load most recent check-in note, same as the old popupopen handler.
+  const el = document.getElementById('ci-note-' + hive.id);
+  if (el && !el.dataset.loaded) {
     el.dataset.loaded = '1';
     const { data } = await db.from('checkins')
       .select('notes, created_at')
@@ -695,9 +716,22 @@ function addMarker(hive) {
     if (data?.[0]?.notes) {
       el.textContent = `"${data[0].notes}"`;
     }
-  });
+  }
+}
 
+function closeHiveNotePanel() {
+  document.getElementById('hive-note-panel').classList.remove('open');
+  if (!document.getElementById('checkin-modal').classList.contains('open') &&
+      !document.getElementById('contact-modal')?.classList.contains('open')) {
+    document.body.classList.remove('checkin-open');
+  }
+}
+
+function addMarker(hive) {
+  const marker = L.marker([hive.lat, hive.lng], {icon: makeIcon(hive.type)});
+  marker.hiveData = hive;
   marker.hiveId = hive.id;
+  marker.on('click', () => showHiveNotePanel(hive));
   clusterGroup.addLayer(marker);
   hive._marker = marker;
 }
@@ -723,77 +757,72 @@ function toggleSingleRadius(id, lat, lng) {
   }
 }
 
-function toggleRadii() {
-  showRadii = !showRadii;
-  const btn = document.getElementById('radius-toggle');
-  btn.classList.toggle('active', showRadii);
-
-  // Clear existing
+// Traderecord.ai-style mating radius (mockup, 2026-10-11) — redraws the
+// 3-mile ring for every hive that's both type/notes-filtered (visibleHives)
+// AND currently within the map's viewport, same live-recompute-on-moveend
+// pattern as updateViewportFilterCount(). Replaces two previously separate,
+// slightly inconsistent radius-drawing blocks (this function's old body,
+// and a near-duplicate inline in reapplyFilters()) with one shared
+// implementation both now call. Returns the count drawn.
+function redrawMatingRadii() {
   radiusCircles.forEach(c => map.removeLayer(c));
   radiusCircles = [];
+  if (!showRadii || !map) return 0;
+  const bounds = map.getBounds();
+  const inView = visibleHives.filter(h => h.lat != null && h.lng != null && bounds.contains([h.lat, h.lng]));
+  inView.forEach(h => {
+    radiusCircles.push(L.circle([h.lat, h.lng], {
+      radius: MATING_RADIUS_M,
+      color: TYPE_COLORS[h.type] || '#f5a623',
+      fillColor: TYPE_COLORS[h.type] || '#f5a623',
+      fillOpacity: 0.03,
+      weight: 1,
+      dashArray: '4 4',
+    }).addTo(map));
+  });
+  return inView.length;
+}
 
-  if (showRadii) {
-    // Draw radii ONLY for hives that are currently visible in the cluster
-    visibleHives.forEach(h => {
-      const c = L.circle([h.lat, h.lng], {
-        radius: MATING_RADIUS_M,
-        color: TYPE_COLORS[h.type] || '#f5a623',
-        fillColor: TYPE_COLORS[h.type] || '#f5a623',
-        fillOpacity: 0.03,
-        weight: 1,
-        dashArray: '4 4',
-      }).addTo(map);
-      radiusCircles.push(c);
-    });
-    showToast(`${visibleHives.length} mating radius circles shown`);
-  }
+function toggleRadii() {
+  showRadii = !showRadii;
+  document.getElementById('radius-toggle-pill')?.classList.toggle('active', showRadii);
+  const count = redrawMatingRadii();
+  if (showRadii) showToast(`${count.toLocaleString()} mating radius circles shown`);
 }
 
 // ═══════════════════════════════════════
 // FILTER
 // ═══════════════════════════════════════
-function filterType(type) {
-  activeFilter = type;
+// (The old single-type filterType() — dead code once the stats-bar pills it
+// targeted were removed, and fully superseded by reapplyFilters(), which
+// does the same job against the current activeFilters Set — was removed
+// 2026-10-11. Its one remaining caller, the delta-sync path above, now
+// calls reapplyFilters() directly.)
 
-  // Update pills
-  document.querySelectorAll('.stat-pill').forEach(p => p.classList.remove('active'));
-  document.getElementById('filter-' + type)?.classList.add('active');
-
-  // Clear cluster
-  clusterGroup.clearLayers();
-
-  // Re-add filtered (also respect keyword search)
-  let filtered = type === 'all' ? allHives : allHives.filter(h => h.type === type);
-  const kw = (document.getElementById('keyword-input')?.value || '').trim().toLowerCase();
-  if (kw) {
-    filtered = filtered.filter(h =>
-      (h.name && h.name.toLowerCase().includes(kw)) ||
-      (h.description && h.description.toLowerCase().includes(kw)) ||
-      (h.city && h.city.toLowerCase().includes(kw)) ||
-      (h.state && h.state.toLowerCase().includes(kw))
-    );
-  }
-  filtered.forEach(h => clusterGroup.addLayer(h._marker));
-  visibleHives = filtered; // keep in sync
-
-  // Redraw radii if on
-  if (showRadii) {
-    radiusCircles.forEach(c => map.removeLayer(c));
-    radiusCircles = [];
-    visibleHives.forEach(h => {
-      const c = L.circle([h.lat, h.lng], {
-        radius: MATING_RADIUS_M,
-        color: TYPE_COLORS[h.type] || '#f5a623',
-        fillColor: TYPE_COLORS[h.type] || '#f5a623',
-        fillOpacity: 0.03,
-        weight: 1,
-        dashArray: '4 4',
-      }).addTo(map);
-      radiusCircles.push(c);
-    });
-  }
-
-  updateCounts();
+// Traderecord.ai-style live viewport count (mockup, 2026-10-11) — unlike
+// the drawer's count-* facets above (global, ignore pan/zoom, same as
+// traderecord's own Filters-drawer "Show N projects" total), this one
+// mirrors traderecord's floating on-map pill: how many hives, matching the
+// active type filter(s), fall inside the CURRENT map bounds right now.
+// Recomputed on every updateCounts() call plus on 'moveend' (bound in
+// initMap) so it tracks panning/zooming too, not just filter changes.
+function updateViewportFilterCount() {
+  const el = document.getElementById('type-filter-count');
+  if (!el || !map) return;
+  const bounds = map.getBounds();
+  // visibleHives (maintained by reapplyFilters()) already reflects BOTH the
+  // type filter and the top-search-bar's notes query — using it here
+  // (rather than recomputing hiveTypeVisible() alone) keeps this count in
+  // sync with the search box too, not just the type chips.
+  const inView = visibleHives.filter(h =>
+    h.lat != null && h.lng != null && bounds.contains([h.lat, h.lng])
+  );
+  let label;
+  if (activeFilters.size === 0) label = 'hives';
+  else if (activeFilters.size === 1) label = [...activeFilters][0].toLowerCase() + ' hives';
+  else label = 'hives (' + activeFilters.size + ' types)';
+  if (activeNotesQuery) label += ' matching "' + activeNotesQuery + '"';
+  el.textContent = inView.length.toLocaleString() + ' ' + label + ' in view';
 }
 
 function updateCounts() {
@@ -807,6 +836,7 @@ function updateCounts() {
       el.textContent = allHives.filter(h => h.type === t).length.toLocaleString();
     }
   });
+  updateViewportFilterCount();
 
   // Live hive count in the header tagline (2026-07-23, Ronnie request).
   // Reuses this function's existing call sites (initial load, delta sync,
@@ -849,7 +879,7 @@ async function doSearch() {
     // Show all — reset cluster to full filtered set
     clusterGroup.clearLayers();
     if (singleRadii['search']) { map.removeLayer(singleRadii['search']); delete singleRadii['search']; }
-    const all = activeFilter === 'all' ? allHives : allHives.filter(h => h.type === activeFilter);
+    const all = allHives.filter(hiveTypeVisible);
     all.forEach(h => clusterGroup.addLayer(h._marker));
     showToast('Showing all ' + all.length.toLocaleString() + ' records');
     return;
@@ -892,7 +922,7 @@ async function doSearch() {
     radiusCircles = [];
 
     const inRange = allHives.filter(h => {
-      if (activeFilter !== 'all' && h.type !== activeFilter) return false;
+      if (!hiveTypeVisible(h)) return false;
       const d = haversine(centerLat, centerLng, h.lat, h.lng);
       return d <= radiusM;
     });
@@ -1075,7 +1105,7 @@ async function submitHive() {
 // ═══════════════════════════════════════
 function openRecords() {
   const list = document.getElementById('records-list');
-  const toShow = allHives.filter(h => activeFilter === 'all' || h.type === activeFilter).slice(0, 50);
+  const toShow = allHives.filter(hiveTypeVisible).slice(0, 50);
   list.innerHTML = toShow.map(h => {
     const color = TYPE_COLORS[h.type] || '#f5a623';
     const icon = TYPE_ICONS[h.type] || '🐝';
@@ -1183,7 +1213,7 @@ function flyToHive(id) {
     return;
   }
   setTab('map');
-  clusterGroup.zoomToShowLayer(hive._marker, () => hive._marker.openPopup());
+  clusterGroup.zoomToShowLayer(hive._marker, () => showHiveNotePanel(hive));
 }
 
 // ═══════════════════════════════════════
@@ -1206,16 +1236,16 @@ function locateMe() {
 // TABS & MODALS
 // ═══════════════════════════════════════
 function hideSearchUI() {
-  const ms = document.getElementById('map-search');
-  const mf = document.getElementById('map-filters');
-  if (ms) ms.style.display = 'none';
-  if (mf) mf.style.display = 'none';
+  const sb = document.getElementById('top-search-bar');
+  const tf = document.getElementById('type-filter-bar');
+  if (sb) sb.style.display = 'none';
+  if (tf) tf.style.display = 'none';
 }
 function showSearchUI() {
-  const ms = document.getElementById('map-search');
-  const mf = document.getElementById('map-filters');
-  if (ms) ms.style.display = '';
-  if (mf) mf.style.display = '';
+  const sb = document.getElementById('top-search-bar');
+  const tf = document.getElementById('type-filter-bar');
+  if (sb) sb.style.display = '';
+  if (tf) tf.style.display = '';
 }
 
 // ═══════════════════════════════════════
@@ -1234,13 +1264,12 @@ function openValidate() {
     return;
   }
   showToast('Finding hives near you…');
-  // The banner spans nearly the full top row (same as the expanded search
-  // field), which would overlap the radius/filter stack in the top-right —
-  // hide them for the duration, same visibility trick used there.
-  const filters = document.getElementById('map-filters');
-  const radius = document.getElementById('radius-toggle');
-  if (filters) filters.style.visibility = 'hidden';
-  if (radius) radius.style.visibility = 'hidden';
+  // The banner spans nearly the full top row, which would overlap the
+  // search bar / type-filter bar — hide them for the duration.
+  const searchBar = document.getElementById('top-search-bar');
+  const typeFilterBar = document.getElementById('type-filter-bar');
+  if (searchBar) searchBar.style.visibility = 'hidden';
+  if (typeFilterBar) typeFilterBar.style.visibility = 'hidden';
   if (!navigator.geolocation) {
     runValidateFilter(map.getCenter().lat, map.getCenter().lng);
     return;
@@ -1259,8 +1288,8 @@ function runValidateFilter(lat, lng) {
   validateActive = true;
   const radiusM = VALIDATE_RADIUS_MILES * 1609.34;
 
-  // Deliberately ignores activeFilter/activeNotesQuery (v2.9 §"Validate
-  // never mutates activeFilter") — Validate shows every type within
+  // Deliberately ignores activeFilters/activeNotesQuery (v2.9 §"Validate
+  // never mutates activeFilters") — Validate shows every type within
   // range so exiting can restore the prior filter state untouched.
   clusterGroup.clearLayers();
   const nearby = allHives.filter(h => h.lat && h.lng && haversine(lat, lng, h.lat, h.lng) <= radiusM);
@@ -1295,7 +1324,7 @@ function runValidateFilter(lat, lng) {
     });
     // Small delay so this doesn't fight the map.setView() animation above.
     setTimeout(() => {
-      if (nearest._marker) clusterGroup.zoomToShowLayer(nearest._marker, () => nearest._marker.openPopup());
+      if (nearest._marker) clusterGroup.zoomToShowLayer(nearest._marker, () => showHiveNotePanel(nearest));
     }, 350);
   }
 }
@@ -1327,11 +1356,11 @@ function exitValidate() {
   const banner = document.getElementById('validate-banner');
   if (banner) banner.style.display = 'none';
   if (singleRadii['validate']) { map.removeLayer(singleRadii['validate']); delete singleRadii['validate']; }
-  const filters = document.getElementById('map-filters');
-  const radius = document.getElementById('radius-toggle');
-  if (filters) filters.style.visibility = '';
-  if (radius) radius.style.visibility = '';
-  reapplyFilters(); // restores whatever activeFilter/activeNotesQuery already were — Validate never touched them
+  const searchBar = document.getElementById('top-search-bar');
+  const typeFilterBar = document.getElementById('type-filter-bar');
+  if (searchBar) searchBar.style.visibility = '';
+  if (typeFilterBar) typeFilterBar.style.visibility = '';
+  reapplyFilters(); // restores whatever activeFilters/activeNotesQuery already were — Validate never touched them
 }
 
 // Exit via the banner's own ✕ (as opposed to switching to a different
@@ -1558,7 +1587,7 @@ function doKeywordSearch(query) {
 
   clusterGroup.clearLayers();
 
-  const typeFiltered = activeFilter === 'all' ? allHives : allHives.filter(h => h.type === activeFilter);
+  const typeFiltered = allHives.filter(hiveTypeVisible);
 
   const results = q ? typeFiltered.filter(h => {
     return (
@@ -1594,12 +1623,29 @@ function clearKeyword() {
 }
 
 // ═══════════════════════════════════════
-// ZIP SEARCH ON ENTER
+// TOP SEARCH BAR (mockup, 2026-10-11) — traderecord.ai-style, always-
+// visible, replacing the old collapsed #map-search icon AND the filter-
+// drawer's separate "Search Notes" field. Typing live-filters hives by
+// name/notes/city/state (activeNotesQuery + reapplyFilters(), same
+// mechanism the drawer search used); Enter also tries to geocode the text
+// and jump there (doSmartSearch(), same as the old location search) — one
+// field now does both, rather than two separate inputs in two places.
 // ═══════════════════════════════════════
-// Smart search bar — Enter key triggers geocode search
-document.getElementById('smart-search-input')?.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSmartSearch();
-});
+function onTopSearchInput(val) {
+  activeNotesQuery = val.trim();
+  const clearBtn = document.getElementById('top-search-clear');
+  if (clearBtn) clearBtn.style.display = activeNotesQuery ? 'flex' : 'none';
+  reapplyFilters();
+}
+
+function clearTopSearch() {
+  const input = document.getElementById('top-search-input');
+  if (input) input.value = '';
+  activeNotesQuery = '';
+  const clearBtn = document.getElementById('top-search-clear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  reapplyFilters();
+}
 
 // ═══════════════════════════════════════
 // START
@@ -1966,6 +2012,7 @@ function openCheckin(hiveId) {
   document.getElementById('checkin-modal').classList.add('open');
   document.body.classList.add('checkin-open');
   map.closePopup();
+  closeHiveNotePanel();
 }
 
 function selectCheckin(status) {
@@ -2047,6 +2094,7 @@ function openContactSubmitter(hiveId) {
   document.getElementById('contact-message').value = '';
   document.getElementById('contact-modal').classList.add('open');
   map.closePopup();
+  closeHiveNotePanel();
 }
 
 function closeContactModal() {
@@ -2087,7 +2135,7 @@ async function submitContactMessage() {
 // SMART SEARCH (v2.3) — geocode only, no keyword fallback
 // ═══════════════════════════════════════
 function doSmartSearch() {
-  const val = document.getElementById('smart-search-input').value.trim();
+  const val = document.getElementById('top-search-input').value.trim();
   if (!val) return;
   // Bare numeric queries (zip/postal codes) are unreliable worldwide —
   // the same digits can match a real place in an entirely different
@@ -2115,7 +2163,6 @@ function doSmartSearch() {
       }
       const [lng, lat] = data.features[0].geometry.coordinates;
       map.setView([lat, lng], 11);
-      toggleMapSearch(false); // collapse back to the icon on a successful search
     })
     .catch(() => showToast('Search unavailable — check your connection'));
 }
@@ -2133,116 +2180,45 @@ function matchesNotesQuery(hive, q) {
 
 function reapplyFilters() {
   const q = activeNotesQuery.toLowerCase();
-  let filtered = activeFilter === 'all' ? allHives : allHives.filter(h => h.type === activeFilter);
+  let filtered = allHives.filter(hiveTypeVisible);
   if (q) filtered = filtered.filter(h => matchesNotesQuery(h, q));
   clusterGroup.clearLayers();
   filtered.forEach(h => clusterGroup.addLayer(h._marker));
   visibleHives = filtered;
-  if (showRadii) {
-    radiusCircles.forEach(c => map.removeLayer(c));
-    radiusCircles = [];
-    visibleHives.forEach(h => {
-      if (h.lat && h.lng) radiusCircles.push(
-        L.circle([h.lat, h.lng], { radius: 4828, color:'#2196f3', weight:1, opacity:0.5, fillOpacity:0.05 }).addTo(map)
-      );
-    });
-  }
+  redrawMatingRadii();
   updateCounts();
-  updateFilterBadge();
 }
 
-function updateDrawerCounts() {
-  const q = activeNotesQuery.toLowerCase();
-  const notesFiltered = allHives.filter(h => matchesNotesQuery(h, q));
-  const elAll = document.getElementById('count-all');
-  if (elAll) elAll.textContent = notesFiltered.length.toLocaleString();
-  ['Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
-    const el = document.getElementById('count-' + t);
-    if (el) el.textContent = notesFiltered.filter(h => h.type === t).length;
-  });
-}
-
-function updateFilterBadge() {
-  const isFiltered = activeFilter !== 'all' || activeNotesQuery !== '';
-  const btn = document.getElementById('filter-drawer-btn');
-  if (btn) {
-    btn.classList.toggle('active', isFiltered);
-    btn.title = isFiltered ? 'Filtered view active — tap to change' : 'Filter hives';
-  }
-  const clearBtn = document.getElementById('filter-clear-btn');
-  if (clearBtn) clearBtn.style.display = isFiltered ? 'flex' : 'none';
-  const drawerClear = document.getElementById('fd-clear-btn');
-  if (drawerClear) drawerClear.style.display = isFiltered ? 'block' : 'none';
-}
-
-function clearAllFilters() {
-  activeNotesQuery = '';
-  activeFilter = 'all';
-  const ni = document.getElementById('fd-notes-input');
-  if (ni) ni.value = '';
-  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
-    const el = document.getElementById('fd-' + t);
-    if (el) el.classList.toggle('active', t === 'all');
-  });
+// Traderecord.ai-style multi-select type chips (mockup, 2026-10-11). 'all'
+// clears the set (every type visible); any other type toggles membership,
+// cumulative with whatever else is already active.
+function toggleTypeFilter(type) {
+  if (type === 'all') activeFilters.clear();
+  else if (activeFilters.has(type)) activeFilters.delete(type);
+  else activeFilters.add(type);
+  syncTypeFilterUI();
   reapplyFilters();
 }
 
-function onDrawerNotesInput(val) {
-  activeNotesQuery = val.trim();
-  updateDrawerCounts();
-  reapplyFilters();
-}
-
-function openFilterDrawer() {
-  const radOn = document.getElementById('fd-radius-toggle');
-  if (radOn) radOn.checked = showRadii;
-  syncRadiusToggleUI(showRadii);
-  const ni = document.getElementById('fd-notes-input');
-  if (ni) ni.value = activeNotesQuery;
-  updateDrawerCounts();
-  updateFilterBadge();
-  document.getElementById('filter-drawer').classList.add('open');
-}
-
-function closeFilterDrawer() {
-  document.getElementById('filter-drawer').classList.remove('open');
-}
-
-function fdFilterType(type) {
-  activeFilter = type;
+function syncTypeFilterUI() {
+  const allActive = activeFilters.size === 0;
   ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
-    const el = document.getElementById('fd-' + t);
-    if (el) el.classList.toggle('active', t === type);
+    const isOn = t === 'all' ? allActive : activeFilters.has(t);
+    document.getElementById('tf-' + t)?.classList.toggle('active', isOn);
   });
-  reapplyFilters();
 }
 
-function toggleRadiiFromDrawer(on) {
-  syncRadiusToggleUI(on);
-  if (on !== showRadii) toggleRadii();
-}
-
-function syncRadiusToggleUI(on) {
-  const thumb = document.getElementById('fd-radius-thumb');
-  const track = document.getElementById('fd-radius-track');
-  if (thumb) {
-    thumb.style.transform = on ? 'translateX(22px)' : 'translateX(0)';
-    thumb.style.background = on ? '#f5a623' : '#fff';
-    thumb.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
-  }
-  if (track) track.style.background = on ? 'rgba(245,166,35,0.55)' : '#c8b89a';
-}
-
-// Keep drawer type buttons in sync when filterType() is called externally
-const _origFilterType = filterType;
-filterType = function(type) {
-  _origFilterType(type);
-  ['all','Live Tree','Dead Tree','Beehive','Structure','Ground'].forEach(t => {
-    const el = document.getElementById('fd-' + t);
-    if (el) el.classList.toggle('active', t === type);
-  });
-  updateFilterBadge();
-};
+// (The filter drawer this section used to support — openFilterDrawer(),
+// closeFilterDrawer(), updateDrawerCounts(), updateFilterBadge(),
+// clearAllFilters(), onDrawerNotesInput(), fdFilterType(),
+// toggleRadiiFromDrawer(), syncRadiusToggleUI() — was removed 2026-10-11.
+// Once the Hive Type chips moved into #type-filter-bar, the drawer only
+// had two things left: notes search and the radius toggle, both now living
+// directly on the map — #top-search-bar (onTopSearchInput()/
+// clearTopSearch(), further up) and #radius-toggle-pill (toggleRadii(),
+// above). updateCounts() still drives the global facet counts those old
+// drawer tiles used to show; nothing currently renders them, but the
+// numbers themselves weren't drawer-specific, so that function stayed.)
 
 // ═══════════════════════════════════════
 // LEARN TAB — data-driven hub + module reader
