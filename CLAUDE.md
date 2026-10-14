@@ -199,14 +199,35 @@ Cross-reference: `KEY_PEOPLE_CONTACTS.md` tracks the same people/orgs in
 prose form and should get a status update whenever the spreadsheet does, so
 the two don't drift apart.
 
-## Never use hello@savethehives.org in outreach email drafts (2026-08-14)
+## Use hello@savethehives.org in outreach email drafts (updated 2026-10-14)
 
-Ronnie confirmed `hello@savethehives.org` doesn't reliably reach him — it's
-not a valid contact address for his purposes. When drafting any outreach or
-follow-up email (Gmail drafts for legacy submitters, university contacts,
-reply threads, etc.), never use `hello@savethehives.org` anywhere — not as
-the From address, not as a reply-to, not in a signature line asking people
-to reach out. Use `ronniebouchon@gmail.com` instead.
+**Reversed from the original 2026-08-14 rule below — hello@ is now the
+preferred contact address.** When drafting any outreach or follow-up email
+(Gmail drafts for legacy submitters, university contacts, reply threads,
+signature lines, etc.), use `hello@savethehives.org`, not
+`ronniebouchon@gmail.com`.
+
+Why the reversal: the Aug 14 "unreliable" finding turned out to be a Gmail
+self-send quirk, not a real deliverability problem. `hello@savethehives.org`
+has no inbox of its own (Resend, the project's sending service, confirmed
+"Receiving: disabled" on the domain) — it forwards to Ronnie's own Gmail,
+almost certainly via Cloudflare Email Routing. A message FROM
+ronniebouchon@gmail.com TO an address that forwards straight back to
+ronniebouchon@gmail.com is exactly the kind of self-referential send Gmail
+sometimes buries or dedupes — so Ronnie's own test emails looked like they
+vanished. Confirmed 2026-10-14 with two independent real-world tests: (1) a
+transactional send from `noreply@savethehives.org` (proposed but not
+ultimately needed) and (2) the actual test that settled it — a `test` email
+from a different real Gmail account (Jane Bouchon) to `hello@savethehives.org`
+arrived in the inbox normally, same-minute, no spam-folder issue. Since real
+outreach replies come from third parties (university contacts, legacy
+submitters) and never from Ronnie's own address, this is the representative
+case — hello@ works for the actual use case.
+
+Pre-existing drafts written under the old rule (e.g.
+`grant-search/fiscal-sponsor-outreach.md`, signed with
+ronniebouchon@gmail.com) were not retroactively rewritten — only update
+them if Ronnie asks.
 
 ## Weekly scheduled task: outreach bounce/reply check
 
