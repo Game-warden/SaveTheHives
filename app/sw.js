@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.14.1'; // Chip padding tightened further in styles.css (2026-10-11) — bumping per the rule set in v2.14.0's note above: any styles.css/app.js/pathfinder.js/index.html change bumps this, every time.
+const CACHE_VERSION = 'v2.14.2'; // Fixed Check-In/Validate auto-open overzooming past the "about an hour of you" overview (app.js, 2026-10-14) — bumping per the standing rule above.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;

@@ -756,7 +756,7 @@ function hivePopupHtml(hive) {
 // (mockup, 2026-10-11), replacing the old marker-anchored Leaflet popup.
 // Also centers+zooms the map on the hive, same spirit as the cluster
 // click's own zoom-to-bounds.
-async function showHiveNotePanel(hive) {
+async function showHiveNotePanel(hive, { skipZoom = false } = {}) {
   // Never zoom OUT from wherever the map already is — only ensures AT LEAST
   // zoom 13. A fixed zoom 13 (tried 2026-10-11, reverted same day) broke
   // exactly this flow: click a 2-hive cluster (Leaflet zooms in only as far
@@ -765,7 +765,14 @@ async function showHiveNotePanel(hive) {
   // the cluster click had just zoomed to, re-merging the pair right after
   // you separated them. Math.max avoids that: it can zoom in from a wide
   // view, but never undoes a zoom-in you (or a cluster click) already did.
-  map.flyTo([hive.lat, hive.lng], Math.max(map.getZoom(), 13), { duration: 0.6 });
+  //
+  // skipZoom (2026-10-14, Ronnie live-testing feedback): the Check-In/
+  // Validate auto-open of the nearest hive (runValidateFilter) was fighting
+  // this — map.setView() had just framed the full ~hour radius at zoom 9,
+  // then this flyTo forced zoom 13, destroying that overview. Validate
+  // passes skipZoom:true so the panel still opens with the hive's story,
+  // but the map stays right where runValidateFilter put it.
+  if (!skipZoom) map.flyTo([hive.lat, hive.lng], Math.max(map.getZoom(), 13), { duration: 0.6 });
 
   const panel = document.getElementById('hive-note-panel');
   panel.innerHTML = `<button class="note-panel-close" onclick="closeHiveNotePanel()" aria-label="Close">&times;</button>${hivePopupHtml(hive)}`;
@@ -1392,8 +1399,13 @@ function runValidateFilter(lat, lng) {
       if (d < nearestDist) { nearest = h; nearestDist = d; }
     });
     // Small delay so this doesn't fight the map.setView() animation above.
+    // Deliberately skips clusterGroup.zoomToShowLayer() and passes
+    // skipZoom:true — both used to force the map in to zoom 13+ to reveal
+    // the nearest marker, undoing the zoom-9 "about an hour of you"
+    // overview map.setView() just framed. The panel still opens with the
+    // nearest hive's full story; the map just stays put.
     setTimeout(() => {
-      if (nearest._marker) clusterGroup.zoomToShowLayer(nearest._marker, () => showHiveNotePanel(nearest));
+      showHiveNotePanel(nearest, { skipZoom: true });
     }, 350);
   }
 }
