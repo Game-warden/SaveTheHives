@@ -57,7 +57,8 @@ These all stay exactly where they are. They also double as Facebook post images 
 |---|---|---|---|
 | `marketing/screenshots/map-overview.jpg` | Post-redesign (Oct 11 2026) map hero: new OSM Bright basemap, white filter chips, search bar, black clusters, continental zoom | `marketing/facebook/map-overview_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
 | `marketing/screenshots/map-near-you.jpg` | "Hives near you" story shot: Raleigh/Triangle metro zoom (~1-hour-drive scale), 112 hives in view, built for a "check in on one near you" angle | `marketing/facebook/map-near-you_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
-| `marketing/screenshots/map-hive-story.jpg` | A single real hive's detail panel open (Charles E. Wallace, #474, Raleigh NC beech-tree colony) — narrative/story framing instead of a flat pin field. **Shows a real submitter's name — confirm with Ronnie before posting publicly, even though it's already visible to anyone using the live app.** | `marketing/facebook/map-hive-story_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-story-bryan.jpg` | A single real hive's detail panel open (#466, Bryan A., Raleigh NC — huge hive under a back porch, swarms 2-3x/year) — narrative/story framing instead of a flat pin field. Replaces the earlier Charles E. Wallace version (archived — its description mentioned a beekeeper trying to remove the hive, which Ronnie didn't want to lead with) | `marketing/facebook/map-story-bryan_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-story-patrick.jpg` | A second hive-story shot (#19, San Francisco Zoo — 10+ year colony in the Pachyderm building's hollow wall, Active status, recent check-in shown). Submitter name (Patrick Schlemmer) is CSS-blurred in the screenshot at Ronnie's request | `marketing/facebook/map-story-patrick_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
 | `marketing/screenshots/map-mating-radius.jpg` | Mating-radius circles toggled on across ~12 Triangle-area hives, overlapping rings — visual for the Genetic Goldmine/connectivity science angle | `marketing/facebook/map-mating-radius_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
 | `marketing/screenshots/map-filter-live-tree.jpg` | Live Tree filter chip active (green, selected state), reduced pin set + live count — demonstrates the new multi-select filter UI | `marketing/facebook/map-filter-live-tree_fb-square-1080x1080.jpg` (square only) | Not yet used — captured Oct 14 2026 |
 | `marketing/video/savethehives-tour-v3.mp4` | 31.5s mission/tour video, no voiceover (burned-in captions only, by design — see `AI_VIDEO_PROMPT_TOUR.md`) | — | Attempted Oct 6 2026 as a Reel; **Metricool couldn't fetch this file as of this date — verify it's actually reachable at `https://savethehives.org/marketing/video/savethehives-tour-v3.mp4` (or wherever it lands) before relying on it again** |
@@ -86,7 +87,8 @@ Every asset below is a pre-cropped square (1080x1080) + portrait (1080x1350) pai
 | `/logo.jpg` | `logo_fb-*` | Aug 2, Aug 16, Oct 11 2026 |
 | `map-overview.jpg` | `map-overview_fb-*` | Not yet used |
 | `map-near-you.jpg` | `map-near-you_fb-*` | Not yet used |
-| `map-hive-story.jpg` | `map-hive-story_fb-*` | Not yet used |
+| `map-story-bryan.jpg` | `map-story-bryan_fb-*` | Not yet used |
+| `map-story-patrick.jpg` | `map-story-patrick_fb-*` | Not yet used |
 | `map-mating-radius.jpg` | `map-mating-radius_fb-*` | Not yet used |
 | `map-filter-live-tree.jpg` | `map-filter-live-tree_fb-square-1080x1080.jpg` only | Not yet used |
 | `1. Hero — The Beeline...png` | `beeline-hero_fb-*` | not yet used via this crop (raw PNG used instead, Jul 22) |
@@ -106,6 +108,7 @@ replaced by the `map-*` rows above:
 | `SaveTheHives_map_screenshot_cropped.jpg` | Cropped version of the above |
 | `map-screenshot-full_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | FB crop of the raw screenshot |
 | `map-screenshot-cropped_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | FB crop of the cropped screenshot |
+| `map-hive-story.jpg` / `map-hive-story_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | First hive-story shot (Charles E. Wallace, #474) — archived Oct 14 2026, same day as capture, because Ronnie didn't want to lead with its "a local beekeeper tried to use a vaccum contraption to get them out" line. Replaced by `map-story-bryan.jpg` and `map-story-patrick.jpg` above |
 
 ## Known gaps as of this reorg (Sep 26 2026)
 
