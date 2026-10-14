@@ -55,8 +55,11 @@ These all stay exactly where they are. They also double as Facebook post images 
 
 | File (new path) | What it is | FB crop | Last used in FB post |
 |---|---|---|---|
-| `marketing/screenshots/SaveTheHives_map_screenshot.jpg` | Uncropped map screenshot (Raleigh area, captured Jul 20 2026) | — | Oct 7 2026 (first use) |
-| `marketing/screenshots/SaveTheHives_map_screenshot_cropped.jpg` | Same screenshot, browser chrome cropped | `marketing/facebook/map-screenshot-cropped_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Jul 26 2026 (Post 3, raw file) · Oct 4, Oct 19 2026 (FB crop) |
+| `marketing/screenshots/map-overview.jpg` | Post-redesign (Oct 11 2026) map hero: new OSM Bright basemap, white filter chips, search bar, black clusters, continental zoom | `marketing/facebook/map-overview_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-near-you.jpg` | "Hives near you" story shot: Raleigh/Triangle metro zoom (~1-hour-drive scale), 112 hives in view, built for a "check in on one near you" angle | `marketing/facebook/map-near-you_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-hive-story.jpg` | A single real hive's detail panel open (Charles E. Wallace, #474, Raleigh NC beech-tree colony) — narrative/story framing instead of a flat pin field. **Shows a real submitter's name — confirm with Ronnie before posting publicly, even though it's already visible to anyone using the live app.** | `marketing/facebook/map-hive-story_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-mating-radius.jpg` | Mating-radius circles toggled on across ~12 Triangle-area hives, overlapping rings — visual for the Genetic Goldmine/connectivity science angle | `marketing/facebook/map-mating-radius_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Not yet used — captured Oct 14 2026 |
+| `marketing/screenshots/map-filter-live-tree.jpg` | Live Tree filter chip active (green, selected state), reduced pin set + live count — demonstrates the new multi-select filter UI | `marketing/facebook/map-filter-live-tree_fb-square-1080x1080.jpg` (square only) | Not yet used — captured Oct 14 2026 |
 | `marketing/video/savethehives-tour-v3.mp4` | 31.5s mission/tour video, no voiceover (burned-in captions only, by design — see `AI_VIDEO_PROMPT_TOUR.md`) | — | Attempted Oct 6 2026 as a Reel; **Metricool couldn't fetch this file as of this date — verify it's actually reachable at `https://savethehives.org/marketing/video/savethehives-tour-v3.mp4` (or wherever it lands) before relying on it again** |
 | `marketing/hero-art/1. Hero — "The Beeline" (Module 1 + hub landing).png` | Large illustrated hero art, bee flying a line to a hollow tree | `marketing/facebook/beeline-hero_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Jul 22 2026 (Post 2) |
 | `marketing/hero-art/2. Triangulation — "Two Lines, One Answer" (Module 3).png` | Large illustrated hero art, two flight lines crossing | `marketing/facebook/triangulation-hero_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | Oct 21 2026 (first use) |
@@ -81,10 +84,28 @@ Every asset below is a pre-cropped square (1080x1080) + portrait (1080x1350) pai
 | `images/meadow-hero.jpg` | `meadow-hero_fb-*` | Sep 9, Oct 12 2026 |
 | `images/oak-tree-colony.jpg` | `oak-tree-colony_fb-*` | Aug 26, Sep 7, Sep 20, Oct 5, Oct 18 2026 |
 | `/logo.jpg` | `logo_fb-*` | Aug 2, Aug 16, Oct 11 2026 |
-| `SaveTheHives_map_screenshot_cropped.jpg` | `map-screenshot-cropped_fb-*` | Oct 4, Oct 19 2026 |
-| (full map screenshot) | `map-screenshot-full_fb-*` | Sep 13, Sep 27 2026 |
+| `map-overview.jpg` | `map-overview_fb-*` | Not yet used |
+| `map-near-you.jpg` | `map-near-you_fb-*` | Not yet used |
+| `map-hive-story.jpg` | `map-hive-story_fb-*` | Not yet used |
+| `map-mating-radius.jpg` | `map-mating-radius_fb-*` | Not yet used |
+| `map-filter-live-tree.jpg` | `map-filter-live-tree_fb-square-1080x1080.jpg` only | Not yet used |
 | `1. Hero — The Beeline...png` | `beeline-hero_fb-*` | not yet used via this crop (raw PNG used instead, Jul 22) |
 | `2. Triangulation...png` | `triangulation-hero_fb-*` | not yet used via this crop (raw PNG used instead, Oct 21) |
+
+## `marketing/archive/` — retired, kept for history (do not schedule)
+
+The Oct 11 2026 map redesign (new OSM Bright basemap, white filter chips/search
+bar, black clusters — see `CLAUDE.md`) made the old map screenshots visibly
+inaccurate: anyone clicking through from a FB post using them would land on a
+very different-looking app. Moved here rather than deleted, Oct 14 2026, and
+replaced by the `map-*` rows above:
+
+| File | Was |
+|---|---|
+| `SaveTheHives_map_screenshot.jpg` | Pre-redesign raw map screenshot (actually pre-dates even the Jul/Aug filter-drawer era — shows `v2.9` version badge, orange clusters, no search bar, no filter chips at all) |
+| `SaveTheHives_map_screenshot_cropped.jpg` | Cropped version of the above |
+| `map-screenshot-full_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | FB crop of the raw screenshot |
+| `map-screenshot-cropped_fb-square-1080x1080.jpg` / `_fb-portrait-1080x1350.jpg` | FB crop of the cropped screenshot |
 
 ## Known gaps as of this reorg (Sep 26 2026)
 
