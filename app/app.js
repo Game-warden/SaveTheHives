@@ -1313,6 +1313,103 @@ function flyToHive(id) {
 // ═══════════════════════════════════════
 // LOCATION
 // ═══════════════════════════════════════
+// 2026-10-14 (Ronnie): "location access denied" used to be a dead end — a
+// toast and nothing else. Browsers remember a denial per-site and won't
+// prompt again until the person changes it themselves in their own
+// settings, so the fix has to tell them exactly where that setting lives.
+// getLocationHelpSteps() picks the right instructions for iOS Safari, an
+// iOS home-screen install, Mac Safari, and Mac Chrome (a generic fallback
+// covers everything else — Android/other desktop browsers).
+function getLocationHelpSteps() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
+  const isStandalone = window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+  const isMac = /Macintosh/.test(ua) && !isIOS;
+  const isChrome = /Chrome/.test(ua) && !/Edg|OPR/.test(ua);
+  const isSafari = /Safari/.test(ua) && !isChrome;
+
+  if (isIOS && isStandalone) {
+    return `<b>On your iPhone/iPad (saved to your Home Screen):</b><br>
+      Settings → Privacy &amp; Security → Location Services → find
+      <b>SaveTheHives</b> in the list → set it to <b>While Using the App</b>.
+      <br><br>Also make sure Location Services is switched on at the top of
+      that screen.`;
+  }
+  if (isIOS) {
+    return `<b>On your iPhone/iPad:</b><br>
+      Tap the <b>"Aa"</b> icon at the left of the address bar →
+      <b>Website Settings</b> → set <b>Location</b> to <b>Allow</b>, then
+      reload this page.`;
+  }
+  if (isMac && isSafari) {
+    return `<b>On your Mac (Safari):</b><br>
+      Safari menu → <b>Settings</b> → <b>Websites</b> tab → <b>Location</b>
+      → set savethehives.org to <b>Allow</b>.<br><br>Also check
+      System Settings → Privacy &amp; Security → Location Services is on,
+      with Safari checked.`;
+  }
+  if (isMac && isChrome) {
+    return `<b>On your Mac (Chrome):</b><br>
+      Click the lock icon next to the address bar → <b>Site settings</b> →
+      set <b>Location</b> to <b>Allow</b>, then reload.<br><br>Also check
+      System Settings → Privacy &amp; Security → Location Services is on,
+      with Chrome checked.`;
+  }
+  return `Location access for this site is turned off in your browser.
+    Look for a location or lock icon near the address bar, open its site
+    settings, and set Location to <b>Allow</b> — then reload this page.`;
+}
+
+let _locationRetryFn = null;
+function openLocationHelp(retryFn) {
+  _locationRetryFn = retryFn || null;
+  document.getElementById('location-help-steps').innerHTML = getLocationHelpSteps();
+  document.getElementById('location-help-modal').classList.add('open');
+}
+function closeLocationHelp() {
+  document.getElementById('location-help-modal').classList.remove('open');
+}
+function retryLocationFromHelp() {
+  closeLocationHelp();
+  if (_locationRetryFn) _locationRetryFn();
+}
+
+// Two-action toast (plain showToastWithRetry only supports one button) —
+// "How to enable" opens the platform-specific modal above, "Try Again"
+// just re-requests permission directly (covers the person who already
+// fixed the setting in another tab and came back).
+function showLocationDeniedToast(retryFn) {
+  const t = document.getElementById('toast');
+  t.textContent = '';
+  const span = document.createElement('span');
+  span.textContent = 'Location access is off for this site.';
+  const helpBtn = document.createElement('button');
+  helpBtn.type = 'button';
+  helpBtn.textContent = 'How to enable';
+  helpBtn.className = 'toast-retry-btn';
+  helpBtn.onclick = () => {
+    clearTimeout(toastTimer);
+    t.classList.remove('show', 'toast-has-retry');
+    openLocationHelp(retryFn);
+  };
+  const retryBtn = document.createElement('button');
+  retryBtn.type = 'button';
+  retryBtn.textContent = 'Try Again';
+  retryBtn.className = 'toast-retry-btn';
+  retryBtn.onclick = () => {
+    clearTimeout(toastTimer);
+    t.classList.remove('show', 'toast-has-retry');
+    retryFn();
+  };
+  t.appendChild(span);
+  t.appendChild(helpBtn);
+  t.appendChild(retryBtn);
+  t.classList.add('show', 'toast-has-retry');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show', 'toast-has-retry'), 10000);
+}
+
 function locateMe() {
   if (!navigator.geolocation) { showToast('GPS not available on this device'); return; }
   showToast('Getting location...');
@@ -1321,7 +1418,13 @@ function locateMe() {
       map.setView([pos.coords.latitude, pos.coords.longitude], 12);
       showToast('📍 Centered on your location');
     },
-    () => showToast('GPS access denied — search by ZIP instead'),
+    err => {
+      if (err && err.code === err.PERMISSION_DENIED) {
+        showLocationDeniedToast(() => locateMe());
+      } else {
+        showToast('GPS unavailable — search by ZIP instead');
+      }
+    },
     { timeout: 8000 }
   );
 }
@@ -1370,9 +1473,13 @@ function openValidate() {
   }
   navigator.geolocation.getCurrentPosition(
     pos => runValidateFilter(pos.coords.latitude, pos.coords.longitude),
-    () => {
-      showToast('Location access denied — showing hives near the current map view instead');
+    err => {
       runValidateFilter(map.getCenter().lat, map.getCenter().lng);
+      if (err && err.code === err.PERMISSION_DENIED) {
+        showLocationDeniedToast(() => openValidate());
+      } else {
+        showToast('Location unavailable — showing hives near the current map view instead');
+      }
     },
     { timeout: 8000 }
   );

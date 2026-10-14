@@ -1209,6 +1209,27 @@
   </div>
 </div>
 
+<!-- ── LOCATION HELP MODAL (2026-10-14) ── reuses .modal-overlay/.modal-sheet.
+     Content is filled in by getLocationHelpSteps() (app.js), which picks
+     platform-specific instructions (iOS Safari, iOS home-screen install,
+     Mac Safari, Mac Chrome, generic fallback) since the right setting to
+     change lives in a different place on each. -->
+<div class="modal-overlay" id="location-help-modal" onclick="closeModal(event,'location-help-modal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📍 Turn On Location</div>
+    <div id="location-help-steps" style="font-size:0.85rem;color:var(--text-muted);line-height:1.6;margin-bottom:14px;"></div>
+    <div class="modal-sticky-footer">
+      <button class="btn" style="width:100%;padding:12px;font-size:1rem;" onclick="retryLocationFromHelp()">
+        Try Again
+      </button>
+      <button class="btn btn-outline" style="width:100%;padding:12px;font-size:1rem;" onclick="closeLocationHelp()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Filter drawer (v2.3) removed 2026-10-11 — once the Hive Type chips
      moved into the always-visible #type-filter-bar, this popup only had
      two things left (notes search, radius toggle), both now folded into
