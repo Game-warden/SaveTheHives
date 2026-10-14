@@ -772,11 +772,29 @@ async function showHiveNotePanel(hive, { skipZoom = false } = {}) {
   // then this flyTo forced zoom 13, destroying that overview. Validate
   // passes skipZoom:true so the panel still opens with the hive's story,
   // but the map stays right where runValidateFilter put it.
-  if (!skipZoom) map.flyTo([hive.lat, hive.lng], Math.max(map.getZoom(), 13), { duration: 0.6 });
-
   const panel = document.getElementById('hive-note-panel');
   panel.innerHTML = `<button class="note-panel-close" onclick="closeHiveNotePanel()" aria-label="Close">&times;</button>${hivePopupHtml(hive)}`;
   panel.classList.add('open');
+
+  // Panel-aware centering (2026-10-14, Ronnie live-testing feedback: "the
+  // ones for Patrick and Bryan don't show the map pointer in the screen
+  // grab"). flyTo-ing straight to the hive's coordinates puts it dead
+  // center — and #hive-note-panel is a fixed card docked over the lower-
+  // left of the map, so the marker landed right underneath its own panel,
+  // invisible. Read the panel's real rendered box (its content-driven
+  // height varies per hive) and bias the fly-to target so the marker ends
+  // up up-and-right of center, clear of the card. Capped relative to the
+  // map's own size so this can't push the target off-screen on a small
+  // viewport.
+  if (!skipZoom) {
+    const zoom = Math.max(map.getZoom(), 13);
+    const mapSize = map.getSize();
+    const panelRect = panel.getBoundingClientRect();
+    const dx = Math.min(panelRect.width / 2 + 24, mapSize.x * 0.3);
+    const dy = Math.min(panelRect.height / 2 + 24, mapSize.y * 0.3);
+    const targetPoint = map.project([hive.lat, hive.lng], zoom).subtract([dx, -dy]);
+    map.flyTo(map.unproject(targetPoint, zoom), zoom, { duration: 0.6 });
+  }
   document.body.classList.add('checkin-open');
 
   // Lazy-load most recent check-in note, same as the old popupopen handler.
