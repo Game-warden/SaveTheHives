@@ -720,6 +720,15 @@ function makeIcon(type) {
 // Leaflet bindPopup() template directly; pulled out unchanged so the new
 // fixed-panel presentation (mockup, 2026-10-11) can reuse the exact same
 // content/buttons instead of duplicating them.
+// Directions links open Google Maps (the native app on iOS/Android when it's
+// installed, the web otherwise). Only shown to signed-in users (spec §9, 2026-10
+// decision): the link carries the hive's full-precision coordinates, which the
+// popup text deliberately rounds to 2 decimals. Anonymous visitors still get
+// the rounded coordinates and Share This Hive.
+function hiveDirectionsUrl(hive, travelMode) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${hive.lat},${hive.lng}&travelmode=${travelMode}`;
+}
+
 function hivePopupHtml(hive) {
   const color = TYPE_COLORS[hive.type] || '#f5a623';
   const icon = TYPE_ICONS[hive.type] || '🐝';
@@ -746,6 +755,11 @@ function hivePopupHtml(hive) {
       <div style="font-size:0.68rem;color:var(--text-muted);margin-bottom:6px;font-family:monospace;">${hive.lat.toFixed(2)}, ${hive.lng.toFixed(2)}</div>
       <button class="popup-radius-btn" onclick="toggleSingleRadius(${hive.id},${hive.lat},${hive.lng})">◎ 3-Mile Mating Radius</button>
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Check In</button>
+      ${currentUser && hive.lat && hive.lng ? `
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <a class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" href="${hiveDirectionsUrl(hive, 'driving')}" target="_blank" rel="noopener">🚗 Drive</a>
+        <a class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" href="${hiveDirectionsUrl(hive, 'walking')}" target="_blank" rel="noopener">🚶 Walk</a>
+      </div>` : ''}
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
       ${hive.allowContact && hive.submittedBy && hive.submittedBy !== currentUser?.id ? `<button class="popup-radius-btn" style="margin-top:6px;background:rgba(245,166,35,0.15);color:var(--honey);border-color:rgba(245,166,35,0.3);" onclick="openContactSubmitter(${hive.id})">📬 Contact Submitter</button>` : ''}
     </div>
@@ -2208,6 +2222,29 @@ function openCheckin(hiveId) {
     handleAuth();
     return;
   }
+  // Land-access acknowledgment comes first: many feral hives sit on private
+  // property, and the check-in itself means walking to the spot. The sheet
+  // opens only after the user confirms (confirmAccessAck -> openCheckinSheet).
+  _ackHiveId = hiveId;
+  document.getElementById('ack-checkbox').checked = false;
+  document.getElementById('ack-continue-btn').disabled = true;
+  document.getElementById('access-ack-modal').classList.add('open');
+}
+
+let _ackHiveId = null;
+
+function closeAccessAck() {
+  document.getElementById('access-ack-modal').classList.remove('open');
+  _ackHiveId = null;
+}
+
+function confirmAccessAck() {
+  const hiveId = _ackHiveId;
+  closeAccessAck();
+  if (hiveId != null) openCheckinSheet(hiveId);
+}
+
+function openCheckinSheet(hiveId) {
   _checkinHiveId = hiveId;
   _checkinStatus = null;
   ['active','gone','uncertain'].forEach(s => {

@@ -1182,6 +1182,28 @@
   </div>
 </div>
 
+<!-- ── ACCESS ACKNOWLEDGMENT (shown before Check In) ── many feral hives are on
+     private land; the user must confirm they've checked access before the
+     check-in sheet opens. Reuses .modal-overlay/.modal-sheet like #contact-modal. -->
+<div class="modal-overlay" id="access-ack-modal" onclick="if(event.target===this)closeAccessAck()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🌾 Before you head out</div>
+    <p style="font-size:0.83rem;color:var(--text-muted);text-align:center;margin:0 0 14px;line-height:1.5;">
+      Many wild hives are on private land. Check with the property owner for permission, or confirm the spot is public land, before you go. Respect fences, posted signs, and crops, and never disturb a colony.
+    </p>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:0.85rem;line-height:1.4;margin:12px 0;cursor:pointer;">
+      <input type="checkbox" id="ack-checkbox" style="margin-top:3px;flex-shrink:0;"
+        onchange="document.getElementById('ack-continue-btn').disabled=!this.checked">
+      <span>I'll check with the property owner if this spot is private, and I have access to it.</span>
+    </label>
+    <div class="checkin-actions">
+      <button class="btn btn-outline" onclick="closeAccessAck()">Cancel</button>
+      <button class="btn" id="ack-continue-btn" onclick="confirmAccessAck()" disabled>Continue</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── CONTACT SUBMITTER MODAL (v2.13) ── reuses .modal-overlay/.modal-sheet,
      same reusable classes as #add-modal and #list-modal (not id-scoped —
      see the CSS id-scoping gotcha in SAVETHEHIVES_SPEC.md §7). Message is
