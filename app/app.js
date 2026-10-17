@@ -757,8 +757,8 @@ function hivePopupHtml(hive) {
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(76,175,80,0.15);color:#4caf50;border-color:rgba(76,175,80,0.3);" onclick="openCheckin(${hive.id})">✅ Check In</button>
       ${currentUser && hive.lat && hive.lng ? `
       <div style="display:flex;gap:6px;margin-top:6px;">
-        <a class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" href="${hiveDirectionsUrl(hive, 'driving')}" target="_blank" rel="noopener">🚗 Drive</a>
-        <a class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" href="${hiveDirectionsUrl(hive, 'walking')}" target="_blank" rel="noopener">🚶 Walk</a>
+        <button class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="openDirections(${hive.id}, 'driving')">🚗 Drive</button>
+        <button class="popup-radius-btn" style="flex:1;text-align:center;text-decoration:none;margin-top:0;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="openDirections(${hive.id}, 'walking')">🚶 Walk</button>
       </div>` : ''}
       <button class="popup-radius-btn" style="margin-top:6px;background:rgba(33,150,243,0.15);color:#2196f3;border-color:rgba(33,150,243,0.3);" onclick="shareHive(${hive.id})">↗ Share This Hive</button>
       ${hive.allowContact && hive.submittedBy && hive.submittedBy !== currentUser?.id ? `<button class="popup-radius-btn" style="margin-top:6px;background:rgba(245,166,35,0.15);color:var(--honey);border-color:rgba(245,166,35,0.3);" onclick="openContactSubmitter(${hive.id})">📬 Contact Submitter</button>` : ''}
@@ -2225,23 +2225,52 @@ function openCheckin(hiveId) {
   // Land-access acknowledgment comes first: many feral hives sit on private
   // property, and the check-in itself means walking to the spot. The sheet
   // opens only after the user confirms (confirmAccessAck -> openCheckinSheet).
+  showAccessAck(hiveId, null);
+}
+
+// Drive/Walk also go through the land-access acknowledgment, so the user
+// confirms access BEFORE they set off, not only at Check In (usually after
+// the trip). Google Maps opens only after Continue.
+function openDirections(hiveId, travelMode) {
+  if (!currentUser) return; // buttons are only rendered for signed-in users
+  showAccessAck(hiveId, travelMode);
+}
+
+let _ackHiveId = null;
+let _ackTravelMode = null; // null = Check In; 'driving'/'walking' = directions
+
+function showAccessAck(hiveId, travelMode) {
   _ackHiveId = hiveId;
+  _ackTravelMode = travelMode;
   document.getElementById('ack-checkbox').checked = false;
   document.getElementById('ack-continue-btn').disabled = true;
   document.getElementById('access-ack-modal').classList.add('open');
 }
 
-let _ackHiveId = null;
-
 function closeAccessAck() {
   document.getElementById('access-ack-modal').classList.remove('open');
   _ackHiveId = null;
+  _ackTravelMode = null;
 }
 
 function confirmAccessAck() {
   const hiveId = _ackHiveId;
+  const travelMode = _ackTravelMode;
   closeAccessAck();
-  if (hiveId != null) openCheckinSheet(hiveId);
+  if (hiveId == null) return;
+  if (travelMode) {
+    const hive = allHives.find(h => h.id === hiveId);
+    if (!hive || !hive.lat || !hive.lng) return;
+    const url = hiveDirectionsUrl(hive, travelMode);
+    // Called from the Continue click, so it counts as a user gesture and
+    // isn't popup-blocked. Fall back to same-tab if a browser blocks it anyway.
+    // (No 'noopener' feature string: with it, window.open always returns null,
+    // which would trigger the fallback too. Clear opener by hand instead.)
+    const w = window.open(url, '_blank');
+    if (w) w.opener = null; else window.location.href = url;
+  } else {
+    openCheckinSheet(hiveId);
+  }
 }
 
 function openCheckinSheet(hiveId) {

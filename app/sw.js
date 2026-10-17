@@ -4,7 +4,7 @@
 // Bump CACHE_VERSION on any deploy that changes a cached file (styles.css,
 // app.js, pathfinder.js, icons, images, etc.) so returning visitors pick up
 // the new version instead of continuing to serve the old cached one.
-const CACHE_VERSION = 'v2.14.5'; // Signed-in Drive/Walk directions in hive popup + land-access acknowledgment before Check In (app.js/index.html) — bumping per the standing rule above.
+const CACHE_VERSION = 'v2.14.6'; // Land-access acknowledgment now also shown before Drive/Walk directions, not only Check In (app.js) — bumping per the standing rule above.
 const SHELL_CACHE = `savethehives-shell-${CACHE_VERSION}`;
 const TILE_CACHE = `savethehives-tiles-${CACHE_VERSION}`;
 const TILE_CACHE_MAX_ENTRIES = 200;
